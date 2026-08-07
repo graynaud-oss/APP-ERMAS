@@ -70,6 +70,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const gammeType = urlParams.get('type') || 'EVO';
 
+        // URL pointant sur l'onglet dédié aux jantes engins (gid=0 ou l'onglet correspondant dans votre Google Sheets)
         const URL_JANTES_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=0&single=true&output=csv'; 
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -100,7 +101,7 @@
                 return;
             }
 
-            productNameEl.textContent = `${selectedProduct.nom} ${selectedProduct.tendeurs ? '(' + selectedProduct.tendeurs + ' tendeurs)' : ''}`;
+            productNameEl.textContent = `${selectedProduct.nom || ''} ${selectedProduct.tendeurs ? '(' + selectedProduct.tendeurs + ' tendeurs)' : ''}`;
 
             try {
                 const res = await fetch(URL_JANTES_CSV);
@@ -128,9 +129,16 @@
                 }
             }
 
+            if (jantesEnginData.length === 0) {
+                selectJanteEngin.innerHTML = '<option value="">Aucune jante trouvée</option>';
+                return;
+            }
+
             selectJanteEngin.innerHTML = '<option value="">-- Sélectionnez une largeur de jante engin --</option>';
             jantesEnginData.forEach(j => {
-                selectJanteEngin.innerHTML += `<option value="${j.taille}">${j.taille}</option>`;
+                if (j.taille) {
+                    selectJanteEngin.innerHTML += `<option value="${j.taille}">${j.taille}</option>`;
+                }
             });
         }
 
