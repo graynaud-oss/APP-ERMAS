@@ -72,9 +72,8 @@
             auth: { persistSession: true, autoRefreshToken: true }
         });
 
-        let pneuData = [];
         let tarifsData = [];
-        let validPneuData = []; // Pneus filtrés ayant des correspondances de jantes tarifées
+        let validPneuData = [];
         let userRemise = 0;
 
         const selLargeurPneu = document.getElementById('select-largeur-pneu');
@@ -124,7 +123,7 @@
                 if (!lines[i].trim()) continue;
                 const cols = lines[i].split(',').map(val => val.trim().replace(/^"|"$/g, ''));
                 
-                if (cols.length >= 10) {
+                if (cols.length >= 8) {
                     const prixVVVal = cols[7];
                     if (!prixVVVal || isNaN(parseFloat(prixVVVal))) continue;
 
@@ -136,16 +135,21 @@
                         profil: cols[4],
                         nom: cols[5],
                         prixVV: prixVVVal,
-                        deportMaxI: cols[8],
-                        deportMinJ: cols[9]
+                        deportMaxI: cols[8] || '',
+                        deportMinJ: cols[9] || ''
                     });
                 }
             }
         }
 
+        function normalizeStr(str) {
+            if (!str) return '';
+            return str.toLowerCase().replace(/\.0$/, '').replace(/\s+/g, '').trim();
+        }
+
         function parsePneuCSV(text) {
             const lines = text.split('\n');
-            pneuData = [];
+            validPneuData = [];
 
             for (let i = 1; i < lines.length; i++) {
                 if (!lines[i].trim()) continue;
@@ -157,10 +161,10 @@
                     const diametrePneu = cols[2];
                     const largeurJante = cols[3];
 
-                    // Vérifier si cette combinaison jante/diamètre existe dans les tarifs roues étroites valides
+                    // Vérification croisée souple et normalisée avec les jantes étroites tarifées
                     const hasTarif = tarifsData.some(t => 
-                        t.largeurJante.toLowerCase() === largeurJante.toLowerCase() && 
-                        t.diametre.toLowerCase() === diametrePneu.toLowerCase()
+                        normalizeStr(t.largeurJante) === normalizeStr(largeurJante) && 
+                        normalizeStr(t.diametre) === normalizeStr(diametrePneu)
                     );
 
                     if (hasTarif) {
@@ -247,14 +251,12 @@
                 return;
             }
 
-            const uniqueLargeursJantes = [...new Set(matchingPneus.map(item => item.largeurJante))].filter(Boolean);
-
             let html = '';
 
-            uniqueLargeursJantes.forEach(targetLargeurJante => {
+            matchingPneus.forEach(pneu => {
                 const matchedTarifs = tarifsData.filter(t => 
-                    t.largeurJante.toLowerCase() === targetLargeurJante.toLowerCase() && 
-                    t.diametre.toLowerCase() === chosenD.toLowerCase()
+                    normalizeStr(t.largeurJante) === normalizeStr(pneu.largeurJante) && 
+                    normalizeStr(t.diametre) === normalizeStr(pneu.diametrePneu)
                 );
 
                 matchedTarifs.forEach(match => {
@@ -268,7 +270,6 @@
                             <div class="pt-2 border-t border-gray-800/80">
                     `;
 
-                    // VOIE VARIABLE UNIQUE
                     const baseVV = parseFloat(match.prixVV);
                     const finalVV = userRemise > 0 ? baseVV * (1 - userRemise / 100) : baseVV;
                     
