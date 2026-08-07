@@ -206,7 +206,7 @@
         </footer>
     </div>
 
-    <!-- 3.ter SECTION JUMELAGES (ÉPURÉE SANS DESCRIPTIONS INVENTÉES) -->
+    <!-- 3.ter SECTION JUMELAGES -->
     <div id="jumelages-view" class="hidden h-full flex flex-col justify-between w-full">
         <div class="flex-grow flex flex-col items-center justify-center px-4 py-8">
             <div class="max-w-xl w-full bg-[#0b101d] border border-gray-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
@@ -218,7 +218,7 @@
                     <button onclick="showHomeView()" class="text-xs text-gray-400 hover:text-white uppercase tracking-wider bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg transition shrink-0">Retour</button>
                 </div>
 
-                <!-- 4 BOUTONS DE GAMMES DE JUMELAGES (AVEC ROUTAGE CONDITIONNEL VIA SCRIPT) -->
+                <!-- 4 BOUTONS DE GAMMES DE JUMELAGES -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                     <!-- EVO -->
                     <button onclick="selectGamme('EVO')" class="p-4 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
@@ -373,10 +373,8 @@
         // LOGIQUE DE ROUTAGE CONDITIONNEL POUR LES JUMELAGES
         function selectGamme(type) {
             if (type === 'EVO' || type === '360') {
-                // Redirige vers une page de choix de recherche (similaire au catalogue jantes)
                 window.location.href = `jumelages-choix.html?type=${type}`;
             } else if (type === 'TGD' || type === 'TGD+') {
-                // Redirige directement vers la recherche par taille de jante
                 window.location.href = `jumelages-taille.html?type=${type}`;
             }
         }
