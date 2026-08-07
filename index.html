@@ -206,50 +206,46 @@
         </footer>
     </div>
 
-    <!-- 3.ter SECTION JUMELAGES (MIS À JOUR AVEC LES 4 TYPES) -->
+    <!-- 3.ter SECTION JUMELAGES (ÉPURÉE SANS DESCRIPTIONS INVENTÉES) -->
     <div id="jumelages-view" class="hidden h-full flex flex-col justify-between w-full">
         <div class="flex-grow flex flex-col items-center justify-center px-4 py-8">
             <div class="max-w-xl w-full bg-[#0b101d] border border-gray-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
                 <div class="flex justify-between items-center mb-6">
                     <div>
                         <h2 class="font-brand text-xl sm:text-2xl font-bold text-white">Catalogue Jumelages</h2>
-                        <p class="text-xs text-gray-400 mt-0.5">Sélectionnez le type de gamme adapté à votre engin :</p>
+                        <p class="text-xs text-gray-400 mt-0.5">Sélectionnez le type de gamme :</p>
                     </div>
                     <button onclick="showHomeView()" class="text-xs text-gray-400 hover:text-white uppercase tracking-wider bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg transition shrink-0">Retour</button>
                 </div>
 
-                <!-- 4 BOUTONS DE GAMMES DE JUMELAGES -->
+                <!-- 4 BOUTONS DE GAMMES DE JUMELAGES (AVEC ROUTAGE CONDITIONNEL VIA SCRIPT) -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                     <!-- EVO -->
-                    <button onclick="window.location.href='jumelages-gamme.html?type=EVO'" class="p-4 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
+                    <button onclick="selectGamme('EVO')" class="p-4 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
                         <span class="font-brand text-lg font-bold tracking-wider text-white group-hover:text-red-500 transition">EVO</span>
                         <span class="text-xs text-red-400 font-semibold mt-1">300 à 500 cv</span>
-                        <span class="text-[11px] text-gray-400 mt-1">Gamme ultra-puissance</span>
                     </button>
 
                     <!-- 360 -->
-                    <button onclick="window.location.href='jumelages-gamme.html?type=360'" class="p-4 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
+                    <button onclick="selectGamme('360')" class="p-4 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
                         <span class="font-brand text-lg font-bold tracking-wider text-white group-hover:text-red-500 transition">360</span>
                         <span class="text-xs text-red-400 font-semibold mt-1">80 à 320 cv</span>
-                        <span class="text-[11px] text-gray-400 mt-1">Gamme polyvalente</span>
                     </button>
 
                     <!-- TGD -->
-                    <button onclick="window.location.href='jumelages-gamme.html?type=TGD'" class="p-4 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
+                    <button onclick="selectGamme('TGD')" class="p-4 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
                         <span class="font-brand text-lg font-bold tracking-wider text-white group-hover:text-red-500 transition">TGD</span>
                         <span class="text-xs text-red-400 font-semibold mt-1">120 à 250 cv</span>
-                        <span class="text-[11px] text-gray-400 mt-1">Gamme standard</span>
                     </button>
 
                     <!-- TGD+ -->
-                    <button onclick="window.location.href='jumelages-gamme.html?type=TGD+'" class="p-4 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
+                    <button onclick="selectGamme('TGD+')" class="p-4 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
                         <span class="font-brand text-lg font-bold tracking-wider text-white group-hover:text-red-500 transition">TGD+</span>
                         <span class="text-xs text-red-400 font-semibold mt-1">160 à 400 cv</span>
-                        <span class="text-[11px] text-gray-400 mt-1">Gamme renforcée</span>
                     </button>
                 </div>
 
-                <!-- LIEN VERS LES FICHE PRODUITS (DOCUMENTS TECHNIQUES) -->
+                <!-- LIEN VERS LES FICHES PRODUITS -->
                 <div class="pt-4 border-t border-gray-800 text-center">
                     <button onclick="showDocumentsView()" class="text-xs text-red-400 hover:text-red-300 font-semibold transition uppercase tracking-wider">
                         Consulter les fiches produits &amp; documentations techniques &rarr;
@@ -372,6 +368,17 @@
         async function logoutUser() {
             await supabaseClient.auth.signOut();
             handleSession();
+        }
+
+        // LOGIQUE DE ROUTAGE CONDITIONNEL POUR LES JUMELAGES
+        function selectGamme(type) {
+            if (type === 'EVO' || type === '360') {
+                // Redirige vers une page de choix de recherche (similaire au catalogue jantes)
+                window.location.href = `jumelages-choix.html?type=${type}`;
+            } else if (type === 'TGD' || type === 'TGD+') {
+                // Redirige directement vers la recherche par taille de jante
+                window.location.href = `jumelages-taille.html?type=${type}`;
+            }
         }
 
         async function handleSession() {
