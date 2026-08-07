@@ -27,7 +27,7 @@
                 <button onclick="history.back()" class="text-xs text-gray-400 hover:text-white uppercase tracking-wider bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg transition shrink-0">Retour</button>
             </div>
 
-            <!-- ÉTAPE 1 : DIAMÈTRE -->
+            <!-- ÉTAPE 1 : DIAMÈTRE (Col B) -->
             <div class="mb-4">
                 <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">1. Diamètre</label>
                 <select id="select-diametre" disabled class="w-full bg-[#070913] border border-gray-800 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition disabled:opacity-50">
@@ -35,7 +35,7 @@
                 </select>
             </div>
 
-            <!-- ÉTAPE 2 : LARGEUR -->
+            <!-- ÉTAPE 2 : LARGEUR DE JANTE (Col A) -->
             <div class="mb-4">
                 <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">2. Largeur de jante</label>
                 <select id="select-largeur" disabled class="w-full bg-[#070913] border border-gray-800 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition disabled:opacity-50">
@@ -43,7 +43,7 @@
                 </select>
             </div>
 
-            <!-- ÉTAPE 3 : NOMBRE DE TENDEURS -->
+            <!-- ÉTAPE 3 : NOMBRE DE TENDEURS (Col F) -->
             <div class="mb-6">
                 <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">3. Nombre de tendeurs</label>
                 <select id="select-tendeurs" disabled class="w-full bg-[#070913] border border-gray-800 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition disabled:opacity-50">
@@ -128,12 +128,12 @@
                 
                 if (cols.length >= 7) {
                     csvData.push({
-                        diametre: cols[0] || '',     // Col A
-                        largeurJante: cols[1] || '', // Col B
+                        largeurJante: cols[0] || '', // Col A
+                        diametre: cols[1] || '',     // Col B
                         colC: cols[2] || '',         // Col C (réservé)
                         colD: cols[3] || '',         // Col D (réservé)
-                        tendeurs: cols[4] || '',     // Col E (Nb tendeurs)
-                        colF: cols[5] || '',         // Col F
+                        colE: cols[4] || '',         // Col E
+                        tendeurs: cols[5] || '',     // Col F (Nb tendeurs)
                         prix: cols[6] || '',         // Col G (Prix principal)
                         kitSansJantes: cols[7] || '',// Col H
                         joncs: cols[8] || '',        // Col I
@@ -258,7 +258,7 @@
                 `;
             }
 
-            // OPTIONS DISCRÈTES (H, I, J, K)
+            // OPTIONS DISCRÈTES (H, I, J, K) AVEC PRIX NETS ET CATALOGUE SI REMISE
             html += `
                 <div class="pt-2 border-t border-gray-800/80">
                     <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-2">Options / Suppléments</span>
@@ -273,13 +273,43 @@
             ];
 
             options.forEach(opt => {
-                const optVal = opt.val && !isNaN(parseFloat(opt.val)) ? `${parseFloat(opt.val).toFixed(2)} €` : 'N/C';
-                html += `
-                    <div class="bg-gray-900/30 border border-gray-800/60 rounded-md px-3 py-2 flex justify-between items-center text-xs">
-                        <span class="text-gray-400 text-[11px]">${opt.label}</span>
-                        <span class="text-gray-200 font-medium">${optVal}</span>
-                    </div>
-                `;
+                if (opt.val && !isNaN(parseFloat(opt.val))) {
+                    const baseOpt = parseFloat(opt.val);
+                    const finalOpt = userRemise > 0 ? baseOpt * (1 - userRemise / 100) : baseOpt;
+
+                    html += `
+                        <div class="bg-gray-900/30 border border-gray-800/60 rounded-md p-2.5 flex flex-col justify-between text-xs">
+                            <span class="text-gray-400 text-[11px] mb-1">${opt.label}</span>
+                    `;
+
+                    if (userRemise > 0) {
+                        html += `
+                            <div class="text-[10px] text-gray-400 pb-1 border-b border-gray-800/40 flex justify-between items-center">
+                                <span>Cat. :</span>
+                                <span class="text-white">${baseOpt.toFixed(2)} €</span>
+                            </div>
+                            <div class="flex justify-between items-center pt-1 font-medium">
+                                <span class="text-red-400 text-[10px]">Net :</span>
+                                <span class="text-gray-200">${finalOpt.toFixed(2)} €</span>
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="flex justify-between items-center pt-1">
+                                <span class="text-gray-500 text-[10px]">Prix :</span>
+                                <span class="text-gray-200 font-medium">${finalOpt.toFixed(2)} €</span>
+                            </div>
+                        `;
+                    }
+                    html += `</div>`;
+                } else {
+                    html += `
+                        <div class="bg-gray-900/30 border border-gray-800/60 rounded-md p-2.5 flex justify-between items-center text-xs">
+                            <span class="text-gray-400 text-[11px]">${opt.label}</span>
+                            <span class="text-gray-500 italic">N/C</span>
+                        </div>
+                    `;
+                }
             });
 
             html += `
