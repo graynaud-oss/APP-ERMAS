@@ -72,7 +72,7 @@
         // URLs CSV selon la gamme (EVO ou 360)
         const URLS_PNEU = {
             'EVO': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=139891043&single=true&output=csv',
-            '360': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=139891043&single=true&output=csv' // À ajuster si le gid pneu 360 diffère, sinon même source de correspondance
+            '360': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=139891043&single=true&output=csv'
         };
 
         const URLS_TARIFS = {
@@ -128,7 +128,6 @@
                 parsePneuCSV(pneuText);
                 parseTarifsCSV(tarifsText);
                 
-                // Appliquer le préfiltre : ne garder que les pneus qui ont un tarif correspondant
                 filtrerPneusDisponibles();
                 populateLargeursPneu();
             } catch (err) {
@@ -146,10 +145,10 @@
                 
                 if (cols.length >= 4) {
                     pneuData.push({
-                        largeurPneu: cols[0] || '', // Colonne A
-                        rapport: cols[1] || '',      // Colonne B
-                        diametrePneu: cols[2] || '', // Colonne C
-                        largeurJante: cols[3] || ''  // Colonne D
+                        largeurPneu: cols[0] || '',
+                        rapport: cols[1] || '',
+                        diametrePneu: cols[2] || '',
+                        largeurJante: cols[3] || ''
                     });
                 }
             }
@@ -165,23 +164,22 @@
                 
                 if (cols.length >= 7) {
                     tarifsData.push({
-                        largeurJante: cols[0] || '', // Col A
-                        diametre: cols[1] || '',     // Col B
+                        largeurJante: cols[0] || '',
+                        diametre: cols[1] || '',
                         colC: cols[2] || '',
                         colD: cols[3] || '',
-                        nom: cols[4] || '',          // Col E (Nom du produit)
-                        tendeurs: cols[5] || '',     // Col F
-                        prix: cols[6] || '',         // Col G (Prix principal)
-                        kitSansJantes: cols[7] || '',// Col H
-                        joncs: cols[8] || '',        // Col I
-                        paireTendeurs: cols[9] || '',// Col J
-                        entretoises: cols[10] || ''  // Col K
+                        nom: cols[4] || '',
+                        tendeurs: cols[5] || '',
+                        prix: cols[6] || '',
+                        kitSansJantes: cols[7] || '',
+                        joncs: cols[8] || '',
+                        paireTendeurs: cols[9] || '',
+                        entretoises: cols[10] || ''
                     });
                 }
             }
         }
 
-        // Préfiltre pour éliminer les lignes de pneus qui n'ont aucun équivalent tarifaire dans la gamme
         let filteredPneuData = [];
         function filtrerPneusDisponibles() {
             filteredPneuData = pneuData.filter(pneu => {
@@ -273,11 +271,16 @@
                 );
 
                 matchedTarifs.forEach(match => {
+                    // Construction du nom complet avec le nombre de tendeurs si disponible
+                    let nomComplet = match.nom || 'N/A';
+                    if (match.tendeurs && match.tendeurs.trim() !== '') {
+                        nomComplet += ` - ${match.tendeurs} TENDEURS`;
+                    }
+
                     html += `
                         <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl space-y-4 mb-3">
                             <div>
-                                <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Nom du produit (Jante ${match.largeurJante})</span>
-                                <div class="text-white text-base font-bold tracking-wide mt-0.5">${match.nom || 'N/A'}</div>
+                                <div class="text-white text-base font-bold tracking-wide mt-0.5">${nomComplet}</div>
                             </div>
                     `;
 
