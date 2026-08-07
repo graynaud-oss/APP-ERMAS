@@ -20,7 +20,7 @@
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h2 class="font-brand text-xl sm:text-2xl font-bold text-white">Recherche roues étroites par pneu</h2>
-                    <p class="text-xs text-gray-400 mt-0.5">Sélectionnez les dimensions du pneu étape par étape</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Sélectionnez les dimensions du pneu étape par étape (ex: 380 / 85 / 30)</p>
                 </div>
                 <button onclick="history.back()" class="text-xs text-gray-400 hover:text-white uppercase tracking-wider bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg transition shrink-0">Retour</button>
             </div>
@@ -73,7 +73,7 @@
         });
 
         let tarifsData = [];
-        let validPneuData = [];
+        let pneuRows = [];
         let userRemise = 0;
 
         const selLargeurPneu = document.getElementById('select-largeur-pneu');
@@ -115,28 +115,45 @@
             }
         }
 
+        function parseCSVLine(line) {
+            const cols = [];
+            let current = '';
+            let inQuotes = false;
+            for (let j = 0; j < line.length; j++) {
+                const char = line[j];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    cols.push(current.trim().replace(/^"|"$/g, ''));
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            cols.push(current.trim().replace(/^"|"$/g, ''));
+            return cols;
+        }
+
         function parseTarifsCSV(text) {
             const lines = text.split('\n');
             tarifsData = [];
 
             for (let i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue;
-                const cols = lines[i].split(',').map(val => val.trim().replace(/^"|"$/g, ''));
+                const line = lines[i].trim();
+                if (!line) continue;
+                const cols = parseCSVLine(line);
                 
                 if (cols.length >= 8) {
-                    const prixVVVal = cols[7];
-                    if (!prixVVVal || isNaN(parseFloat(prixVVVal))) continue;
-
                     tarifsData.push({
                         largeurJante: cols[0],
-                        diametre: cols[1],
-                        horsTout: cols[2],
-                        emboitement: cols[3],
-                        profil: cols[4],
-                        nom: cols[5],
-                        prixVV: prixVVVal,
-                        deportMaxI: cols[8] || '',
-                        deportMinJ: cols[9] || ''
+                        diametre:     cols[1],
+                        horsTout:     cols[2],
+                        emboitement:  cols[3],
+                        profil:       cols[4],
+                        nom:          cols[5],
+                        prixVV:       cols[7],
+                        deportMaxI:   cols[8] || '',
+                        deportMinJ:   cols[9] || ''
                     });
                 }
             }
@@ -149,40 +166,28 @@
 
         function parsePneuCSV(text) {
             const lines = text.split('\n');
-            validPneuData = [];
+            pneuRows = [];
 
             for (let i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue;
-                const cols = lines[i].split(',').map(val => val.trim().replace(/^"|"$/g, ''));
+                const line = lines[i].trim();
+                if (!line) continue;
+                const cols = parseCSVLine(line);
                 
-                // Colonne A: Largeur pneu, Colonne B: Rapport, Colonne C: Diamètre pneu, Colonne D: Largeur jante associée
+                // Colonnes attendues du tableau de correspondance pneu (ex: 380, 85, 30, jante...)
                 if (cols.length >= 4) {
-                    const largeurPneu = cols[0];
-                    const rapport = cols[1];
-                    const diametrePneu = cols[2];
-                    const largeurJante = cols[3];
-
-                    // On vérifie que la jante et le diamètre existent dans le catalogue des roues étroites
-                    const hasTarif = tarifsData.some(t => 
-                        normalizeStr(t.largeurJante) === normalizeStr(largeurJante) && 
-                        normalizeStr(t.diametre) === normalizeStr(diametrePneu)
-                    );
-
-                    if (hasTarif) {
-                        validPneuData.push({
-                            largeurPneu,
-                            rapport,
-                            diametrePneu,
-                            largeurJante
-                        });
-                    }
+                    pneuRows.push({
+                        largeurPneu:  cols[0],
+                        rapport:      cols[1],
+                        diametrePneu: cols[2],
+                        largeurJante: cols[3]
+                    });
                 }
             }
             populateLargeursPneu();
         }
 
         function populateLargeursPneu() {
-            const largeurs = [...new Set(validPneuData.map(item => item.largeurPneu))].filter(Boolean);
+            const largeurs = [...new Set(pneuRows.map(item => item.largeurPneu))].filter(Boolean);
             largeurs.sort((a, b) => parseFloat(a) - parseFloat(b));
 
             selLargeurPneu.innerHTML = '<option value="">-- Sélectionnez une largeur de pneu --</option>';
@@ -202,7 +207,7 @@
 
             if (!chosenL) return;
 
-            const filtered = validPneuData.filter(item => item.largeurPneu === chosenL);
+            const filtered = pneuRows.filter(item => item.largeurPneu === chosenL);
             const rapports = [...new Set(filtered.map(item => item.rapport))].filter(Boolean);
             rapports.sort((a, b) => parseFloat(a) - parseFloat(b));
 
@@ -221,7 +226,7 @@
 
             if (!chosenR) return;
 
-            const filtered = validPneuData.filter(item => item.largeurPneu === chosenL && item.rapport === chosenR);
+            const filtered = pneuRows.filter(item => item.largeurPneu === chosenL && item.rapport === chosenR);
             const diametres = [...new Set(filtered.map(item => item.diametrePneu))].filter(Boolean);
             diametres.sort((a, b) => parseFloat(a) - parseFloat(b));
 
@@ -241,16 +246,11 @@
                 return;
             }
 
-            const matchingPneus = validPneuData.filter(item => 
+            const matchingPneus = pneuRows.filter(item => 
                 item.largeurPneu === chosenL && 
                 item.rapport === chosenR && 
                 item.diametrePneu === chosenD
             );
-
-            if (matchingPneus.length === 0) {
-                resultsContainer.classList.add('hidden');
-                return;
-            }
 
             let html = '';
 
@@ -271,7 +271,7 @@
                             <div class="pt-2 border-t border-gray-800/80">
                     `;
 
-                    const baseVV = parseFloat(match.prixVV);
+                    const baseVV = parseFloat(match.prixVV) || 0;
                     const finalVV = userRemise > 0 ? baseVV * (1 - userRemise / 100) : baseVV;
                     
                     html += `
