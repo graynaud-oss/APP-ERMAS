@@ -206,42 +206,54 @@
         </footer>
     </div>
 
-    <!-- 3.ter SECTION JUMELAGES (CHOIX DE RECHERCHE) -->
+    <!-- 3.ter SECTION JUMELAGES (MIS À JOUR AVEC LES 4 TYPES) -->
     <div id="jumelages-view" class="hidden h-full flex flex-col justify-between w-full">
         <div class="flex-grow flex flex-col items-center justify-center px-4 py-8">
             <div class="max-w-xl w-full bg-[#0b101d] border border-gray-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
                 <div class="flex justify-between items-center mb-6">
                     <div>
                         <h2 class="font-brand text-xl sm:text-2xl font-bold text-white">Catalogue Jumelages</h2>
-                        <p class="text-xs text-gray-400 mt-0.5">Choisissez votre mode de recherche :</p>
+                        <p class="text-xs text-gray-400 mt-0.5">Sélectionnez le type de gamme adapté à votre engin :</p>
                     </div>
                     <button onclick="showHomeView()" class="text-xs text-gray-400 hover:text-white uppercase tracking-wider bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg transition shrink-0">Retour</button>
                 </div>
 
+                <!-- 4 BOUTONS DE GAMMES DE JUMELAGES -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                    <button onclick="alert('Recherche par taille de jumelages')" class="p-5 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
-                        <div class="w-12 h-12 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-400 group-hover:text-red-500 group-hover:border-red-600/50 transition mb-3">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="9" cy="12" r="6" stroke-width="2"/><circle cx="15" cy="12" r="6" stroke-width="2"/></svg>
-                        </div>
-                        <span class="font-brand text-base font-bold tracking-wider text-white group-hover:text-red-500 transition">Par taille de jumelages</span>
-                        <span class="text-[11px] text-gray-400 mt-1">Recherche directe par dimensions de jumelage</span>
+                    <!-- EVO -->
+                    <button onclick="window.location.href='jumelages-gamme.html?type=EVO'" class="p-4 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
+                        <span class="font-brand text-lg font-bold tracking-wider text-white group-hover:text-red-500 transition">EVO</span>
+                        <span class="text-xs text-red-400 font-semibold mt-1">300 à 500 cv</span>
+                        <span class="text-[11px] text-gray-400 mt-1">Gamme ultra-puissance</span>
                     </button>
 
-                    <button onclick="alert('Recherche par taille de pneus')" class="p-5 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
-                        <div class="w-12 h-12 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-400 group-hover:text-red-500 group-hover:border-red-600/50 transition mb-3">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
-                        </div>
-                        <span class="font-brand text-base font-bold tracking-wider text-white group-hover:text-red-500 transition">Par taille de pneus</span>
-                        <span class="text-[11px] text-gray-400 mt-1">Recherche indicative par dimension de pneu</span>
+                    <!-- 360 -->
+                    <button onclick="window.location.href='jumelages-gamme.html?type=360'" class="p-4 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
+                        <span class="font-brand text-lg font-bold tracking-wider text-white group-hover:text-red-500 transition">360</span>
+                        <span class="text-xs text-red-400 font-semibold mt-1">80 à 320 cv</span>
+                        <span class="text-[11px] text-gray-400 mt-1">Gamme polyvalente</span>
+                    </button>
+
+                    <!-- TGD -->
+                    <button onclick="window.location.href='jumelages-gamme.html?type=TGD'" class="p-4 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
+                        <span class="font-brand text-lg font-bold tracking-wider text-white group-hover:text-red-500 transition">TGD</span>
+                        <span class="text-xs text-red-400 font-semibold mt-1">120 à 250 cv</span>
+                        <span class="text-[11px] text-gray-400 mt-1">Gamme standard</span>
+                    </button>
+
+                    <!-- TGD+ -->
+                    <button onclick="window.location.href='jumelages-gamme.html?type=TGD+'" class="p-4 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
+                        <span class="font-brand text-lg font-bold tracking-wider text-white group-hover:text-red-500 transition">TGD+</span>
+                        <span class="text-xs text-red-400 font-semibold mt-1">160 à 400 cv</span>
+                        <span class="text-[11px] text-gray-400 mt-1">Gamme renforcée</span>
                     </button>
                 </div>
 
-                <div class="p-3.5 bg-amber-950/30 border border-amber-900/40 rounded-xl flex items-start space-x-3 text-amber-300 text-xs leading-relaxed">
-                    <svg class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    <div>
-                        <strong class="font-semibold block mb-0.5 text-amber-200">Avertissement important :</strong>
-                        La recherche par taille de pneus est fournie à titre purement indicatif. Il est impératif de vérifier la correspondance et la faisabilité auprès des données techniques du manufacturier avant toute commande.
-                    </div>
+                <!-- LIEN VERS LES FICHE PRODUITS (DOCUMENTS TECHNIQUES) -->
+                <div class="pt-4 border-t border-gray-800 text-center">
+                    <button onclick="showDocumentsView()" class="text-xs text-red-400 hover:text-red-300 font-semibold transition uppercase tracking-wider">
+                        Consulter les fiches produits &amp; documentations techniques &rarr;
+                    </button>
                 </div>
             </div>
         </div>
