@@ -264,12 +264,9 @@
                     matchedTarifs.forEach(match => {
                         html += `
                             <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl space-y-3 mb-3">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Jante préconisée (Largeur : ${targetLargeurJante})</span>
-                                        <div class="text-white text-base font-bold tracking-wide">${match.nom || 'N/A'}</div>
-                                    </div>
-                                    <span class="px-2 py-1 bg-red-950/40 border border-red-900/40 text-red-400 text-[10px] font-semibold rounded uppercase">Jante ${match.largeurJante}</span>
+                                <div>
+                                    <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Nom du produit (Jante ${match.largeurJante})</span>
+                                    <div class="text-white text-base font-bold tracking-wide">\${match.nom || 'N/A'}</div>
                                 </div>
                                 
                                 <div class="grid grid-cols-2 gap-3 pt-2 border-t border-gray-800/80">
@@ -288,11 +285,11 @@
                             
                             if (userRemise > 0) {
                                 html += `
-                                        <div class="text-[10px] text-gray-400 mt-1 pb-2 border-b border-gray-800/60">Prix catalogue : <span class="text-white font-medium">${baseVF.toFixed(2)} €</span></div>
+                                        <div class="text-[10px] text-gray-400 mt-1 pb-2 border-b border-gray-800/60">Prix catalogue : <span class="text-white font-medium">\${baseVF.toFixed(2)} €</span></div>
                                         <div class="text-[10px] uppercase tracking-wider text-red-400 font-semibold mt-2">Prix net</div>
                                     </div>
                                     <div>
-                                        <div class="text-white font-bold text-sm">${finalVF.toFixed(2)} €</div>
+                                        <div class="text-white font-bold text-sm">\${finalVF.toFixed(2)} €</div>
                                     </div>
                                 `;
                             } else {
@@ -300,7 +297,7 @@
                                         <div class="text-[10px] uppercase tracking-wider text-gray-500 mt-1">Prix catalogue</div>
                                     </div>
                                     <div class="mt-2 pt-2 border-t border-gray-800/60">
-                                        <div class="text-white font-bold text-sm">${finalVF.toFixed(2)} €</div>
+                                        <div class="text-white font-bold text-sm">\${finalVF.toFixed(2)} €</div>
                                     </div>
                                 `;
                             }
@@ -327,11 +324,11 @@
 
                             if (userRemise > 0) {
                                 html += `
-                                        <div class="text-[10px] text-gray-400 mt-1 pb-2 border-b border-gray-800/60">Prix catalogue : <span class="text-white font-medium">${baseVV.toFixed(2)} €</span></div>
+                                        <div class="text-[10px] text-gray-400 mt-1 pb-2 border-b border-gray-800/60">Prix catalogue : <span class="text-white font-medium">\${baseVV.toFixed(2)} €</span></div>
                                         <div class="text-[10px] uppercase tracking-wider text-red-400 font-semibold mt-2">Prix net</div>
                                     </div>
                                     <div>
-                                        <div class="text-white font-bold text-sm">${finalVV.toFixed(2)} €</div>
+                                        <div class="text-white font-bold text-sm">\${finalVV.toFixed(2)} €</div>
                                     </div>
                                 `;
                             } else {
@@ -339,7 +336,7 @@
                                         <div class="text-[10px] uppercase tracking-wider text-gray-500 mt-1">Prix catalogue</div>
                                     </div>
                                     <div class="mt-2 pt-2 border-t border-gray-800/60">
-                                        <div class="text-white font-bold text-sm">${finalVV.toFixed(2)} €</div>
+                                        <div class="text-white font-bold text-sm">\${finalVV.toFixed(2)} €</div>
                                     </div>
                                 `;
                             }
@@ -362,7 +359,7 @@
                         if (hasValidI && hasValidJ) {
                             html += `
                                 <div class="pt-2">
-                                    <button onclick='ouvrirCalculateur(${JSON.stringify(match)})' class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-xs transition tracking-wide uppercase shadow-md shadow-red-950/50">
+                                    <button onclick='ouvrirCalculateur(\${JSON.stringify(match)})' class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-xs transition tracking-wide uppercase shadow-md shadow-red-950/50">
                                         Estimer la voie de travail
                                     </button>
                                 </div>
