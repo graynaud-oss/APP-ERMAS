@@ -46,7 +46,7 @@
             auth: { persistSession: true, autoRefreshToken: true }
         });
 
-        // Récupération du type de gamme passé dans l'URL (ex: ?type=EVO, 360, TGD, TGD+)
+        // Récupération du type de gamme passé dans l'URL (ex: ?type=EVO, 360, TGD, TGD+)[cite: 9]
         const urlParams = new URLSearchParams(window.location.search);
         const gammeType = urlParams.get('type') || 'EVO';
 
