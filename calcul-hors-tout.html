@@ -70,8 +70,8 @@
         const urlParams = new URLSearchParams(window.location.search);
         const gammeType = urlParams.get('type') || 'EVO';
 
-        // URL pointant sur l'onglet dédié aux jantes engins (gid=0 ou l'onglet correspondant dans votre Google Sheets)
-        const URL_JANTES_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=0&single=true&output=csv'; 
+        // URL pointant vers le bon onglet CSV contenant les jantes engins
+        const URL_JANTES_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1966421754&single=true&output=csv';
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: { persistSession: true, autoRefreshToken: true }
