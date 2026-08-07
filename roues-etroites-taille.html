@@ -114,7 +114,6 @@
                 const line = lines[i].trim();
                 if (!line) continue;
                 
-                // Gestion robuste du découpage CSV avec guillemets potentiels
                 const cols = [];
                 let current = '';
                 let inQuotes = false;
@@ -131,7 +130,7 @@
                 }
                 cols.push(current.trim().replace(/^"|"$/g, ''));
 
-                if (cols.length >= 8) {
+                if (cols.length >= 7) {
                     csvData.push({
                         largeurJante: cols[0], // Col A
                         diametre:     cols[1], // Col B
@@ -139,7 +138,7 @@
                         emboitement:  cols[3], // Col D
                         profil:       cols[4], // Col E
                         nom:          cols[5], // Col F
-                        prixVV:       cols[7], // Col H
+                        prixVV:       cols[6], // Col G (Prix roue étroite)
                         deportMaxI:   cols[8] || '',
                         deportMinJ:   cols[9] || ''
                     });
@@ -224,7 +223,7 @@
                     <div class="pt-2 border-t border-gray-800/80">
             `;
 
-            const baseVV = parseFloat(match.prixVV) || 0;
+            const baseVV = parseFloat(match.prixVV.replace(',', '.')) || 0;
             const finalVV = userRemise > 0 ? baseVV * (1 - userRemise / 100) : baseVV;
             
             html += `
