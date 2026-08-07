@@ -70,8 +70,11 @@
         const urlParams = new URLSearchParams(window.location.search);
         const gammeType = urlParams.get('type') || 'EVO';
 
-        // URL pointant vers le bon onglet CSV contenant les jantes engins
-        const URL_JANTES_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1966421754&single=true&output=csv';
+        // URLs CSV adaptées selon la gamme (EVO ou 360)
+        const URLS_JANTES_CSV = {
+            'EVO': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1732806915&single=true&output=csv',
+            '360': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1287684735&single=true&output=csv'
+        };
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: { persistSession: true, autoRefreshToken: true }
@@ -101,10 +104,11 @@
                 return;
             }
 
-            productNameEl.textContent = `${selectedProduct.nom || ''} ${selectedProduct.tendeurs ? '(' + selectedProduct.tendeurs + ' tendeurs)' : ''}`;
+            productNameEl.textContent = `${selectedProduct.nom || ''} ${selectedProduct.tendeurs ? '(' + selectedProduct.tendeurs + ' tendeurs)' : ''} [Gamme ${gammeType}]`;
 
             try {
-                const res = await fetch(URL_JANTES_CSV);
+                const csvUrl = URLS_JANTES_CSV[gammeType] || URLS_JANTES_CSV['EVO'];
+                const res = await fetch(csvUrl);
                 const text = await res.text();
                 parseJantesCSV(text);
             } catch (err) {
@@ -120,11 +124,11 @@
                 if (!lines[i].trim()) continue;
                 const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => val.trim().replace(/^"|"$/g, ''));
                 
-                if (cols.length >= 4) {
+                if (cols.length >= 7) {
                     jantesEnginData.push({
-                        taille: cols[0] || '', 
-                        horsToutJante: parseFloat(cols[2]) || 0, 
-                        emboitementEngin: parseFloat(cols[3]) || 0  
+                        taille: cols[0] || '',       // Col A (Largeur de jante)
+                        horsToutJante: parseFloat(cols[2]) || 0, // Col C (Déport max)
+                        emboitementEngin: parseFloat(cols[3]) || 0 // Col D (Déport min)
                     });
                 }
             }
@@ -134,11 +138,13 @@
                 return;
             }
 
+            // Filtrage des doublons sur la taille de jante
+            const uniqueTailles = [...new Set(jantesEnginData.map(j => j.taille))].filter(Boolean);
+            uniqueTailles.sort((a, b) => parseFloat(a) - parseFloat(b));
+
             selectJanteEngin.innerHTML = '<option value="">-- Sélectionnez une largeur de jante engin --</option>';
-            jantesEnginData.forEach(j => {
-                if (j.taille) {
-                    selectJanteEngin.innerHTML += `<option value="${j.taille}">${j.taille}</option>`;
-                }
+            uniqueTailles.forEach(taille => {
+                selectJanteEngin.innerHTML += `<option value="${taille}">${taille}</option>`;
             });
         }
 
