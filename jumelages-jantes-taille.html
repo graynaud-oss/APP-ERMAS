@@ -113,6 +113,7 @@
                 const response = await fetch(URLS_CSV[gammeType]);
                 const text = await response.text();
                 parseCSV(text);
+                restaurerSelections();
             } catch (err) {
                 selDiametre.innerHTML = '<option value="">Erreur de chargement des données</option>';
             }
@@ -127,7 +128,7 @@
                 const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => val.trim().replace(/^"|"$/g, ''));
                 
                 if (cols.length >= 7) {
-                    const item = {
+                    csvData.push({
                         largeurJante: cols[0] || '', // Col A
                         diametre: cols[1] || '',     // Col B
                         colC: cols[2] || '',         // Col C (DEPORT MAX)
@@ -139,8 +140,7 @@
                         joncs: cols[8] || '',        // Col I
                         paireTendeurs: cols[9] || '',// Col J
                         entretoises: cols[10] || ''  // Col K
-                    };
-                    csvData.push(item);
+                    });
                 }
             }
             populateDiametres();
@@ -157,6 +157,33 @@
             selDiametre.disabled = false;
         }
 
+        function sauvegarderSelections() {
+            sessionStorage.setItem('ermas_jante_diametre', selDiametre.value);
+            sessionStorage.setItem('ermas_jante_largeur', selLargeur.value);
+            sessionStorage.setItem('ermas_jante_tendeurs', selTendeurs.value);
+        }
+
+        function restaurerSelections() {
+            const savedD = sessionStorage.getItem('ermas_jante_diametre');
+            const savedL = sessionStorage.getItem('ermas_jante_largeur');
+            const savedT = sessionStorage.getItem('ermas_jante_tendeurs');
+
+            if (savedD && [...selDiametre.options].some(o => o.value === savedD)) {
+                selDiametre.value = savedD;
+                selDiametre.dispatchEvent(new Event('change'));
+
+                if (savedL && [...selLargeur.options].some(o => o.value === savedL)) {
+                    selLargeur.value = savedL;
+                    selLargeur.dispatchEvent(new Event('change'));
+
+                    if (savedT && [...selTendeurs.options].some(o => o.value === savedT)) {
+                        selTendeurs.value = savedT;
+                        selTendeurs.dispatchEvent(new Event('change'));
+                    }
+                }
+            }
+        }
+
         selDiametre.addEventListener('change', () => {
             const chosenD = selDiametre.value;
             selLargeur.innerHTML = '<option value="">-- Sélectionnez une largeur --</option>';
@@ -164,6 +191,7 @@
             selLargeur.disabled = true;
             selTendeurs.disabled = true;
             resultsContainer.classList.add('hidden');
+            sauvegarderSelections();
 
             if (!chosenD) return;
 
@@ -183,6 +211,7 @@
             selTendeurs.innerHTML = '<option value="">-- Sélectionnez un nombre de tendeurs --</option>';
             selTendeurs.disabled = true;
             resultsContainer.classList.add('hidden');
+            sauvegarderSelections();
 
             if (!chosenL) return;
 
@@ -200,33 +229,39 @@
             const chosenD = selDiametre.value;
             const chosenL = selLargeur.value;
             const chosenT = selTendeurs.value;
+            sauvegarderSelections();
 
-            // Filtrage strict basé uniquement sur le NOM (colonne E) pour éviter les doublons de produits
+            if (!chosenT) {
+                resultsContainer.classList.add('hidden');
+                return;
+            }
+
             const matchingItems = csvData.filter(item => 
                 item.diametre === chosenD && 
                 item.largeurJante === chosenL && 
                 item.tendeurs === chosenT
             );
 
-            if (matchingItems.length === 0) {
+            // Filtrage strict des doublons/triples basé sur le NOM (col E) et les TENDEURS (col F)
+            const uniqueMap = new Map();
+            matchingItems.forEach(item => {
+                const uniqueKey = `${(item.nom || '').trim().toLowerCase()}_${(item.tendeurs || '').trim().toLowerCase()}`;
+                if (!uniqueMap.has(uniqueKey)) {
+                    uniqueMap.set(uniqueKey, item);
+                }
+            });
+            const matches = Array.from(uniqueMap.values());
+
+            if (matches.length === 0) {
                 resultsContainer.classList.add('hidden');
                 return;
             }
 
-            // Dédoublonnage strict par Nom (Col E)
-            const uniqueMap = new Map();
-            matchingItems.forEach(item => {
-                if (item.nom && !uniqueMap.has(item.nom.trim().toLowerCase())) {
-                    uniqueMap.set(item.nom.trim().toLowerCase(), item);
-                }
-            });
-
-            const uniqueMatches = Array.from(uniqueMap.values());
-
             let html = '';
-            uniqueMatches.forEach(match => {
+
+            matches.forEach(match => {
                 html += `
-                    <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl space-y-4 mb-4">
+                    <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl space-y-4 mb-3">
                         <div>
                             <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Nom du produit</span>
                             <div class="text-white text-base font-bold tracking-wide mt-0.5">${match.nom || 'N/A'}</div>
@@ -331,7 +366,7 @@
                     </div>
                 `;
 
-                // BOUTON ACCÈS CALCULATEUR HORS-TOUT
+                // BOUTON ACCÈS CALCULATEUR HORS-TOUT (pointant vers calcul-hors-tout.html)
                 html += `
                     <div class="pt-2 border-t border-gray-800/80">
                         <button onclick='ouvrirCalculateurHorsTout(${JSON.stringify(match)})' class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-xs transition tracking-wide uppercase shadow-md shadow-red-950/50">
