@@ -238,137 +238,125 @@
                 return;
             }
 
-            // 2. Éliminer les doublons basés sur la largeur de jante (colonne D) pour éviter d'afficher plusieurs fois la même largeur de jante
-            const uniqueLargeursJantes = [];
-            const filteredMatchingPneus = matchingPneus.filter(item => {
-                if (!uniqueLargeursJantes.includes(item.largeurJante)) {
-                    uniqueLargeursJantes.push(item.largeurJante);
-                    return true;
-                }
-                return false;
-            });
+            // 2. Extraire uniquement les largeurs de jantes uniques associées à ce pneu
+            const uniqueLargeursJantes = [...new Set(matchingPneus.map(item => item.largeurJante))].filter(Boolean);
 
             let html = '';
 
-            // Pour chaque largeur de jante unique, on cherche dans les tarifs
-            filteredMatchingPneus.forEach(pneuMatch => {
-                const targetLargeurJante = pneuMatch.largeurJante;
-                const targetDiametre = pneuMatch.diametrePneu;
-
+            // 3. Pour chaque largeur de jante unique, chercher les tarifs correspondants
+            uniqueLargeursJantes.forEach(targetLargeurJante => {
                 const matchedTarifs = tarifsData.filter(t => 
                     t.largeurJante.toLowerCase() === targetLargeurJante.toLowerCase() && 
-                    t.diametre.toLowerCase() === targetDiametre.toLowerCase()
+                    t.diametre.toLowerCase() === chosenD.toLowerCase()
                 );
 
-                if (matchedTarifs.length > 0) {
-                    matchedTarifs.forEach(match => {
+                matchedTarifs.forEach(match => {
+                    html += `
+                        <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl space-y-3 mb-3">
+                            <div>
+                                <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Nom du produit (Jante ${match.largeurJante})</span>
+                                <div class="text-white text-base font-bold tracking-wide">${match.nom || 'N/A'}</div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-3 pt-2 border-t border-gray-800/80">
+                    `;
+
+                    // VOIE FIXE
+                    if (match.prixVF && !isNaN(parseFloat(match.prixVF))) {
+                        const baseVF = parseFloat(match.prixVF);
+                        const finalVF = userRemise > 0 ? baseVF * (1 - userRemise / 100) : baseVF;
+                        
                         html += `
-                            <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl space-y-3 mb-3">
+                            <div class="bg-gray-900/50 p-2.5 rounded-lg border border-gray-800 flex flex-col justify-between">
                                 <div>
-                                    <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Nom du produit (Jante ${match.largeurJante})</span>
-                                    <div class="text-white text-base font-bold tracking-wide">\${match.nom || 'N/A'}</div>
+                                    <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Voie fixe</span>
+                        `;
+                        
+                        if (userRemise > 0) {
+                            html += `
+                                    <div class="text-[10px] text-gray-400 mt-1 pb-2 border-b border-gray-800/60">Prix catalogue : <span class="text-white font-medium">${baseVF.toFixed(2)} €</span></div>
+                                    <div class="text-[10px] uppercase tracking-wider text-red-400 font-semibold mt-2">Prix net</div>
                                 </div>
-                                
-                                <div class="grid grid-cols-2 gap-3 pt-2 border-t border-gray-800/80">
+                                <div>
+                                    <div class="text-white font-bold text-sm">${finalVF.toFixed(2)} €</div>
+                                </div>
+                            `;
+                        } else {
+                            html += `
+                                    <div class="text-[10px] uppercase tracking-wider text-gray-500 mt-1">Prix catalogue</div>
+                                </div>
+                                <div class="mt-2 pt-2 border-t border-gray-800/60">
+                                    <div class="text-white font-bold text-sm">${finalVF.toFixed(2)} €</div>
+                                </div>
+                            `;
+                        }
+                        html += `</div>`;
+                    } else {
+                        html += `
+                            <div class="bg-gray-900/50 p-2.5 rounded-lg border border-gray-800 flex flex-col justify-between">
+                                <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Voie fixe</span>
+                                <div class="text-gray-500 text-xs italic my-auto">Non disponible</div>
+                            </div>
+                        `;
+                    }
+
+                    // VOIE VARIABLE
+                    if (match.prixVV && !isNaN(parseFloat(match.prixVV))) {
+                        const baseVV = parseFloat(match.prixVV);
+                        const finalVV = userRemise > 0 ? baseVV * (1 - userRemise / 100) : baseVV;
+                        
+                        html += `
+                            <div class="bg-gray-900/50 p-2.5 rounded-lg border border-gray-800 flex flex-col justify-between">
+                                <div>
+                                    <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Voie variable</span>
                         `;
 
-                        // VOIE FIXE
-                        if (match.prixVF && !isNaN(parseFloat(match.prixVF))) {
-                            const baseVF = parseFloat(match.prixVF);
-                            const finalVF = userRemise > 0 ? baseVF * (1 - userRemise / 100) : baseVF;
-                            
+                        if (userRemise > 0) {
                             html += `
-                                <div class="bg-gray-900/50 p-2.5 rounded-lg border border-gray-800 flex flex-col justify-between">
-                                    <div>
-                                        <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Voie fixe</span>
+                                    <div class="text-[10px] text-gray-400 mt-1 pb-2 border-b border-gray-800/60">Prix catalogue : <span class="text-white font-medium">${baseVV.toFixed(2)} €</span></div>
+                                    <div class="text-[10px] uppercase tracking-wider text-red-400 font-semibold mt-2">Prix net</div>
+                                </div>
+                                <div>
+                                    <div class="text-white font-bold text-sm">${finalVV.toFixed(2)} €</div>
+                                </div>
                             `;
-                            
-                            if (userRemise > 0) {
-                                html += `
-                                        <div class="text-[10px] text-gray-400 mt-1 pb-2 border-b border-gray-800/60">Prix catalogue : <span class="text-white font-medium">\${baseVF.toFixed(2)} €</span></div>
-                                        <div class="text-[10px] uppercase tracking-wider text-red-400 font-semibold mt-2">Prix net</div>
-                                    </div>
-                                    <div>
-                                        <div class="text-white font-bold text-sm">\${finalVF.toFixed(2)} €</div>
-                                    </div>
-                                `;
-                            } else {
-                                html += `
-                                        <div class="text-[10px] uppercase tracking-wider text-gray-500 mt-1">Prix catalogue</div>
-                                    </div>
-                                    <div class="mt-2 pt-2 border-t border-gray-800/60">
-                                        <div class="text-white font-bold text-sm">\${finalVF.toFixed(2)} €</div>
-                                    </div>
-                                `;
-                            }
-                            html += `</div>`;
                         } else {
                             html += `
-                                <div class="bg-gray-900/50 p-2.5 rounded-lg border border-gray-800 flex flex-col justify-between">
-                                    <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Voie fixe</span>
-                                    <div class="text-gray-500 text-xs italic my-auto">Non disponible</div>
+                                    <div class="text-[10px] uppercase tracking-wider text-gray-500 mt-1">Prix catalogue</div>
+                                </div>
+                                <div class="mt-2 pt-2 border-t border-gray-800/60">
+                                    <div class="text-white font-bold text-sm">${finalVV.toFixed(2)} €</div>
                                 </div>
                             `;
                         }
-
-                        // VOIE VARIABLE
-                        if (match.prixVV && !isNaN(parseFloat(match.prixVV))) {
-                            const baseVV = parseFloat(match.prixVV);
-                            const finalVV = userRemise > 0 ? baseVV * (1 - userRemise / 100) : baseVV;
-                            
-                            html += `
-                                <div class="bg-gray-900/50 p-2.5 rounded-lg border border-gray-800 flex flex-col justify-between">
-                                    <div>
-                                        <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Voie variable</span>
-                            `;
-
-                            if (userRemise > 0) {
-                                html += `
-                                        <div class="text-[10px] text-gray-400 mt-1 pb-2 border-b border-gray-800/60">Prix catalogue : <span class="text-white font-medium">\${baseVV.toFixed(2)} €</span></div>
-                                        <div class="text-[10px] uppercase tracking-wider text-red-400 font-semibold mt-2">Prix net</div>
-                                    </div>
-                                    <div>
-                                        <div class="text-white font-bold text-sm">\${finalVV.toFixed(2)} €</div>
-                                    </div>
-                                `;
-                            } else {
-                                html += `
-                                        <div class="text-[10px] uppercase tracking-wider text-gray-500 mt-1">Prix catalogue</div>
-                                    </div>
-                                    <div class="mt-2 pt-2 border-t border-gray-800/60">
-                                        <div class="text-white font-bold text-sm">\${finalVV.toFixed(2)} €</div>
-                                    </div>
-                                `;
-                            }
-                            html += `</div>`;
-                        } else {
-                            html += `
-                                <div class="bg-gray-900/50 p-2.5 rounded-lg border border-gray-800 flex flex-col justify-between">
-                                    <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Voie variable</span>
-                                    <div class="text-gray-500 text-xs italic my-auto">Non disponible</div>
-                                </div>
-                            `;
-                        }
-
                         html += `</div>`;
+                    } else {
+                        html += `
+                            <div class="bg-gray-900/50 p-2.5 rounded-lg border border-gray-800 flex flex-col justify-between">
+                                <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Voie variable</span>
+                                <div class="text-gray-500 text-xs italic my-auto">Non disponible</div>
+                            </div>
+                        `;
+                    }
 
-                        // BOUTON DE CALCUL DE VOIE SI DEPORTS VALIDES
-                        const hasValidI = match.deportMaxI && !isNaN(parseFloat(match.deportMaxI));
-                        const hasValidJ = match.deportMinJ && !isNaN(parseFloat(match.deportMinJ));
+                    html += `</div>`;
 
-                        if (hasValidI && hasValidJ) {
-                            html += `
-                                <div class="pt-2">
-                                    <button onclick='ouvrirCalculateur(\${JSON.stringify(match)})' class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-xs transition tracking-wide uppercase shadow-md shadow-red-950/50">
-                                        Estimer la voie de travail
-                                    </button>
-                                </div>
-                            `;
-                        }
+                    // BOUTON DE CALCUL DE VOIE SI DEPORTS VALIDES
+                    const hasValidI = match.deportMaxI && !isNaN(parseFloat(match.deportMaxI));
+                    const hasValidJ = match.deportMinJ && !isNaN(parseFloat(match.deportMinJ));
 
-                        html += `</div>`;
-                    });
-                }
+                    if (hasValidI && hasValidJ) {
+                        html += `
+                            <div class="pt-2">
+                                <button onclick='ouvrirCalculateur(${JSON.stringify(match)})' class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-xs transition tracking-wide uppercase shadow-md shadow-red-950/50">
+                                    Estimer la voie de travail
+                                </button>
+                            </div>
+                        `;
+                    }
+
+                    html += `</div>`;
+                });
             });
 
             if (!html) {
