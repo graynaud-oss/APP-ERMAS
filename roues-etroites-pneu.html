@@ -65,9 +65,7 @@
         const SUPABASE_URL = 'https://wtxmaolhztuvujtgouaw.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0eG1hb2xoenR1dnVqdGdvdWF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MjgzMDIsImV4cCI6MjEwMTQwNDMwMn0.ttuoJAutNJ98KDz45Te40VOqLyMIuda7n2CtaFK8IGg';
         
-        // URL CSV Tableau Correspondance Pneus
         const PNEU_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=139891043&single=true&output=csv';
-        // URL CSV Tableau Tarifs Roues Étroites
         const TARIFS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=21297594&single=true&output=csv';
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -76,6 +74,7 @@
 
         let pneuData = [];
         let tarifsData = [];
+        let validPneuData = []; // Pneus filtrés ayant des correspondances de jantes tarifées
         let userRemise = 0;
 
         const selLargeurPneu = document.getElementById('select-largeur-pneu');
@@ -110,10 +109,37 @@
                 const pneuText = await pneuRes.text();
                 const tarifsText = await tarifsRes.text();
 
-                parsePneuCSV(pneuText);
                 parseTarifsCSV(tarifsText);
+                parsePneuCSV(pneuText);
             } catch (err) {
                 selLargeurPneu.innerHTML = '<option value="">Erreur de chargement des données</option>';
+            }
+        }
+
+        function parseTarifsCSV(text) {
+            const lines = text.split('\n');
+            tarifsData = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                const cols = lines[i].split(',').map(val => val.trim().replace(/^"|"$/g, ''));
+                
+                if (cols.length >= 10) {
+                    const prixVVVal = cols[7];
+                    if (!prixVVVal || isNaN(parseFloat(prixVVVal))) continue;
+
+                    tarifsData.push({
+                        largeurJante: cols[0],
+                        diametre: cols[1],
+                        horsTout: cols[2],
+                        emboitement: cols[3],
+                        profil: cols[4],
+                        nom: cols[5],
+                        prixVV: prixVVVal,
+                        deportMaxI: cols[8],
+                        deportMinJ: cols[9]
+                    });
+                }
             }
         }
 
@@ -126,44 +152,32 @@
                 const cols = lines[i].split(',').map(val => val.trim().replace(/^"|"$/g, ''));
                 
                 if (cols.length >= 4) {
-                    pneuData.push({
-                        largeurPneu: cols[0],
-                        rapport: cols[1],
-                        diametrePneu: cols[2],
-                        largeurJante: cols[3]
-                    });
+                    const largeurPneu = cols[0];
+                    const rapport = cols[1];
+                    const diametrePneu = cols[2];
+                    const largeurJante = cols[3];
+
+                    // Vérifier si cette combinaison jante/diamètre existe dans les tarifs roues étroites valides
+                    const hasTarif = tarifsData.some(t => 
+                        t.largeurJante.toLowerCase() === largeurJante.toLowerCase() && 
+                        t.diametre.toLowerCase() === diametrePneu.toLowerCase()
+                    );
+
+                    if (hasTarif) {
+                        validPneuData.push({
+                            largeurPneu,
+                            rapport,
+                            diametrePneu,
+                            largeurJante
+                        });
+                    }
                 }
             }
             populateLargeursPneu();
         }
 
-        function parseTarifsCSV(text) {
-            const lines = text.split('\n');
-            tarifsData = [];
-
-            for (let i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue;
-                const cols = lines[i].split(',').map(val => val.trim().replace(/^"|"$/g, ''));
-                
-                if (cols.length >= 10) {
-                    tarifsData.push({
-                        largeurJante: cols[0],
-                        diametre: cols[1],
-                        horsTout: cols[2],
-                        emboitement: cols[3],
-                        profil: cols[4],
-                        nom: cols[5],
-                        prixVF: cols[6],
-                        prixVV: cols[7],
-                        deportMaxI: cols[8],
-                        deportMinJ: cols[9]
-                    });
-                }
-            }
-        }
-
         function populateLargeursPneu() {
-            const largeurs = [...new Set(pneuData.map(item => item.largeurPneu))].filter(Boolean);
+            const largeurs = [...new Set(validPneuData.map(item => item.largeurPneu))].filter(Boolean);
             largeurs.sort((a, b) => parseFloat(a) - parseFloat(b));
 
             selLargeurPneu.innerHTML = '<option value="">-- Sélectionnez une largeur de pneu --</option>';
@@ -183,7 +197,7 @@
 
             if (!chosenL) return;
 
-            const filtered = pneuData.filter(item => item.largeurPneu === chosenL);
+            const filtered = validPneuData.filter(item => item.largeurPneu === chosenL);
             const rapports = [...new Set(filtered.map(item => item.rapport))].filter(Boolean);
             rapports.sort((a, b) => parseFloat(a) - parseFloat(b));
 
@@ -202,7 +216,7 @@
 
             if (!chosenR) return;
 
-            const filtered = pneuData.filter(item => item.largeurPneu === chosenL && item.rapport === chosenR);
+            const filtered = validPneuData.filter(item => item.largeurPneu === chosenL && item.rapport === chosenR);
             const diametres = [...new Set(filtered.map(item => item.diametrePneu))].filter(Boolean);
             diametres.sort((a, b) => parseFloat(a) - parseFloat(b));
 
@@ -222,7 +236,7 @@
                 return;
             }
 
-            const matchingPneus = pneuData.filter(item => 
+            const matchingPneus = validPneuData.filter(item => 
                 item.largeurPneu === chosenL && 
                 item.rapport === chosenR && 
                 item.diametrePneu === chosenD
@@ -251,88 +265,38 @@
                                 <div class="text-white text-base font-bold tracking-wide">${match.nom || 'N/A'}</div>
                             </div>
                             
-                            <div class="grid grid-cols-2 gap-3 pt-2 border-t border-gray-800/80">
+                            <div class="pt-2 border-t border-gray-800/80">
                     `;
 
-                    // VOIE FIXE
-                    if (match.prixVF && !isNaN(parseFloat(match.prixVF))) {
-                        const baseVF = parseFloat(match.prixVF);
-                        const finalVF = userRemise > 0 ? baseVF * (1 - userRemise / 100) : baseVF;
-                        
+                    // VOIE VARIABLE UNIQUE
+                    const baseVV = parseFloat(match.prixVV);
+                    const finalVV = userRemise > 0 ? baseVV * (1 - userRemise / 100) : baseVV;
+                    
+                    html += `
+                        <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-800 flex items-center justify-between">
+                            <div>
+                                <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Voie variable (Roue étroite)</span>
+                    `;
+
+                    if (userRemise > 0) {
                         html += `
-                            <div class="bg-gray-900/50 p-2.5 rounded-lg border border-gray-800 flex flex-col justify-between">
-                                <div>
-                                    <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Voie fixe</span>
+                                <div class="text-[10px] text-gray-400 mt-0.5">Prix catalogue : <span class="text-white font-medium">${baseVV.toFixed(2)} €</span></div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-[10px] uppercase tracking-wider text-red-400 font-semibold">Prix net</div>
+                                <div class="text-white font-bold text-base">${finalVV.toFixed(2)} €</div>
+                            </div>
                         `;
-                        
-                        if (userRemise > 0) {
-                            html += `
-                                    <div class="text-[10px] text-gray-400 mt-1 pb-2 border-b border-gray-800/60">Prix catalogue : <span class="text-white font-medium">${baseVF.toFixed(2)} €</span></div>
-                                    <div class="text-[10px] uppercase tracking-wider text-red-400 font-semibold mt-2">Prix net</div>
-                                </div>
-                                <div>
-                                    <div class="text-white font-bold text-sm">${finalVF.toFixed(2)} €</div>
-                                </div>
-                            `;
-                        } else {
-                            html += `
-                                    <div class="text-[10px] uppercase tracking-wider text-gray-500 mt-1">Prix catalogue</div>
-                                </div>
-                                <div class="mt-2 pt-2 border-t border-gray-800/60">
-                                    <div class="text-white font-bold text-sm">${finalVF.toFixed(2)} €</div>
-                                </div>
-                            `;
-                        }
-                        html += `</div>`;
                     } else {
                         html += `
-                            <div class="bg-gray-900/50 p-2.5 rounded-lg border border-gray-800 flex flex-col justify-between">
-                                <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Voie fixe</span>
-                                <div class="text-gray-500 text-xs italic my-auto">Non disponible</div>
+                                <div class="text-[10px] uppercase tracking-wider text-gray-500 mt-0.5">Prix catalogue</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-white font-bold text-base">${finalVV.toFixed(2)} €</div>
                             </div>
                         `;
                     }
-
-                    // VOIE VARIABLE
-                    if (match.prixVV && !isNaN(parseFloat(match.prixVV))) {
-                        const baseVV = parseFloat(match.prixVV);
-                        const finalVV = userRemise > 0 ? baseVV * (1 - userRemise / 100) : baseVV;
-                        
-                        html += `
-                            <div class="bg-gray-900/50 p-2.5 rounded-lg border border-gray-800 flex flex-col justify-between">
-                                <div>
-                                    <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Voie variable</span>
-                        `;
-
-                        if (userRemise > 0) {
-                            html += `
-                                    <div class="text-[10px] text-gray-400 mt-1 pb-2 border-b border-gray-800/60">Prix catalogue : <span class="text-white font-medium">${baseVV.toFixed(2)} €</span></div>
-                                    <div class="text-[10px] uppercase tracking-wider text-red-400 font-semibold mt-2">Prix net</div>
-                                </div>
-                                <div>
-                                    <div class="text-white font-bold text-sm">${finalVV.toFixed(2)} €</div>
-                                </div>
-                            `;
-                        } else {
-                            html += `
-                                    <div class="text-[10px] uppercase tracking-wider text-gray-500 mt-1">Prix catalogue</div>
-                                </div>
-                                <div class="mt-2 pt-2 border-t border-gray-800/60">
-                                    <div class="text-white font-bold text-sm">${finalVV.toFixed(2)} €</div>
-                                </div>
-                            `;
-                        }
-                        html += `</div>`;
-                    } else {
-                        html += `
-                            <div class="bg-gray-900/50 p-2.5 rounded-lg border border-gray-800 flex flex-col justify-between">
-                                <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Voie variable</span>
-                                <div class="text-gray-500 text-xs italic my-auto">Non disponible</div>
-                            </div>
-                        `;
-                    }
-
-                    html += `</div>`;
+                    html += `</div></div>`;
 
                     const hasValidI = match.deportMaxI && !isNaN(parseFloat(match.deportMaxI));
                     const hasValidJ = match.deportMinJ && !isNaN(parseFloat(match.deportMinJ));
