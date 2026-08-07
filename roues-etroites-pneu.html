@@ -20,7 +20,7 @@
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h2 class="font-brand text-xl sm:text-2xl font-bold text-white">Recherche roues étroites par pneu</h2>
-                    <p class="text-xs text-gray-400 mt-0.5">Sélectionnez les dimensions du pneu étape par étape (ex: 380 / 85 / 30)</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Sélectionnez les dimensions du pneu étape par étape</p>
                 </div>
                 <button onclick="history.back()" class="text-xs text-gray-400 hover:text-white uppercase tracking-wider bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg transition shrink-0">Retour</button>
             </div>
@@ -143,15 +143,15 @@
                 if (!line) continue;
                 const cols = parseCSVLine(line);
                 
-                if (cols.length >= 8) {
+                if (cols.length >= 7) {
                     tarifsData.push({
-                        largeurJante: cols[0],
-                        diametre:     cols[1],
-                        horsTout:     cols[2],
-                        emboitement:  cols[3],
-                        profil:       cols[4],
-                        nom:          cols[5],
-                        prixVV:       cols[7],
+                        largeurJante: cols[0], // Col A
+                        diametre:     cols[1], // Col B
+                        horsTout:     cols[2], // Col C
+                        emboitement:  cols[3], // Col D
+                        profil:       cols[4], // Col E
+                        nom:          cols[5], // Col F
+                        prixVV:       cols[6], // Col G (Prix roue étroite)
                         deportMaxI:   cols[8] || '',
                         deportMinJ:   cols[9] || ''
                     });
@@ -173,14 +173,26 @@
                 if (!line) continue;
                 const cols = parseCSVLine(line);
                 
-                // Colonnes attendues du tableau de correspondance pneu (ex: 380, 85, 30, jante...)
                 if (cols.length >= 4) {
-                    pneuRows.push({
-                        largeurPneu:  cols[0],
-                        rapport:      cols[1],
-                        diametrePneu: cols[2],
-                        largeurJante: cols[3]
-                    });
+                    const largeurPneu  = cols[0];
+                    const rapport      = cols[1];
+                    const diametrePneu = cols[2];
+                    const largeurJante = cols[3];
+
+                    // FILTRE STRICT : On ne garde que si la jante et le diamètre existent dans les tarifs roues étroites
+                    const correspondanceExiste = tarifsData.some(t => 
+                        normalizeStr(t.largeurJante) === normalizeStr(largeurJante) && 
+                        normalizeStr(t.diametre) === normalizeStr(diametrePneu)
+                    );
+
+                    if (correspondanceExiste) {
+                        pneuRows.push({
+                            largeurPneu,
+                            rapport,
+                            diametrePneu,
+                            largeurJante
+                        });
+                    }
                 }
             }
             populateLargeursPneu();
@@ -271,7 +283,7 @@
                             <div class="pt-2 border-t border-gray-800/80">
                     `;
 
-                    const baseVV = parseFloat(match.prixVV) || 0;
+                    const baseVV = parseFloat(match.prixVV.replace(',', '.')) || 0;
                     const finalVV = userRemise > 0 ? baseVV * (1 - userRemise / 100) : baseVV;
                     
                     html += `
