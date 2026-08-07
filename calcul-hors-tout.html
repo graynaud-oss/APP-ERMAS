@@ -70,9 +70,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const gammeType = urlParams.get('type') || 'EVO';
 
-        // URL de la base de données jantes (commune ou adaptée selon la structure)
         const URL_JANTES_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=0&single=true&output=csv'; 
-        // Note: Assurez-vous que le gid correspond à votre table de jantes engin si différent.
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: { persistSession: true, autoRefreshToken: true }
@@ -98,7 +96,7 @@
 
             selectedProduct = JSON.parse(sessionStorage.getItem('ermas_hors_tout_product'));
             if (!selectedProduct) {
-                window.location.href = `jumelages-jantes-pneu.html?type=${gammeType}`;
+                window.history.back();
                 return;
             }
 
@@ -123,9 +121,9 @@
                 
                 if (cols.length >= 4) {
                     jantesEnginData.push({
-                        taille: cols[0] || '', // Colonne A (Identifiant/Taille jante)
-                        horsToutJante: parseFloat(cols[2]) || 0, // Colonne C
-                        emboitementEngin: parseFloat(cols[3]) || 0  // Colonne D
+                        taille: cols[0] || '', 
+                        horsToutJante: parseFloat(cols[2]) || 0, 
+                        emboitementEngin: parseFloat(cols[3]) || 0  
                     });
                 }
             }
@@ -152,14 +150,12 @@
                 return;
             }
 
-            // Données du produit jumelage sélectionné (Colonnes C et D du fichier jumelages)
-            const horsToutJumelage = parseFloat(selectedProduct.colC) || 0; // Colonne C Jumelage
-            const emboitementJumelage = parseFloat(selectedProduct.colD) || 0; // Colonne D Jumelage
+            const horsToutJumelage = parseFloat(selectedProduct.colC) || 0; 
+            const emboitementJumelage = parseFloat(selectedProduct.colD) || 0; 
 
             const horsToutJanteEngin = janteEngin.horsToutJante;
             const emboitementJanteEngin = janteEngin.emboitementEngin;
 
-            // Formule : (VOIE + HORS TOUT JUMELAGE) + (2 x HORS TOUT JANTE ENGIN) + (2 x LARGEUR ENTRETOISE SOUHAITEE) - (2 x EMBOITEMENT JANTE ENGIN) - (2 x EMBOITEMENT JANTE JUMELAGE)
             const resultat = (voie + horsToutJumelage) 
                            + (2 * horsToutJanteEngin) 
                            + (2 * entretoiseSouhaitee) 
