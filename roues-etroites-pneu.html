@@ -155,13 +155,14 @@
                 if (!lines[i].trim()) continue;
                 const cols = lines[i].split(',').map(val => val.trim().replace(/^"|"$/g, ''));
                 
+                // Colonne A: Largeur pneu, Colonne B: Rapport, Colonne C: Diamètre pneu, Colonne D: Largeur jante associée
                 if (cols.length >= 4) {
                     const largeurPneu = cols[0];
                     const rapport = cols[1];
                     const diametrePneu = cols[2];
                     const largeurJante = cols[3];
 
-                    // Vérification croisée souple et normalisée avec les jantes étroites tarifées
+                    // On vérifie que la jante et le diamètre existent dans le catalogue des roues étroites
                     const hasTarif = tarifsData.some(t => 
                         normalizeStr(t.largeurJante) === normalizeStr(largeurJante) && 
                         normalizeStr(t.diametre) === normalizeStr(diametrePneu)
