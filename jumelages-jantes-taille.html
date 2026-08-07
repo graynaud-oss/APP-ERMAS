@@ -72,8 +72,8 @@
         const urlParams = new URLSearchParams(window.location.search);
         const gammeType = urlParams.get('type') || 'EVO';
 
-        // URL du CSV correspondant aux jumelages (adaptez le gid si nécessaire)
-        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=0&single=true&output=csv';
+        // URL du CSV pointant vers l'onglet correct des tarifs/jumelages (gid=1966421754)
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1966421754&single=true&output=csv';
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: { persistSession: true, autoRefreshToken: true }
@@ -110,6 +110,7 @@
 
             try {
                 const response = await fetch(SHEET_CSV_URL);
+                if (!response.ok) throw new Error('Erreur réseau');
                 const text = await response.text();
                 parseCSV(text);
             } catch (err) {
@@ -145,6 +146,11 @@
             const filteredGamme = csvData.filter(item => item.gamme.toUpperCase() === gammeType.toUpperCase());
             const diametres = [...new Set(filteredGamme.map(item => item.diametre))].filter(Boolean);
             diametres.sort((a, b) => parseFloat(a) - parseFloat(b));
+
+            if (diametres.length === 0) {
+                selDiametre.innerHTML = '<option value="">Aucune donnée disponible pour cette gamme</option>';
+                return;
+            }
 
             selDiametre.innerHTML = '<option value="">-- Sélectionnez un diamètre --</option>';
             diametres.forEach(d => {
