@@ -132,7 +132,7 @@
                         diametre: cols[1] || '',     // Col B
                         colC: cols[2] || '',         // Col C (réservé)
                         colD: cols[3] || '',         // Col D (réservé)
-                        colE: cols[4] || '',         // Col E
+                        nom: cols[4] || '',          // Col E (Nom du produit)
                         tendeurs: cols[5] || '',     // Col F (Nb tendeurs)
                         prix: cols[6] || '',         // Col G (Prix principal)
                         kitSansJantes: cols[7] || '',// Col H
@@ -214,8 +214,8 @@
             let html = `
                 <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl space-y-4">
                     <div>
-                        <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Référence sélectionnée</span>
-                        <div class="text-white text-sm font-bold tracking-wide mt-0.5">Diamètre : ${chosenD} | Largeur : ${chosenL} | ${chosenT} Tendeurs</div>
+                        <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Nom du produit</span>
+                        <div class="text-white text-base font-bold tracking-wide mt-0.5">${match.nom || 'N/A'}</div>
                     </div>
             `;
 
@@ -258,7 +258,7 @@
                 `;
             }
 
-            // OPTIONS DISCRÈTES (H, I, J, K) AVEC PRIX NETS ET CATALOGUE SI REMISE
+            // OPTIONS DISCRÈTES (H, I, J, K) SANS REPÈRE DE COLONNE
             html += `
                 <div class="pt-2 border-t border-gray-800/80">
                     <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-2">Options / Suppléments</span>
@@ -266,10 +266,10 @@
             `;
 
             const options = [
-                { label: 'Kit sans jantes (H)', val: match.kitSansJantes },
-                { label: 'Suppl. joncs à boulonner (I)', val: match.joncs },
-                { label: 'Paire tendeurs supp. (J)', val: match.paireTendeurs },
-                { label: 'Suppl. entretoises étagées (K)', val: match.entretoises }
+                { label: 'Kit sans jantes', val: match.kitSansJantes },
+                { label: 'Suppl. joncs à boulonner', val: match.joncs },
+                { label: 'Paire tendeurs supp.', val: match.paireTendeurs },
+                { label: 'Suppl. entretoises étagées', val: match.entretoises }
             ];
 
             options.forEach(opt => {
