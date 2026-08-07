@@ -21,13 +21,13 @@
         <div class="max-w-xl w-full bg-[#0b101d] border border-gray-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
             <div class="flex justify-between items-center mb-6">
                 <div>
-                    <h2 id="page-title" class="font-brand text-xl sm:text-2xl font-bold text-white">Jumelages - Recherche par Jante</h2>
-                    <p class="text-xs text-gray-400 mt-0.5">Sélectionnez les dimensions étape par étape</p>
+                    <h2 class="font-brand text-xl sm:text-2xl font-bold text-white">Recherche Jumelages par Taille</h2>
+                    <p id="subtitle-gamme" class="text-xs text-gray-400 mt-0.5">Sélectionnez les dimensions étape par étape</p>
                 </div>
                 <button onclick="history.back()" class="text-xs text-gray-400 hover:text-white uppercase tracking-wider bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg transition shrink-0">Retour</button>
             </div>
 
-            <!-- ÉTAPE 1 : DIAMÈTRE (Col B) -->
+            <!-- ÉTAPE 1 : DIAMÈTRE -->
             <div class="mb-4">
                 <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">1. Diamètre</label>
                 <select id="select-diametre" disabled class="w-full bg-[#070913] border border-gray-800 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition disabled:opacity-50">
@@ -35,7 +35,7 @@
                 </select>
             </div>
 
-            <!-- ÉTAPE 2 : LARGEUR DE JANTE (Col A) -->
+            <!-- ÉTAPE 2 : LARGEUR -->
             <div class="mb-4">
                 <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">2. Largeur de jante</label>
                 <select id="select-largeur" disabled class="w-full bg-[#070913] border border-gray-800 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition disabled:opacity-50">
@@ -43,7 +43,7 @@
                 </select>
             </div>
 
-            <!-- ÉTAPE 3 : NOMBRE DE TENDEURS (Col F) -->
+            <!-- ÉTAPE 3 : TENDEURS -->
             <div class="mb-6">
                 <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">3. Nombre de tendeurs</label>
                 <select id="select-tendeurs" disabled class="w-full bg-[#070913] border border-gray-800 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition disabled:opacity-50">
@@ -51,7 +51,7 @@
                 </select>
             </div>
 
-            <!-- RÉSULTATS (TARIFS & OPTIONS) -->
+            <!-- RÉSULTATS -->
             <div id="results-container" class="hidden space-y-3 pt-4 border-t border-gray-800">
                 <h3 class="text-xs uppercase tracking-wider text-red-500 font-semibold mb-2">Produit correspondant :</h3>
                 <div id="results-content" class="space-y-3">
@@ -69,15 +69,11 @@
         const SUPABASE_URL = 'https://wtxmaolhztuvujtgouaw.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0eG1hb2xoenR1dnVqdGdvdWF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MjgzMDIsImV4cCI6MjEwMTQwNDMwMn0.ttuoJAutNJ98KDz45Te40VOqLyMIuda7n2CtaFK8IGg';
         
-        const URLS_CSV = {
-            'EVO': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1732806915&single=true&output=csv',
-            '360': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1287684735&single=true&output=csv'
-        };
-
         const urlParams = new URLSearchParams(window.location.search);
         const gammeType = urlParams.get('type') || 'EVO';
 
-        document.getElementById('page-title').textContent = `Jumelages (Gamme ${gammeType}) - Par Taille de Jantes`;
+        // URL du CSV correspondant aux jumelages (adaptez le gid si nécessaire)
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=0&single=true&output=csv';
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: { persistSession: true, autoRefreshToken: true }
@@ -91,6 +87,9 @@
         const selTendeurs = document.getElementById('select-tendeurs');
         const resultsContainer = document.getElementById('results-container');
         const resultsContent = document.getElementById('results-content');
+        const subtitleGamme = document.getElementById('subtitle-gamme');
+
+        subtitleGamme.textContent = `Gamme ${gammeType} - Sélectionnez les dimensions étape par étape`;
 
         async function initPage() {
             const { data: { session } } = await supabaseClient.auth.getSession();
@@ -110,7 +109,7 @@
             }
 
             try {
-                const response = await fetch(URLS_CSV[gammeType]);
+                const response = await fetch(SHEET_CSV_URL);
                 const text = await response.text();
                 parseCSV(text);
             } catch (err) {
@@ -126,19 +125,16 @@
                 if (!lines[i].trim()) continue;
                 const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => val.trim().replace(/^"|"$/g, ''));
                 
-                if (cols.length >= 7) {
+                if (cols.length >= 8) {
                     csvData.push({
-                        largeurJante: cols[0] || '', // Col A
-                        diametre: cols[1] || '',     // Col B
-                        colC: cols[2] || '',         // Col C (réservé)
-                        colD: cols[3] || '',         // Col D (réservé)
-                        nom: cols[4] || '',          // Col E (Nom du produit)
-                        tendeurs: cols[5] || '',     // Col F (Nb tendeurs)
-                        prix: cols[6] || '',         // Col G (Prix principal)
-                        kitSansJantes: cols[7] || '',// Col H
-                        joncs: cols[8] || '',        // Col I
-                        paireTendeurs: cols[9] || '',// Col J
-                        entretoises: cols[10] || ''  // Col K
+                        gamme: cols[0] || '',
+                        diametre: cols[1] || '',
+                        largeurJante: cols[2] || '',
+                        tendeurs: cols[3] || '',
+                        nom: cols[4] || '',
+                        prix: cols[5] || '',
+                        colC: cols[6] || '', // Hors-tout jumelage
+                        colD: cols[7] || ''  // Emboitement jumelage
                     });
                 }
             }
@@ -146,7 +142,8 @@
         }
 
         function populateDiametres() {
-            const diametres = [...new Set(csvData.map(item => item.diametre))].filter(Boolean);
+            const filteredGamme = csvData.filter(item => item.gamme.toUpperCase() === gammeType.toUpperCase());
+            const diametres = [...new Set(filteredGamme.map(item => item.diametre))].filter(Boolean);
             diametres.sort((a, b) => parseFloat(a) - parseFloat(b));
 
             selDiametre.innerHTML = '<option value="">-- Sélectionnez un diamètre --</option>';
@@ -166,7 +163,7 @@
 
             if (!chosenD) return;
 
-            const filtered = csvData.filter(item => item.diametre === chosenD);
+            const filtered = csvData.filter(item => item.gamme.toUpperCase() === gammeType.toUpperCase() && item.diametre === chosenD);
             const largeurs = [...new Set(filtered.map(item => item.largeurJante))].filter(Boolean);
             largeurs.sort((a, b) => parseFloat(a) - parseFloat(b));
 
@@ -179,15 +176,14 @@
         selLargeur.addEventListener('change', () => {
             const chosenD = selDiametre.value;
             const chosenL = selLargeur.value;
-            selTendeurs.innerHTML = '<option value="">-- Sélectionnez un nombre de tendeurs --</option>';
+            selTendeurs.innerHTML = '<option value="">-- Sélectionnez le nombre de tendeurs --</option>';
             selTendeurs.disabled = true;
             resultsContainer.classList.add('hidden');
 
             if (!chosenL) return;
 
-            const filtered = csvData.filter(item => item.diametre === chosenD && item.largeurJante === chosenL);
+            const filtered = csvData.filter(item => item.gamme.toUpperCase() === gammeType.toUpperCase() && item.diametre === chosenD && item.largeurJante === chosenL);
             const tendeursList = [...new Set(filtered.map(item => item.tendeurs))].filter(Boolean);
-            tendeursList.sort((a, b) => parseInt(a) - parseInt(b));
 
             tendeursList.forEach(t => {
                 selTendeurs.innerHTML += `<option value="${t}">${t} tendeurs</option>`;
@@ -201,6 +197,7 @@
             const chosenT = selTendeurs.value;
 
             const match = csvData.find(item => 
+                item.gamme.toUpperCase() === gammeType.toUpperCase() && 
                 item.diametre === chosenD && 
                 item.largeurJante === chosenL && 
                 item.tendeurs === chosenT
@@ -211,115 +208,60 @@
                 return;
             }
 
+            const basePrix = parseFloat(match.prix) || 0;
+            const finalPrix = userRemise > 0 ? basePrix * (1 - userRemise / 100) : basePrix;
+
             let html = `
-                <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl space-y-4">
+                <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl space-y-3">
                     <div>
                         <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Nom du produit</span>
-                        <div class="text-white text-base font-bold tracking-wide mt-0.5">${match.nom || 'N/A'}</div>
+                        <div class="text-white text-base font-bold tracking-wide">${match.nom || 'N/A'}</div>
                     </div>
+                    
+                    <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-800 flex flex-col justify-between">
+                        <div>
+                            <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Tarif Jumelage</span>
             `;
 
-            // TARIF PRINCIPAL (G) avec gestion catalogue et net remisé
-            if (match.prix && !isNaN(parseFloat(match.prix))) {
-                const basePrix = parseFloat(match.prix);
-                const finalPrix = userRemise > 0 ? basePrix * (1 - userRemise / 100) : basePrix;
-
+            if (userRemise > 0) {
                 html += `
-                    <div class="bg-gray-900/50 p-3.5 rounded-lg border border-gray-800">
-                        <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1">Tarif Principal</span>
+                            <div class="text-[10px] text-gray-400 mt-1 pb-2 border-b border-gray-800/60">Prix catalogue : <span class="text-white font-medium">${basePrix.toFixed(2)} €</span></div>
+                            <div class="text-[10px] uppercase tracking-wider text-red-400 font-semibold mt-2">Prix net</div>
+                        </div>
+                        <div class="mt-1">
+                            <div class="text-white font-bold text-base">${finalPrix.toFixed(2)} €</div>
+                        </div>
                 `;
-
-                if (userRemise > 0) {
-                    html += `
-                        <div class="text-xs text-gray-400 pb-2 border-b border-gray-800/60 flex justify-between items-center">
-                            <span>Prix catalogue :</span>
-                            <span class="text-white font-medium">${basePrix.toFixed(2)} €</span>
-                        </div>
-                        <div class="flex justify-between items-center pt-2">
-                            <span class="text-xs uppercase tracking-wider text-red-400 font-semibold">Prix net</span>
-                            <span class="text-white font-extrabold text-lg">${finalPrix.toFixed(2)} €</span>
-                        </div>
-                    `;
-                } else {
-                    html += `
-                        <div class="flex justify-between items-center pt-1">
-                            <span class="text-xs uppercase tracking-wider text-gray-400">Prix catalogue</span>
-                            <span class="text-white font-extrabold text-lg">${finalPrix.toFixed(2)} €</span>
-                        </div>
-                    `;
-                }
-                html += `</div>`;
             } else {
                 html += `
-                    <div class="bg-gray-900/50 p-3.5 rounded-lg border border-gray-800 flex justify-between items-center">
-                        <span class="text-xs uppercase tracking-wider text-gray-400 font-semibold">Tarif Principal</span>
-                        <span class="text-gray-500 text-xs italic">Sur consultation</span>
-                    </div>
+                            <div class="text-[10px] uppercase tracking-wider text-gray-500 mt-1">Prix catalogue</div>
+                        </div>
+                        <div class="mt-2 pt-2 border-t border-gray-800/60">
+                            <div class="text-white font-bold text-base">${finalPrix.toFixed(2)} €</div>
+                        </div>
                 `;
             }
 
-            // OPTIONS DISCRÈTES (H, I, J, K) SANS REPÈRE DE COLONNE
+            html += `</div>`;
+
+            // BOUTON ACCÈS CALCULATEUR HORS-TOUT
             html += `
-                <div class="pt-2 border-t border-gray-800/80">
-                    <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-2">Options / Suppléments</span>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div class="pt-2">
+                    <button onclick='ouvrirCalculateurHorsTout(${JSON.stringify(match)})' class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-xs transition tracking-wide uppercase shadow-md shadow-red-950/50">
+                        Calculer la largeur hors tout
+                    </button>
+                </div>
             `;
 
-            const options = [
-                { label: 'Kit sans jantes', val: match.kitSansJantes },
-                { label: 'Suppl. joncs à boulonner', val: match.joncs },
-                { label: 'Paire tendeurs supp.', val: match.paireTendeurs },
-                { label: 'Suppl. entretoises étagées', val: match.entretoises }
-            ];
-
-            options.forEach(opt => {
-                if (opt.val && !isNaN(parseFloat(opt.val))) {
-                    const baseOpt = parseFloat(opt.val);
-                    const finalOpt = userRemise > 0 ? baseOpt * (1 - userRemise / 100) : baseOpt;
-
-                    html += `
-                        <div class="bg-gray-900/30 border border-gray-800/60 rounded-md p-2.5 flex flex-col justify-between text-xs">
-                            <span class="text-gray-400 text-[11px] mb-1">${opt.label}</span>
-                    `;
-
-                    if (userRemise > 0) {
-                        html += `
-                            <div class="text-[10px] text-gray-400 pb-1 border-b border-gray-800/40 flex justify-between items-center">
-                                <span>Cat. :</span>
-                                <span class="text-white">${baseOpt.toFixed(2)} €</span>
-                            </div>
-                            <div class="flex justify-between items-center pt-1 font-medium">
-                                <span class="text-red-400 text-[10px]">Net :</span>
-                                <span class="text-gray-200">${finalOpt.toFixed(2)} €</span>
-                            </div>
-                        `;
-                    } else {
-                        html += `
-                            <div class="flex justify-between items-center pt-1">
-                                <span class="text-gray-500 text-[10px]">Prix :</span>
-                                <span class="text-gray-200 font-medium">${finalOpt.toFixed(2)} €</span>
-                            </div>
-                        `;
-                    }
-                    html += `</div>`;
-                } else {
-                    html += `
-                        <div class="bg-gray-900/30 border border-gray-800/60 rounded-md p-2.5 flex justify-between items-center text-xs">
-                            <span class="text-gray-400 text-[11px]">${opt.label}</span>
-                            <span class="text-gray-500 italic">N/C</span>
-                        </div>
-                    `;
-                }
-            });
-
-            html += `
-                    </div>
-                </div>
-            </div>`;
-
+            html += `</div>`;
             resultsContent.innerHTML = html;
             resultsContainer.classList.remove('hidden');
         });
+
+        window.ouvrirCalculateurHorsTout = function(product) {
+            sessionStorage.setItem('ermas_hors_tout_product', JSON.stringify(product));
+            window.location.href = `hors-tout.html?type=${gammeType}`;
+        };
 
         initPage();
     </script>
