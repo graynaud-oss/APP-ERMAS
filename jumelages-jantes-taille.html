@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERMAS - Recherche Jumelages par Taille de Jantes</title>
+    <!-- Favicon personnalisé -->
+    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/15om2TV_YaY4mP-dIn80LSdyeJJjG0PMF">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #070913; color: #f3f4f6; }
+        .font-brand { font-family: 'Rajdhani', sans-serif; }
+    </style>
+</head>
+<body class="h-full flex flex-col justify-between antialiased">
+
+    <!-- CONTENU PRINCIPAL -->
+    <div class="flex-grow flex flex-col items-center justify-center px-4 py-8">
+        <div class="max-w-3xl w-full bg-[#0b101d] border border-gray-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
+            
+            <!-- En-tête -->
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 id="page-title" class="font-brand text-xl sm:text-2xl font-bold text-white">Jumelages - Recherche par Jante</h2>
+                    <p class="text-xs text-gray-400 mt-0.5">Sélectionnez les caractéristiques de votre montage</p>
+                </div>
+                <button onclick="history.back()" class="text-xs text-gray-400 hover:text-white uppercase tracking-wider bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg transition shrink-0">Retour</button>
+            </div>
+
+            <!-- FILTRES EN CASCADE -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <!-- 1. Diamètre -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">1. Diamètre</label>
+                    <select id="select-diametre" onchange="changerDiametre()" class="w-full bg-[#070913] border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-red-600/50 transition">
+                        <option value="">Sélectionner...</option>
+                    </select>
+                </div>
+
+                <!-- 2. Largeur -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">2. Largeur</label>
+                    <select id="select-largeur" onchange="changerLargeur()" disabled class="w-full bg-[#070913] border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-red-600/50 transition disabled:opacity-40 disabled:cursor-not-allowed">
+                        <option value="">Sélectionner...</option>
+                    </select>
+                </div>
+
+                <!-- 3. Nombre de tendeurs -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">3. Nb Tendeurs</label>
+                    <select id="select-tendeurs" onchange="calculerResultat()" disabled class="w-full bg-[#070913] border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-red-600/50 transition disabled:opacity-40 disabled:cursor-not-allowed">
+                        <option value="">Sélectionner...</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- ZONE DE RÉSULTAT -->
+            <div id="resultat-container" class="hidden mt-6 pt-6 border-t border-gray-800">
+                <div class="bg-[#070913] border border-gray-800 rounded-xl p-6">
+                    
+                    <!-- Tarif Principal (Mise en valeur maximale) -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-gray-800 gap-4">
+                        <div>
+                            <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Tarif Principal</span>
+                            <span class="font-brand text-xs text-red-500 font-semibold" id="ref-grille"></span>
+                        </div>
+                        <div class="text-left sm:text-right">
+                            <span class="font-brand text-3xl font-extrabold text-white" id="prix-principal">-- €</span>
+                            <span class="text-[11px] text-gray-500 block">Prix net HT</span>
+                        </div>
+                    </div>
+
+                    <!-- Options (Mise en évidence plus discrète, colonnes H, I, J, K) -->
+                    <div class="mt-5">
+                        <span class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider block mb-3">Options disponibles (suppléments / variantes)</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <div class="bg-gray-900/40 border border-gray-800/80 rounded-lg px-3.5 py-2 flex justify-between items-center text-xs">
+                                <span class="text-gray-400">Kit sans jantes</span>
+                                <span class="font-medium text-gray-200" id="opt-kit">-- €</span>
+                            </div>
+                            <div class="bg-gray-900/40 border border-gray-800/80 rounded-lg px-3.5 py-2 flex justify-between items-center text-xs">
+                                <span class="text-gray-400">Suppl. joncs à boulonner</span>
+                                <span class="font-medium text-gray-200" id="opt-joncs">-- €</span>
+                            </div>
+                            <div class="bg-gray-900/40 border border-gray-800/80 rounded-lg px-3.5 py-2 flex justify-between items-center text-xs">
+                                <span class="text-gray-400">Paire tendeurs supp.</span>
+                                <span class="font-medium text-gray-200" id="opt-tendeurs">-- €</span>
+                            </div>
+                            <div class="bg-gray-900/40 border border-gray-800/80 rounded-lg px-3.5 py-2 flex justify-between items-center text-xs">
+                                <span class="text-gray-400">Suppl. entretoises étagées</span>
+                                <span class="font-medium text-gray-200" id="opt-entretoises">-- €</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="bg-[#0b101d] border-t border-gray-800 py-4 text-center text-xs text-gray-500">
+        &copy; 2026 ERMAS - Tous droits réservés.
+    </footer>
+
+    <script>
+        const SUPABASE_URL = 'https://wtxmaolhztuvujtgouaw.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0eG1hb2xoenR1dnVqdGdvdWF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MjgzMDIsImV4cCI6MjEwMTQwNDMwMn0.ttuoJAutNJ98KDz45Te40VOqLyMIuda7n2CtaFK8IGg';
+
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: { persistSession: true, autoRefreshToken: true }
+        });
+
+        const URLS_CSV = {
+            'EVO': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1732806915&single=true&output=csv',
+            '360': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1287684735&single=true&output=csv'
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const gammeType = urlParams.get('type') || 'EVO';
+
+        document.getElementById('page-title').textContent = `Jumelages (Gamme ${gammeType}) - Par Taille de Jantes`;
+
+        let dataset = [];
+
+        async function init() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+            await chargerCSV();
+        }
+
+        async function chargerCSV() {
+            try {
+                const response = await fetch(URLS_CSV[gammeType]);
+                const text = await response.text();
+                parseCSV(text);
+                remplirDiametres();
+            } catch (err) {
+                console.error("Erreur de chargement du catalogue:", err);
+            }
+        }
+
+        function parseCSV(text) {
+            const lignes = text.split('\n');
+            dataset = [];
+            // On ignore l'en-tête (ligne 0)
+            for (let i = 1; i < lignes.length; i++) {
+                const ligne = lignes[i].trim();
+                if (!ligne) continue;
+                
+                // Gestion basique du CSV (séparation par virgule ou point-virgule)
+                const colonnes = ligne.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => val.replace(/^"|"$/g, '').trim());
+                
+                if (colonnes.length >= 7) {
+                    dataset.push({
+                        diametre: colonnes[0] || '',
+                        largeur: colonnes[1] || '',
+                        colC: colonnes[2] || '', // Réservé futur
+                        colD: colonnes[3] || '', // Réservé futur
+                        tendeurs: colonnes[4] || '',
+                        colF: colonnes[5] || '',
+                        prix: colonnes[6] || '',      // Colonne G (Prix principal)
+                        kitSansJantes: colonnes[7] || '',  // Colonne H
+                        joncs: colonnes[8] || '',          // Colonne I
+                        paireTendeurs: colonnes[9] || '',  // Colonne J
+                        entretoises: colonnes[10] || ''    // Colonne K
+                    });
+                }
+            }
+        }
+
+        function remplirDiametres() {
+            const select = document.getElementById('select-diametre');
+            const diametresUniques = [...new Set(dataset.map(item => item.diametre))].filter(Boolean);
+            
+            select.innerHTML = '<option value="">Sélectionner...</option>';
+            diametresUniques.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d;
+                opt.textContent = d;
+                select.appendChild(opt);
+            });
+        }
+
+        function changerDiametre() {
+            const diametre = document.getElementById('select-diametre').value;
+            const selectLargeur = document.getElementById('select-largeur');
+            const selectTendeurs = document.getElementById('select-tendeurs');
+            
+            selectLargeur.innerHTML = '<option value="">Sélectionner...</option>';
+            selectTendeurs.innerHTML = '<option value="">Sélectionner...</option>';
+            selectTendeurs.disabled = true;
+            document.getElementById('resultat-container').classList.add('hidden');
+
+            if (!diametre) {
+                selectLargeur.disabled = true;
+                return;
+            }
+
+            const largeursUniques = [...new Set(dataset.filter(item => item.diametre === diametre).map(item => item.largeur))].filter(Boolean);
+            largeursUniques.forEach(l => {
+                const opt = document.createElement('option');
+                opt.value = l;
+                opt.textContent = l;
+                selectLargeur.appendChild(opt);
+            });
+            selectLargeur.disabled = false;
+        }
+
+        function changerLargeur() {
+            const diametre = document.getElementById('select-diametre').value;
+            const largeur = document.getElementById('select-largeur').value;
+            const selectTendeurs = document.getElementById('select-tendeurs');
+            
+            selectTendeurs.innerHTML = '<option value="">Sélectionner...</option>';
+            document.getElementById('resultat-container').classList.add('hidden');
+
+            if (!largeur) {
+                selectTendeurs.disabled = true;
+                return;
+            }
+
+            const tendeursUniques = [...new Set(dataset.filter(item => item.diametre === diametre && item.largeur === largeur).map(item => item.tendeurs))].filter(Boolean);
+            tendeursUniques.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t;
+                opt.textContent = t;
+                selectTendeurs.appendChild(opt);
+            });
+            selectTendeurs.disabled = false;
+        }
+
+        function calculerResultat() {
+            const diametre = document.getElementById('select-diametre').value;
+            const largeur = document.getElementById('select-largeur').value;
+            const tendeurs = document.getElementById('select-tendeurs').value;
+            const container = document.getElementById('resultat-container');
+
+            if (!diametre || !largeur || !tendeurs) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            const match = dataset.find(item => item.diametre === diametre && item.largeur === largeur && item.tendeurs === tendeurs);
+
+            if (match) {
+                document.getElementById('prix-principal').textContent = match.prix ? `${match.prix} €` : 'Sur consultation';
+                document.getElementById('ref-grille').textContent = `Jante ${diametre} - ${largeur} (${tendeurs} tendeurs)`;
+                
+                // Options (H, I, J, K)
+                document.getElementById('opt-kit').textContent = match.kitSansJantes ? `${match.kitSansJantes} €` : 'N/C';
+                document.getElementById('opt-joncs').textContent = match.joncs ? `${match.joncs} €` : 'N/C';
+                document.getElementById('opt-tendeurs').textContent = match.paireTendeurs ? `${match.paireTendeurs} €` : 'N/C';
+                document.getElementById('opt-entretoises').textContent = match.entretoises ? `${match.entretoises} €` : 'N/C';
+
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
