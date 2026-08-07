@@ -127,7 +127,7 @@
                 const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => val.trim().replace(/^"|"$/g, ''));
                 
                 if (cols.length >= 7) {
-                    csvData.push({
+                    const item = {
                         largeurJante: cols[0] || '', // Col A
                         diametre: cols[1] || '',     // Col B
                         colC: cols[2] || '',         // Col C (DEPORT MAX)
@@ -139,7 +139,8 @@
                         joncs: cols[8] || '',        // Col I
                         paireTendeurs: cols[9] || '',// Col J
                         entretoises: cols[10] || ''  // Col K
-                    });
+                    };
+                    csvData.push(item);
                 }
             }
             populateDiametres();
@@ -200,133 +201,147 @@
             const chosenL = selLargeur.value;
             const chosenT = selTendeurs.value;
 
-            const match = csvData.find(item => 
+            // Filtrage strict basé uniquement sur le NOM (colonne E) pour éviter les doublons de produits
+            const matchingItems = csvData.filter(item => 
                 item.diametre === chosenD && 
                 item.largeurJante === chosenL && 
                 item.tendeurs === chosenT
             );
 
-            if (!match) {
+            if (matchingItems.length === 0) {
                 resultsContainer.classList.add('hidden');
                 return;
             }
 
-            let html = `
-                <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl space-y-4">
-                    <div>
-                        <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Nom du produit</span>
-                        <div class="text-white text-base font-bold tracking-wide mt-0.5">${match.nom || 'N/A'}</div>
-                    </div>
-            `;
-
-            // TARIF PRINCIPAL (G) avec gestion catalogue et net remisé
-            if (match.prix && !isNaN(parseFloat(match.prix))) {
-                const basePrix = parseFloat(match.prix);
-                const finalPrix = userRemise > 0 ? basePrix * (1 - userRemise / 100) : basePrix;
-
-                html += `
-                    <div class="bg-gray-900/50 p-3.5 rounded-lg border border-gray-800">
-                        <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1">Tarif Principal</span>
-                `;
-
-                if (userRemise > 0) {
-                    html += `
-                        <div class="text-xs text-gray-400 pb-2 border-b border-gray-800/60 flex justify-between items-center">
-                            <span>Prix catalogue :</span>
-                            <span class="text-white font-medium">${basePrix.toFixed(2)} €</span>
-                        </div>
-                        <div class="flex justify-between items-center pt-2">
-                            <span class="text-xs uppercase tracking-wider text-red-400 font-semibold">Prix net</span>
-                            <span class="text-white font-extrabold text-lg">${finalPrix.toFixed(2)} €</span>
-                        </div>
-                    `;
-                } else {
-                    html += `
-                        <div class="flex justify-between items-center pt-1">
-                            <span class="text-xs uppercase tracking-wider text-gray-400">Prix catalogue</span>
-                            <span class="text-white font-extrabold text-lg">${finalPrix.toFixed(2)} €</span>
-                        </div>
-                    `;
+            // Dédoublonnage strict par Nom (Col E)
+            const uniqueMap = new Map();
+            matchingItems.forEach(item => {
+                if (item.nom && !uniqueMap.has(item.nom.trim().toLowerCase())) {
+                    uniqueMap.set(item.nom.trim().toLowerCase(), item);
                 }
-                html += `</div>`;
-            } else {
+            });
+
+            const uniqueMatches = Array.from(uniqueMap.values());
+
+            let html = '';
+            uniqueMatches.forEach(match => {
                 html += `
-                    <div class="bg-gray-900/50 p-3.5 rounded-lg border border-gray-800 flex justify-between items-center">
-                        <span class="text-xs uppercase tracking-wider text-gray-400 font-semibold">Tarif Principal</span>
-                        <span class="text-gray-500 text-xs italic">Sur consultation</span>
-                    </div>
+                    <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl space-y-4 mb-4">
+                        <div>
+                            <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Nom du produit</span>
+                            <div class="text-white text-base font-bold tracking-wide mt-0.5">${match.nom || 'N/A'}</div>
+                        </div>
                 `;
-            }
 
-            // OPTIONS DISCRÈTES (H, I, J, K)
-            html += `
-                <div class="pt-2 border-t border-gray-800/80">
-                    <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-2">Options / Suppléments</span>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            `;
-
-            const options = [
-                { label: 'Kit sans jantes', val: match.kitSansJantes },
-                { label: 'Suppl. joncs à boulonner', val: match.joncs },
-                { label: 'Paire tendeurs supp.', val: match.paireTendeurs },
-                { label: 'Suppl. entretoises étagées', val: match.entretoises }
-            ];
-
-            options.forEach(opt => {
-                if (opt.val && !isNaN(parseFloat(opt.val))) {
-                    const baseOpt = parseFloat(opt.val);
-                    const finalOpt = userRemise > 0 ? baseOpt * (1 - userRemise / 100) : baseOpt;
+                // TARIF PRINCIPAL (G) avec gestion catalogue et net remisé
+                if (match.prix && !isNaN(parseFloat(match.prix))) {
+                    const basePrix = parseFloat(match.prix);
+                    const finalPrix = userRemise > 0 ? basePrix * (1 - userRemise / 100) : basePrix;
 
                     html += `
-                        <div class="bg-gray-900/30 border border-gray-800/60 rounded-md p-2.5 flex flex-col justify-between text-xs">
-                            <span class="text-gray-400 text-[11px] mb-1">${opt.label}</span>
+                        <div class="bg-gray-900/50 p-3.5 rounded-lg border border-gray-800">
+                            <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1">Tarif Principal</span>
                     `;
 
                     if (userRemise > 0) {
                         html += `
-                            <div class="text-[10px] text-gray-400 pb-1 border-b border-gray-800/40 flex justify-between items-center">
-                                <span>Cat. :</span>
-                                <span class="text-white">${baseOpt.toFixed(2)} €</span>
+                            <div class="text-xs text-gray-400 pb-2 border-b border-gray-800/60 flex justify-between items-center">
+                                <span>Prix catalogue :</span>
+                                <span class="text-white font-medium">${basePrix.toFixed(2)} €</span>
                             </div>
-                            <div class="flex justify-between items-center pt-1 font-medium">
-                                <span class="text-red-400 text-[10px]">Net :</span>
-                                <span class="text-gray-200">${finalOpt.toFixed(2)} €</span>
+                            <div class="flex justify-between items-center pt-2">
+                                <span class="text-xs uppercase tracking-wider text-red-400 font-semibold">Prix net</span>
+                                <span class="text-white font-extrabold text-lg">${finalPrix.toFixed(2)} €</span>
                             </div>
                         `;
                     } else {
                         html += `
                             <div class="flex justify-between items-center pt-1">
-                                <span class="text-gray-500 text-[10px]">Prix :</span>
-                                <span class="text-gray-200 font-medium">${finalOpt.toFixed(2)} €</span>
+                                <span class="text-xs uppercase tracking-wider text-gray-400">Prix catalogue</span>
+                                <span class="text-white font-extrabold text-lg">${finalPrix.toFixed(2)} €</span>
                             </div>
                         `;
                     }
                     html += `</div>`;
                 } else {
                     html += `
-                        <div class="bg-gray-900/30 border border-gray-800/60 rounded-md p-2.5 flex justify-between items-center text-xs">
-                            <span class="text-gray-400 text-[11px]">${opt.label}</span>
-                            <span class="text-gray-500 italic">N/C</span>
+                        <div class="bg-gray-900/50 p-3.5 rounded-lg border border-gray-800 flex justify-between items-center">
+                            <span class="text-xs uppercase tracking-wider text-gray-400 font-semibold">Tarif Principal</span>
+                            <span class="text-gray-500 text-xs italic">Sur consultation</span>
                         </div>
                     `;
                 }
-            });
 
-            html += `
+                // OPTIONS DISCRÈTES (H, I, J, K)
+                html += `
+                    <div class="pt-2 border-t border-gray-800/80">
+                        <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-2">Options / Suppléments</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                `;
+
+                const options = [
+                    { label: 'Kit sans jantes', val: match.kitSansJantes },
+                    { label: 'Suppl. joncs à boulonner', val: match.joncs },
+                    { label: 'Paire tendeurs supp.', val: match.paireTendeurs },
+                    { label: 'Suppl. entretoises étagées', val: match.entretoises }
+                ];
+
+                options.forEach(opt => {
+                    if (opt.val && !isNaN(parseFloat(opt.val))) {
+                        const baseOpt = parseFloat(opt.val);
+                        const finalOpt = userRemise > 0 ? baseOpt * (1 - userRemise / 100) : baseOpt;
+
+                        html += `
+                            <div class="bg-gray-900/30 border border-gray-800/60 rounded-md p-2.5 flex flex-col justify-between text-xs">
+                                <span class="text-gray-400 text-[11px] mb-1">${opt.label}</span>
+                        `;
+
+                        if (userRemise > 0) {
+                            html += `
+                                <div class="text-[10px] text-gray-400 pb-1 border-b border-gray-800/40 flex justify-between items-center">
+                                    <span>Cat. :</span>
+                                    <span class="text-white">${baseOpt.toFixed(2)} €</span>
+                                </div>
+                                <div class="flex justify-between items-center pt-1 font-medium">
+                                    <span class="text-red-400 text-[10px]">Net :</span>
+                                    <span class="text-gray-200">${finalOpt.toFixed(2)} €</span>
+                                </div>
+                            `;
+                        } else {
+                            html += `
+                                <div class="flex justify-between items-center pt-1">
+                                    <span class="text-gray-500 text-[10px]">Prix :</span>
+                                    <span class="text-gray-200 font-medium">${finalOpt.toFixed(2)} €</span>
+                                </div>
+                            `;
+                        }
+                        html += `</div>`;
+                    } else {
+                        html += `
+                            <div class="bg-gray-900/30 border border-gray-800/60 rounded-md p-2.5 flex justify-between items-center text-xs">
+                                <span class="text-gray-400 text-[11px]">${opt.label}</span>
+                                <span class="text-gray-500 italic">N/C</span>
+                            </div>
+                        `;
+                    }
+                });
+
+                html += `
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
 
-            // BOUTON ACCÈS CALCULATEUR HORS-TOUT (pointant vers calcul-hors-tout.html)
-            html += `
-                <div class="pt-2 border-t border-gray-800/80">
-                    <button onclick='ouvrirCalculateurHorsTout(${JSON.stringify(match)})' class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-xs transition tracking-wide uppercase shadow-md shadow-red-950/50">
-                        Calculer la largeur hors tout
-                    </button>
-                </div>
-            `;
+                // BOUTON ACCÈS CALCULATEUR HORS-TOUT
+                html += `
+                    <div class="pt-2 border-t border-gray-800/80">
+                        <button onclick='ouvrirCalculateurHorsTout(${JSON.stringify(match)})' class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-xs transition tracking-wide uppercase shadow-md shadow-red-950/50">
+                            Calculer la largeur hors tout
+                        </button>
+                    </div>
+                `;
 
-            html += `</div>`;
+                html += `</div>`;
+            });
 
             resultsContent.innerHTML = html;
             resultsContainer.classList.remove('hidden');
