@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ERMAS - Calcul Largeur Hors Tout</title>
+    <title>ERMAS - Calcul de Largeur Hors Tout</title>
     <!-- Favicon personnalisé -->
     <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/15om2TV_YaY4mP-dIn80LSdyeJJjG0PMF">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,57 +18,44 @@
 
     <!-- CONTENU PRINCIPAL -->
     <div class="flex-grow flex flex-col items-center justify-center px-4 py-8">
-        <div class="max-w-xl w-full bg-[#0b101d] border border-gray-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
-            <div class="flex justify-between items-center mb-6">
+        <div class="max-w-xl w-full bg-[#0b101d] border border-gray-800 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+            
+            <div class="flex justify-between items-center border-b border-gray-800 pb-4">
                 <div>
-                    <h2 id="page-title" class="font-brand text-xl sm:text-2xl font-bold text-white">Calcul Largeur Hors Tout</h2>
-                    <p class="text-xs text-gray-400 mt-0.5">Calcul basé sur la voie et les déports</p>
+                    <h2 class="font-brand text-xl sm:text-2xl font-bold text-white">Calcul de Largeur Hors Tout</h2>
+                    <p id="product-name" class="text-xs text-amber-400 mt-0.5 font-medium">Chargement du produit...</p>
                 </div>
                 <button onclick="history.back()" class="text-xs text-gray-400 hover:text-white uppercase tracking-wider bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg transition shrink-0">Retour</button>
             </div>
 
-            <!-- INFOS PRODUIT SÉLECTIONNÉ -->
-            <div id="product-info" class="bg-gray-900/50 border border-gray-800 rounded-xl p-4 mb-6">
-                <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-1">Produit sélectionné</span>
-                <div id="product-name" class="text-white font-bold text-sm">Chargement...</div>
-                <div class="grid grid-cols-2 gap-4 mt-3 pt-3 border-t border-gray-800/80 text-xs">
-                    <div>
-                        <span class="text-gray-500 block text-[10px]">Déport Max (I)</span>
-                        <span id="val-i" class="text-gray-200 font-semibold">-</span>
-                    </div>
-                    <div>
-                        <span class="text-gray-500 block text-[10px]">Déport Min (J)</span>
-                        <span id="val-j" class="text-gray-200 font-semibold">-</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FORMULAIRE DE SAISIE VOIE -->
-            <div class="space-y-4 mb-6">
+            <!-- CHAMPS DE SAISIE -->
+            <div class="space-y-4">
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">Voie actuelle de l'engin (mm)</label>
-                    <input type="number" id="input-voie" placeholder="Ex: 1500" class="w-full bg-[#070913] border border-gray-800 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition">
+                    <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">1. Voie actuelle de l'engin (mm)</label>
+                    <input type="number" id="input-voie" step="0.1" placeholder="Ex: 1500" class="w-full bg-[#070913] border border-gray-800 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition">
                 </div>
 
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">Position du jumelage</label>
-                    <select id="select-position" class="w-full bg-[#070913] border border-gray-800 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition">
-                        <option value="max">Déport Max (I)</option>
-                        <option value="min">Déport Min (J)</option>
+                    <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">2. Largeur de jante engin</label>
+                    <select id="select-jante-engin" class="w-full bg-[#070913] border border-gray-800 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition">
+                        <option value="">Chargement des jantes...</option>
                     </select>
                 </div>
 
-                <button onclick="calculerHorsTout()" class="w-full bg-red-600 hover:bg-red-500 text-white font-brand uppercase tracking-wider text-xs font-bold py-3 rounded-lg transition shadow-md shadow-red-900/20">
-                    Calculer
-                </button>
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">3. Largeur entretoise souhaitée (mm)</label>
+                    <input type="number" id="input-entretoise" step="0.1" placeholder="Ex: 200" class="w-full bg-[#070913] border border-gray-800 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition">
+                </div>
+
+                <button id="btn-calculer" class="w-full bg-red-600 hover:bg-red-500 text-white font-brand uppercase tracking-wider font-bold py-3 rounded-lg transition shadow-lg shadow-red-900/20">Calculer la largeur hors tout</button>
             </div>
 
             <!-- RÉSULTAT -->
-            <div id="result-box" class="hidden bg-gray-900 border border-gray-800 rounded-xl p-5 text-center space-y-2">
-                <span class="block text-xs uppercase tracking-wider text-red-500 font-semibold">LARGEUR HORS TOUT DE L'ENGIN : (Materiel fer, hors pneus)</span>
-                <div id="result-value" class="text-3xl font-extrabold text-white font-brand">0 mm</div>
-                <p id="result-details" class="text-xs text-gray-400"></p>
+            <div id="result-section" class="hidden bg-[#070913] border border-gray-800 p-4 rounded-xl space-y-2 text-center">
+                <span class="text-xs uppercase tracking-wider text-gray-400 font-semibold">Largeur Hors Tout de l'engin (Matériel fer, Hors pneu) :</span>
+                <div id="res-hors-tout" class="text-2xl font-extrabold text-green-400 font-brand">-</div>
             </div>
+
         </div>
     </div>
 
@@ -80,76 +67,120 @@
         const SUPABASE_URL = 'https://wtxmaolhztuvujtgouaw.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0eG1hb2xoenR1dnVqdGdvdWF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MjgzMDIsImV4cCI6MjEwMTQwNDMwMn0.ttuoJAutNJ98KDz45Te40VOqLyMIuda7n2CtaFK8IGg';
 
+        const urlParams = new URLSearchParams(window.location.search);
+        const gammeType = urlParams.get('type') || 'EVO';
+
+        // URLs CSV adaptées selon la gamme (EVO ou 360)
+        const URLS_JANTES_CSV = {
+            'EVO': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1732806915&single=true&output=csv',
+            '360': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1287684735&single=true&output=csv'
+        };
+
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: { persistSession: true, autoRefreshToken: true }
         });
 
-        let currentProduct = null;
+        const productNameEl = document.getElementById('product-name');
+        const inputVoie = document.getElementById('input-voie');
+        const selectJanteEngin = document.getElementById('select-jante-engin');
+        const inputEntretoise = document.getElementById('input-entretoise');
+        const btnCalculer = document.getElementById('btn-calculer');
+        const resultSection = document.getElementById('result-section');
+        const resHorsTout = document.getElementById('res-hors-tout');
 
-        async function initPage() {
+        let selectedProduct = null;
+        let jantesEnginData = [];
+
+        async function init() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) {
                 window.location.href = 'index.html';
                 return;
             }
 
-            const storedProduct = sessionStorage.getItem('ermas_hors_tout_product');
-            if (!storedProduct) {
-                document.getElementById('product-name').textContent = "Aucun produit sélectionné.";
+            selectedProduct = JSON.parse(sessionStorage.getItem('ermas_hors_tout_product'));
+            if (!selectedProduct) {
+                window.history.back();
                 return;
             }
 
-            currentProduct = JSON.parse(storedProduct);
+            productNameEl.textContent = `${selectedProduct.nom || ''} ${selectedProduct.tendeurs ? '(' + selectedProduct.tendeurs + ' tendeurs)' : ''} [Gamme ${gammeType}]`;
 
-            let nomAffichage = currentProduct.nom || 'Produit sans nom';
-            if (currentProduct.tendeurs && currentProduct.tendeurs.trim() !== '') {
-                nomAffichage += ` - ${currentProduct.tendeurs} TENDEURS`;
+            try {
+                const csvUrl = URLS_JANTES_CSV[gammeType] || URLS_JANTES_CSV['EVO'];
+                const res = await fetch(csvUrl);
+                const text = await res.text();
+                parseJantesCSV(text);
+            } catch (err) {
+                selectJanteEngin.innerHTML = '<option value="">Erreur de chargement des jantes</option>';
             }
-
-            document.getElementById('product-name').textContent = nomAffichage;
-            document.getElementById('val-i').textContent = currentProduct.colC ? `${currentProduct.colC} mm` : 'N/C';
-            document.getElementById('val-j').textContent = currentProduct.colD ? `${currentProduct.colD} mm` : 'N/C';
         }
 
-        function calculerHorsTout() {
-            if (!currentProduct) return;
+        function parseJantesCSV(text) {
+            const lines = text.split('\n');
+            jantesEnginData = [];
 
-            const voieInput = document.getElementById('input-voie').value;
-            const position = document.getElementById('select-position').value;
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => val.trim().replace(/^"|"$/g, ''));
+                
+                if (cols.length >= 7) {
+                    jantesEnginData.push({
+                        taille: cols[0] || '',       // Col A (Largeur de jante)
+                        horsToutJante: parseFloat(cols[2]) || 0, // Col C (Déport max)
+                        emboitementEngin: parseFloat(cols[3]) || 0 // Col D (Déport min)
+                    });
+                }
+            }
 
-            if (!voieInput || isNaN(voieInput)) {
-                alert("Veuillez saisir une valeur de voie valide.");
+            if (jantesEnginData.length === 0) {
+                selectJanteEngin.innerHTML = '<option value="">Aucune jante trouvée</option>';
                 return;
             }
 
-            const voie = parseFloat(voieInput);
-            let deport = 0;
+            // Filtrage des doublons sur la taille de jante
+            const uniqueTailles = [...new Set(jantesEnginData.map(j => j.taille))].filter(Boolean);
+            uniqueTailles.sort((a, b) => parseFloat(a) - parseFloat(b));
 
-            if (position === 'max') {
-                deport = parseFloat(currentProduct.colC);
-            } else {
-                deport = parseFloat(currentProduct.colD);
-            }
-
-            if (isNaN(deport)) {
-                alert("La valeur du déport pour ce produit n'est pas renseignée ou invalide.");
-                return;
-            }
-
-            // Formule de calcul hors-tout : Voie + (2 * Déport)
-            const horsTout = voie + (2 * deport);
-
-            const resultBox = document.getElementById('result-box');
-            const resultValue = document.getElementById('result-value');
-            const resultDetails = document.getElementById('result-details');
-
-            resultValue.textContent = `${horsTout.toFixed(1)} mm (${(horsTout / 1000).toFixed(3)} m)`;
-            resultDetails.textContent = `Calcul : Voie (${voie} mm) + 2 × Déport ${position === 'max' ? 'Max (I)' : 'Min (J)'} (${deport} mm)`;
-            
-            resultBox.classList.remove('hidden');
+            selectJanteEngin.innerHTML = '<option value="">-- Sélectionnez une largeur de jante engin --</option>';
+            uniqueTailles.forEach(taille => {
+                selectJanteEngin.innerHTML += `<option value="${taille}">${taille}</option>`;
+            });
         }
 
-        initPage();
+        btnCalculer.addEventListener('click', () => {
+            const voie = parseFloat(inputVoie.value);
+            const selectedJanteTaille = selectJanteEngin.value;
+            const entretoiseSouhaitee = parseFloat(inputEntretoise.value);
+
+            if (isNaN(voie) || !selectedJanteTaille || isNaN(entretoiseSouhaitee)) {
+                alert('Veuillez remplir tous les champs correctement.');
+                return;
+            }
+
+            const janteEngin = jantesEnginData.find(j => j.taille.toLowerCase() === selectedJanteTaille.toLowerCase());
+            if (!janteEngin) {
+                alert('Jante engin introuvable.');
+                return;
+            }
+
+            const horsToutJumelage = parseFloat(selectedProduct.colC) || 0; 
+            const emboitementJumelage = parseFloat(selectedProduct.colD) || 0; 
+
+            const horsToutJanteEngin = janteEngin.horsToutJante;
+            const emboitementJanteEngin = janteEngin.emboitementEngin;
+
+            const resultat = (voie + horsToutJumelage) 
+                           + (2 * horsToutJanteEngin) 
+                           + (2 * entretoiseSouhaitee) 
+                           - (2 * emboitementJanteEngin) 
+                           - (2 * emboitementJumelage);
+
+            resHorsTout.textContent = resultat.toFixed(1) + ' mm';
+            resultSection.classList.remove('hidden');
+        });
+
+        init();
     </script>
 </body>
 </html>
