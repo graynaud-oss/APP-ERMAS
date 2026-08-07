@@ -114,10 +114,9 @@
                 if (!lines[i].trim()) continue;
                 const cols = lines[i].split(',').map(val => val.trim().replace(/^"|"$/g, ''));
                 
-                if (cols.length >= 10) {
-                    const prixVVVal = cols[7]; // Voie variable uniquement
-                    const hasVV = prixVVVal && !isNaN(parseFloat(prixVVVal));
-                    if (!hasVV) continue; // On ne garde que ce qui a un tarif voie variable valide
+                if (cols.length >= 8) {
+                    const prixVVVal = cols[7]; // Colonne H (Voie variable)
+                    if (!prixVVVal || isNaN(parseFloat(prixVVVal))) continue;
 
                     csvData.push({
                         largeurJante: cols[0], // Colonne A
@@ -127,8 +126,8 @@
                         profil: cols[4],       // Colonne E
                         nom: cols[5],          // Colonne F
                         prixVV: prixVVVal,
-                        deportMaxI: cols[8],
-                        deportMinJ: cols[9]
+                        deportMaxI: cols[8] || '',
+                        deportMinJ: cols[9] || ''
                     });
                 }
             }
@@ -211,7 +210,6 @@
                     <div class="pt-2 border-t border-gray-800/80">
             `;
 
-            // VOIE VARIABLE UNIQUE
             const baseVV = parseFloat(match.prixVV);
             const finalVV = userRemise > 0 ? baseVV * (1 - userRemise / 100) : baseVV;
             
@@ -241,7 +239,6 @@
             }
             html += `</div></div>`;
 
-            // BOUTON DE CALCUL DE VOIE
             const hasValidI = match.deportMaxI && !isNaN(parseFloat(match.deportMaxI));
             const hasValidJ = match.deportMinJ && !isNaN(parseFloat(match.deportMinJ));
 
