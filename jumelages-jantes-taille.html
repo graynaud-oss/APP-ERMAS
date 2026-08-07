@@ -130,8 +130,8 @@
                     csvData.push({
                         largeurJante: cols[0] || '', // Col A
                         diametre: cols[1] || '',     // Col B
-                        colC: cols[2] || '',         // Col C (Hors-tout jumelage)
-                        colD: cols[3] || '',         // Col D (Emboitement jumelage)
+                        colC: cols[2] || '',         // Col C (DEPORT MAX)
+                        colD: cols[3] || '',         // Col D (DEPORT MIN)
                         nom: cols[4] || '',          // Col E (Nom du produit)
                         tendeurs: cols[5] || '',     // Col F (Nb tendeurs)
                         prix: cols[6] || '',         // Col G (Prix principal)
@@ -258,7 +258,7 @@
                 `;
             }
 
-            // OPTIONS DISCRÈTES (H, I, J, K) SANS REPÈRE DE COLONNE
+            // OPTIONS DISCRÈTES (H, I, J, K)
             html += `
                 <div class="pt-2 border-t border-gray-800/80">
                     <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-2">Options / Suppléments</span>
@@ -317,7 +317,7 @@
                 </div>
             `;
 
-            // BOUTON ACCÈS CALCULATEUR HORS-TOUT
+            // BOUTON ACCÈS CALCULATEUR HORS-TOUT (pointant vers calcul-hors-tout.html)
             html += `
                 <div class="pt-2 border-t border-gray-800/80">
                     <button onclick='ouvrirCalculateurHorsTout(${JSON.stringify(match)})' class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-xs transition tracking-wide uppercase shadow-md shadow-red-950/50">
@@ -334,7 +334,7 @@
 
         window.ouvrirCalculateurHorsTout = function(product) {
             sessionStorage.setItem('ermas_hors_tout_product', JSON.stringify(product));
-            window.location.href = `hors-tout.html?type=${gammeType}`;
+            window.location.href = `calcul-hors-tout.html?type=${gammeType}`;
         };
 
         initPage();
