@@ -69,7 +69,6 @@
         const SUPABASE_URL = 'https://wtxmaolhztuvujtgouaw.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0eG1hb2xoenR1dnVqdGdvdWF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MjgzMDIsImV4cCI6MjEwMTQwNDMwMn0.ttuoJAutNJ98KDz45Te40VOqLyMIuda7n2CtaFK8IGg';
         
-        // URLs CSV selon la gamme (EVO ou 360)
         const URLS_PNEU = {
             'EVO': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=139891043&single=true&output=csv',
             '360': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=139891043&single=true&output=csv'
@@ -166,8 +165,8 @@
                     tarifsData.push({
                         largeurJante: cols[0] || '',
                         diametre: cols[1] || '',
-                        colC: cols[2] || '',
-                        colD: cols[3] || '',
+                        colC: cols[2] || '', // Hors Tout
+                        colD: cols[3] || '', // Emboitement
                         nom: cols[4] || '',
                         tendeurs: cols[5] || '',
                         prix: cols[6] || '',
@@ -271,11 +270,18 @@
                 );
 
                 matchedTarifs.forEach(match => {
-                    // Construction du nom complet avec le nombre de tendeurs si disponible
                     let nomComplet = match.nom || 'N/A';
                     if (match.tendeurs && match.tendeurs.trim() !== '') {
                         nomComplet += ` - ${match.tendeurs} TENDEURS`;
                     }
+
+                    // Encodage sécurisé des données produit pour les passer au calculateur
+                    const productPayload = encodeURIComponent(JSON.stringify({
+                        nom: match.nom,
+                        tendeurs: match.tendeurs,
+                        colC: match.colC,
+                        colD: match.colD
+                    }));
 
                     html += `
                         <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl space-y-4 mb-3">
@@ -284,7 +290,7 @@
                             </div>
                     `;
 
-                    // TARIF PRINCIPAL (G) avec gestion catalogue et net remisé
+                    // TARIF PRINCIPAL (G)
                     if (match.prix && !isNaN(parseFloat(match.prix))) {
                         const basePrix = parseFloat(match.prix);
                         const finalPrix = userRemise > 0 ? basePrix * (1 - userRemise / 100) : basePrix;
@@ -323,7 +329,7 @@
                         `;
                     }
 
-                    // OPTIONS DISCRÈTES (H, I, J, K) SANS REPÈRE DE COLONNE
+                    // OPTIONS DISCRÈTES (H, I, J, K)
                     html += `
                         <div class="pt-2 border-t border-gray-800/80">
                             <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-2">Options / Suppléments</span>
@@ -380,6 +386,13 @@
                     html += `
                             </div>
                         </div>
+
+                        <!-- BOUTON CALCULATEUR HORS TOUT -->
+                        <div class="pt-2">
+                            <button onclick='ouvrirCalculHorsTout("${productPayload}")' class="w-full bg-red-600 hover:bg-red-500 text-white font-brand uppercase tracking-wider text-xs font-bold py-2.5 rounded-lg transition shadow-md shadow-red-900/20">
+                                Calculer Largeur Hors Tout
+                            </button>
+                        </div>
                     </div>`;
                 });
             });
@@ -392,6 +405,12 @@
 
             resultsContainer.classList.remove('hidden');
         });
+
+        function ouvrirCalculHorsTout(payloadEncoded) {
+            const productData = JSON.parse(decodeURIComponent(payloadEncoded));
+            sessionStorage.setItem('ermas_hors_tout_product', JSON.stringify(productData));
+            window.location.href = `calcul-hors-tout.html?type=${gammeType}`;
+        }
 
         initPage();
     </script>
