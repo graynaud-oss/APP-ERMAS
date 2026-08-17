@@ -63,12 +63,9 @@
         &copy; 2026 ERMAS - Tous droits réservés.
     </footer>
 
-    <script>
-        const SUPABASE_URL = 'https://wtxmaolhztuvujtgouaw.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0eG1hb2xoenR1dnVqdGdvdWF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MjgzMDIsImV4cCI6MjEwMTQwNDMwMn0.ttuoJAutNJ98KDz45Te40VOqLyMIuda7n2CtaFK8IGg';
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const gammeType = urlParams.get('type') || 'EVO';
+    <script type="module">
+        import { getSupabaseClient } from './js/supabase-client.js';
+        import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
 
         // URLs CSV adaptées selon la gamme (EVO ou 360)
         const URLS_JANTES_CSV = {
@@ -76,9 +73,7 @@
             '360': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1287684735&single=true&output=csv'
         };
 
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: { persistSession: true, autoRefreshToken: true }
-        });
+        const supabaseClient = getSupabaseClient();
 
         const productNameEl = document.getElementById('product-name');
         const inputVoie = document.getElementById('input-voie');
@@ -90,13 +85,25 @@
 
         let selectedProduct = null;
         let jantesEnginData = [];
+        let gammeType = null;
+        let pageAuthorized = false;
 
         async function init() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
+            let context;
+            try {
+                context = await requireAuthorizedUser({ client: supabaseClient });
+            } catch (error) {
                 window.location.href = 'index.html';
                 return;
             }
+
+            if (context.state !== AUTHORIZATION_STATES.AUTHORIZED) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            gammeType = urlParams.get('type') || 'EVO';
 
             selectedProduct = JSON.parse(sessionStorage.getItem('ermas_hors_tout_product'));
             if (!selectedProduct) {
@@ -105,6 +112,7 @@
             }
 
             productNameEl.textContent = `${selectedProduct.nom || ''} ${selectedProduct.tendeurs ? '(' + selectedProduct.tendeurs + ' tendeurs)' : ''} [Gamme ${gammeType}]`;
+            pageAuthorized = true;
 
             try {
                 const csvUrl = URLS_JANTES_CSV[gammeType] || URLS_JANTES_CSV['EVO'];
@@ -149,6 +157,8 @@
         }
 
         btnCalculer.addEventListener('click', () => {
+            if (!pageAuthorized) return;
+
             const voie = parseFloat(inputVoie.value);
             const selectedJanteTaille = selectJanteEngin.value;
             const entretoiseSouhaitee = parseFloat(inputEntretoise.value);
