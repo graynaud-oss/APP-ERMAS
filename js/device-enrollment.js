@@ -1,4 +1,5 @@
 export const DEVICE_TOKEN_STORAGE_KEY = 'ermas_device_token';
+export const PENDING_DEVICE_TOKEN_STORAGE_KEY = 'ermas_device_token_pending';
 
 export const DEVICE_ENROLLMENT_STATUSES = Object.freeze({
     INITIALIZED: 'INITIALIZED',
@@ -15,6 +16,13 @@ export function readLocalDeviceToken(storage = globalThis.localStorage) {
     if (!storage || typeof storage.getItem !== 'function') return null;
 
     const token = storage.getItem(DEVICE_TOKEN_STORAGE_KEY);
+    return typeof token === 'string' && token.length > 0 ? token : null;
+}
+
+export function readPendingDeviceToken(storage = globalThis.localStorage) {
+    if (!storage || typeof storage.getItem !== 'function') return null;
+
+    const token = storage.getItem(PENDING_DEVICE_TOKEN_STORAGE_KEY);
     return typeof token === 'string' && token.length > 0 ? token : null;
 }
 
@@ -35,6 +43,30 @@ function assertEnrollmentIsAllowed(profile) {
     return null;
 }
 
+export function confirmPendingDeviceEnrollment(profile, storage = globalThis.localStorage) {
+    if (!storage
+        || typeof storage.setItem !== 'function'
+        || typeof storage.removeItem !== 'function') {
+        throw new Error('Stockage local requis pour confirmer l’appareil.');
+    }
+
+    const definitiveToken = readLocalDeviceToken(storage);
+    if (definitiveToken) return Object.freeze({ confirmed: false, token: definitiveToken });
+
+    const pendingToken = readPendingDeviceToken(storage);
+    const serverToken = profile?.device_token;
+    const canConfirm = pendingToken
+        && typeof serverToken === 'string'
+        && serverToken === pendingToken
+        && profile.device_enrollment_allowed === false;
+
+    if (!canConfirm) return Object.freeze({ confirmed: false, token: null });
+
+    storage.setItem(DEVICE_TOKEN_STORAGE_KEY, pendingToken);
+    storage.removeItem(PENDING_DEVICE_TOKEN_STORAGE_KEY);
+    return Object.freeze({ confirmed: true, token: pendingToken });
+}
+
 export async function initializeAuthorizedDeviceEnrollment({
     client,
     profile,
@@ -47,19 +79,45 @@ export async function initializeAuthorizedDeviceEnrollment({
     if (!client || typeof client.rpc !== 'function') {
         throw new Error('Client Supabase requis pour initialiser l’appareil.');
     }
-    if (!storage || typeof storage.setItem !== 'function') {
+    if (!storage
+        || typeof storage.getItem !== 'function'
+        || typeof storage.setItem !== 'function'
+        || typeof storage.removeItem !== 'function') {
         throw new Error('Stockage local requis pour initialiser l’appareil.');
     }
 
-    const token = generateEnrollmentToken(cryptoProvider);
-    storage.setItem(DEVICE_TOKEN_STORAGE_KEY, token);
+    if (readLocalDeviceToken(storage)) {
+        return Object.freeze({ status: DEVICE_ENROLLMENT_STATUSES.ALREADY_INITIALIZED });
+    }
+
+    let token = readPendingDeviceToken(storage);
+    if (!token) {
+        token = generateEnrollmentToken(cryptoProvider);
+        storage.setItem(PENDING_DEVICE_TOKEN_STORAGE_KEY, token);
+    }
 
     const { data, error } = await client.rpc('initialize_own_device_token', {
         p_token: token
     });
 
-    if (error) {
-        return Object.freeze({ status: null, error });
+    const { data: refreshedProfile, error: profileError } = await client
+        .from('profiles')
+        .select('device_token, device_enrollment_allowed')
+        .eq('id', profile.id)
+        .maybeSingle();
+
+    if (!profileError) {
+        const confirmation = confirmPendingDeviceEnrollment(refreshedProfile, storage);
+        if (confirmation.confirmed) {
+            return Object.freeze({
+                status: DEVICE_ENROLLMENT_STATUSES.INITIALIZED,
+                token: confirmation.token
+            });
+        }
+    }
+
+    if (error || profileError) {
+        return Object.freeze({ status: null, error: error || profileError });
     }
 
     const status = typeof data === 'string' ? data : null;
@@ -70,6 +128,5 @@ export async function initializeAuthorizedDeviceEnrollment({
         });
     }
 
-    return Object.freeze({ status, token });
+    return Object.freeze({ status, token: null });
 }
-

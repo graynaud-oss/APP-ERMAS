@@ -10,13 +10,16 @@ export const PROFILE_SELECT_COLUMNS = [
     'device_enrollment_allowed'
 ].join(', ');
 
-function normalizePersonalFields(fields = {}) {
-    return {
-        email: typeof fields.email === 'string' ? fields.email.trim() : '',
-        nom: typeof fields.nom === 'string' ? fields.nom.trim() : '',
-        prenom: typeof fields.prenom === 'string' ? fields.prenom.trim() : '',
-        entreprise: typeof fields.entreprise === 'string' ? fields.entreprise.trim() : ''
-    };
+function normalizePersonalFields(fields = {}, includeMissing = false) {
+    const normalized = {};
+
+    for (const field of ['email', 'nom', 'prenom', 'entreprise']) {
+        if (includeMissing || Object.hasOwn(fields, field)) {
+            normalized[field] = typeof fields[field] === 'string' ? fields[field].trim() : '';
+        }
+    }
+
+    return normalized;
 }
 
 async function requireCurrentUser(client) {
@@ -59,7 +62,7 @@ export async function getOwnProfile(client, userId) {
 
 export async function createOwnProfile(client, fields) {
     const user = await requireCurrentUser(client);
-    const personalFields = normalizePersonalFields(fields);
+    const personalFields = normalizePersonalFields(fields, true);
 
     return client
         .from('profiles')
@@ -82,4 +85,3 @@ export async function updateOwnPersonalProfile(client, fields) {
         .select(PROFILE_SELECT_COLUMNS)
         .single();
 }
-

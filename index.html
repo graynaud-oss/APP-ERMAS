@@ -85,7 +85,7 @@
                 </div>
 
                 <button type="submit" class="w-full mt-4 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition tracking-wider uppercase text-sm shadow-lg shadow-red-950/50">
-                    Enregistrer et accéder à la plateforme
+                    Enregistrer les informations
                 </button>
             </form>
         </div>
@@ -110,6 +110,24 @@
                 </div>
             </div>
 
+            <button onclick="logoutUser()" class="w-full py-3 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-lg transition tracking-wider uppercase text-xs">
+                Se déconnecter
+            </button>
+        </div>
+    </div>
+
+    <!-- 2.ter SECTION ÉTAT D'ACCÈS / ENRÔLEMENT -->
+    <div id="access-status-view" class="hidden h-full flex flex-col justify-center items-center px-4 py-8">
+        <div class="max-w-md w-full bg-[#0b101d] border border-gray-800 rounded-2xl p-8 shadow-2xl text-center">
+            <div class="w-16 h-16 bg-amber-950/40 border border-amber-900/50 rounded-full flex items-center justify-center mx-auto mb-5 text-amber-400">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <h2 id="access-status-title" class="font-brand text-2xl font-bold tracking-wider text-white mb-3">Accès en attente</h2>
+            <p id="access-status-message" class="text-sm text-gray-300 leading-relaxed mb-6"></p>
+            <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl text-xs text-gray-400 leading-relaxed mb-6">
+                Pour toute question, contactez ERMAS au <a href="tel:0386664722" class="text-white hover:text-red-500">03 86 66 47 22</a>
+                ou à <a href="mailto:contact@ermas.fr" class="text-white hover:text-red-500">contact@ermas.fr</a>.
+            </div>
             <button onclick="logoutUser()" class="w-full py-3 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-lg transition tracking-wider uppercase text-xs">
                 Se déconnecter
             </button>
@@ -181,7 +199,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                    <button onclick="window.location.href='jantes-taille.html'" class="p-5 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
+                    <button onclick="navigateToProtectedPage('jantes-taille.html')" class="p-5 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
                         <div class="w-12 h-12 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-400 group-hover:text-red-500 group-hover:border-red-600/50 transition mb-3">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
                         </div>
@@ -189,7 +207,7 @@
                         <span class="text-[11px] text-gray-400 mt-1">Recherche directe par dimensions de jante</span>
                     </button>
 
-                    <button onclick="window.location.href='jantes-pneu.html'" class="p-5 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
+                    <button onclick="navigateToProtectedPage('jantes-pneu.html')" class="p-5 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
                         <div class="w-12 h-12 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-400 group-hover:text-red-500 group-hover:border-red-600/50 transition mb-3">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
                         </div>
@@ -340,7 +358,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                    <button onclick="window.location.href='roues-etroites-taille.html'" class="p-5 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
+                    <button onclick="navigateToProtectedPage('roues-etroites-taille.html')" class="p-5 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
                         <div class="w-12 h-12 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-400 group-hover:text-red-500 group-hover:border-red-600/50 transition mb-3">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
                         </div>
@@ -348,7 +366,7 @@
                         <span class="text-[11px] text-gray-400 mt-1">Recherche directe par dimensions de jante étroite</span>
                     </button>
 
-                    <button onclick="window.location.href='roues-etroites-pneu.html'" class="p-5 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
+                    <button onclick="navigateToProtectedPage('roues-etroites-pneu.html')" class="p-5 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
                         <div class="w-12 h-12 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-400 group-hover:text-red-500 group-hover:border-red-600/50 transition mb-3">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
                         </div>
@@ -452,18 +470,21 @@
         </footer>
     </div>
 
-    <script>
-        const SUPABASE_URL = 'https://wtxmaolhztuvujtgouaw.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0eG1hb2xoenR1dnVqdGdvdWF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MjgzMDIsImV4cCI6MjEwMTQwNDMwMn0.ttuoJAutNJ98KDz45Te40VOqLyMIuda7n2CtaFK8IGg';
+    <script type="module">
+        import { getSupabaseClient } from './js/supabase-client.js';
+        import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
+        import { createOwnProfile, updateOwnPersonalProfile } from './js/profile.js';
+        import { DEVICE_ENROLLMENT_STATUSES, initializeAuthorizedDeviceEnrollment } from './js/device-enrollment.js';
+
         const DOCUMENTS_BUCKET = 'doc-app-ermas';
-        
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-        });
+        const supabaseClient = getSupabaseClient();
 
         const loginView = document.getElementById('login-view');
         const onboardingView = document.getElementById('onboarding-view');
         const blockedView = document.getElementById('blocked-view');
+        const accessStatusView = document.getElementById('access-status-view');
+        const accessStatusTitle = document.getElementById('access-status-title');
+        const accessStatusMessage = document.getElementById('access-status-message');
         const appView = document.getElementById('app-view');
         const jantesView = document.getElementById('jantes-view');
         const jumelagesView = document.getElementById('jumelages-view');
@@ -472,26 +493,68 @@
         const rouesEtroitesView = document.getElementById('roues-etroites-view');
         const contactView = document.getElementById('contact-view');
         const documentsView = document.getElementById('documents-view');
-
-        function getDeviceToken() {
-            let token = localStorage.getItem('ermas_device_token');
-            if (!token) {
-                token = 'dev_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
-                localStorage.setItem('ermas_device_token', token);
-            }
-            return token;
-        }
+        let currentAuthorization = null;
+        let onboardingMode = 'create';
+        let authorizationRequestGeneration = 0;
 
         async function logoutUser() {
+            authorizationRequestGeneration += 1;
+            currentAuthorization = null;
             await supabaseClient.auth.signOut();
             handleSession();
         }
 
+        function hasAuthorizedAccess() {
+            if (currentAuthorization?.state === AUTHORIZATION_STATES.AUTHORIZED) {
+                return true;
+            }
+
+            handleSession();
+            return false;
+        }
+
+        const protectedPageRoutes = new Set([
+            'jantes-taille.html',
+            'jantes-pneu.html',
+            'jumelages-choix.html?type=EVO',
+            'jumelages-choix.html?type=360',
+            'roues-etroites-taille.html',
+            'roues-etroites-pneu.html'
+        ]);
+
+        async function navigateToProtectedPage(path) {
+            if (!protectedPageRoutes.has(path)) return;
+
+            const requestGeneration = ++authorizationRequestGeneration;
+            let authorization;
+
+            try {
+                authorization = await requireAuthorizedUser({ client: supabaseClient });
+            } catch (error) {
+                if (requestGeneration !== authorizationRequestGeneration) return;
+                currentAuthorization = null;
+                showAccessStatus('Service indisponible', 'La vérification de votre accès a échoué. La navigation a été refusée.');
+                return;
+            }
+
+            if (requestGeneration !== authorizationRequestGeneration) return;
+
+            if (authorization.state === AUTHORIZATION_STATES.AUTHORIZED) {
+                currentAuthorization = authorization;
+                window.location.href = path;
+                return;
+            }
+
+            currentAuthorization = authorization;
+            await handleSession({ allowEnrollment: false });
+        }
+
         // LOGIQUE DE ROUTAGE CONDITIONNEL POUR LES JUMELAGES
-        function selectGamme(type) {
+        async function selectGamme(type) {
             if (type === 'EVO' || type === '360') {
-                window.location.href = `jumelages-choix.html?type=${type}`;
+                await navigateToProtectedPage(`jumelages-choix.html?type=${type}`);
             } else if (type === 'TGD') {
+                if (!hasAuthorizedAccess()) return;
                 appView.classList.add('hidden');
                 jantesView.classList.add('hidden');
                 jumelagesView.classList.add('hidden');
@@ -501,6 +564,7 @@
                 documentsView.classList.add('hidden');
                 jumelagesTgdView.classList.remove('hidden');
             } else if (type === 'TGD+') {
+                if (!hasAuthorizedAccess()) return;
                 appView.classList.add('hidden');
                 jantesView.classList.add('hidden');
                 jumelagesView.classList.add('hidden');
@@ -512,94 +576,168 @@
             }
         }
 
-        async function handleSession() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                onboardingView.classList.add('hidden');
-                blockedView.classList.add('hidden');
-                appView.classList.add('hidden');
-                jantesView.classList.add('hidden');
-                jumelagesView.classList.add('hidden');
-                jumelagesTgdView.classList.add('hidden');
-                jumelagesTgdPlusView.classList.add('hidden');
-                rouesEtroitesView.classList.add('hidden');
-                contactView.classList.add('hidden');
-                documentsView.classList.add('hidden');
-                loginView.classList.remove('hidden');
-                return;
-            }
-
-            const currentDeviceToken = getDeviceToken();
-
-            const { data: profile } = await supabaseClient
-                .from('profiles')
-                .select('nom, prenom, entreprise, device_token, email, blocage')
-                .eq('id', session.user.id)
-                .maybeSingle();
-
-            if (profile && profile.blocage && profile.blocage.toString().toLowerCase() === 'oui') {
-                loginView.classList.add('hidden');
-                onboardingView.classList.add('hidden');
-                appView.classList.add('hidden');
-                jantesView.classList.add('hidden');
-                jumelagesView.classList.add('hidden');
-                jumelagesTgdView.classList.add('hidden');
-                jumelagesTgdPlusView.classList.add('hidden');
-                rouesEtroitesView.classList.add('hidden');
-                contactView.classList.add('hidden');
-                documentsView.classList.add('hidden');
-                blockedView.classList.remove('hidden');
-                return;
-            }
-
-            if (!profile || !profile.nom || !profile.prenom || !profile.entreprise) {
-                loginView.classList.add('hidden');
-                blockedView.classList.add('hidden');
-                appView.classList.add('hidden');
-                jantesView.classList.add('hidden');
-                jumelagesView.classList.add('hidden');
-                jumelagesTgdView.classList.add('hidden');
-                jumelagesTgdPlusView.classList.add('hidden');
-                rouesEtroitesView.classList.add('hidden');
-                contactView.classList.add('hidden');
-                documentsView.classList.add('hidden');
-                onboardingView.classList.remove('hidden');
-                return;
-            }
-
-            if (profile.device_token && profile.device_token !== currentDeviceToken) {
-                alert("Ce compte est déjà actif sur un autre appareil. Veuillez contacter l'administrateur ERMAS pour réinitialiser votre accès.");
-                await supabaseClient.auth.signOut();
-                appView.classList.add('hidden');
-                onboardingView.classList.add('hidden');
-                blockedView.classList.add('hidden');
-                jantesView.classList.add('hidden');
-                jumelagesView.classList.add('hidden');
-                jumelagesTgdView.classList.add('hidden');
-                jumelagesTgdPlusView.classList.add('hidden');
-                rouesEtroitesView.classList.add('hidden');
-                contactView.classList.add('hidden');
-                documentsView.classList.add('hidden');
-                loginView.classList.remove('hidden');
-                return;
-            }
-
-            await supabaseClient.from('profiles').update({ email: session.user.email }).eq('id', session.user.id);
-
+        function hideAllViews() {
             loginView.classList.add('hidden');
             onboardingView.classList.add('hidden');
             blockedView.classList.add('hidden');
-            contactView.classList.add('hidden');
-            documentsView.classList.add('hidden');
+            accessStatusView.classList.add('hidden');
+            appView.classList.add('hidden');
             jantesView.classList.add('hidden');
             jumelagesView.classList.add('hidden');
             jumelagesTgdView.classList.add('hidden');
             jumelagesTgdPlusView.classList.add('hidden');
             rouesEtroitesView.classList.add('hidden');
-            appView.classList.remove('hidden');
+            contactView.classList.add('hidden');
+            documentsView.classList.add('hidden');
+        }
+
+        function showAccessStatus(title, message) {
+            hideAllViews();
+            accessStatusTitle.textContent = title;
+            accessStatusMessage.textContent = message;
+            accessStatusView.classList.remove('hidden');
+        }
+
+        function showOnboarding(authorization) {
+            hideAllViews();
+            onboardingMode = authorization.state === AUTHORIZATION_STATES.PROFILE_NOT_FOUND
+                ? 'create'
+                : 'update';
+
+            const profile = authorization.profile || {};
+            document.getElementById('profile-nom').value = profile.nom || '';
+            document.getElementById('profile-prenom').value = profile.prenom || '';
+            document.getElementById('profile-entreprise').value = profile.entreprise || '';
+            onboardingView.classList.remove('hidden');
+        }
+
+        async function processAuthorizedEnrollment(authorization, requestGeneration) {
+            showAccessStatus('Association de l’appareil', 'Association sécurisée de cet appareil en cours…');
+
+            let enrollment;
+            try {
+                enrollment = await initializeAuthorizedDeviceEnrollment({
+                    client: supabaseClient,
+                    profile: authorization.profile
+                });
+            } catch (error) {
+                if (requestGeneration !== authorizationRequestGeneration) return;
+                await handleSession({ allowEnrollment: false });
+                return;
+            }
+
+            if (requestGeneration !== authorizationRequestGeneration) return;
+
+            if (enrollment.error) {
+                showAccessStatus('Association impossible', 'Une erreur technique empêche l’association de cet appareil. Aucun accès n’a été accordé.');
+                return;
+            }
+
+            if (enrollment.status === DEVICE_ENROLLMENT_STATUSES.INITIALIZED
+                || enrollment.status === DEVICE_ENROLLMENT_STATUSES.ALREADY_INITIALIZED) {
+                await handleSession({ allowEnrollment: false });
+                return;
+            }
+
+            if (enrollment.status === DEVICE_ENROLLMENT_STATUSES.NOT_AUTHENTICATED) {
+                await handleSession({ allowEnrollment: false });
+                return;
+            }
+
+            if (enrollment.status === DEVICE_ENROLLMENT_STATUSES.PROFILE_NOT_FOUND) {
+                showAccessStatus('Profil introuvable', 'Votre profil doit être créé avant l’association de cet appareil.');
+                return;
+            }
+
+            if (enrollment.status === DEVICE_ENROLLMENT_STATUSES.INVALID_TOKEN) {
+                showAccessStatus('Association impossible', 'Le jeton généré pour cet appareil est invalide. Aucun accès n’a été accordé.');
+                return;
+            }
+
+            showAccessStatus('Association non autorisée', 'L’association de cet appareil n’est pas ou plus autorisée. Contactez ERMAS.');
+        }
+
+        async function handleSession({ allowEnrollment = true } = {}) {
+            const requestGeneration = ++authorizationRequestGeneration;
+            currentAuthorization = null;
+
+            let authorization;
+            try {
+                authorization = await requireAuthorizedUser({ client: supabaseClient });
+            } catch (error) {
+                if (requestGeneration !== authorizationRequestGeneration) return;
+                showAccessStatus('Service indisponible', 'La vérification de votre accès a échoué. Aucun accès n’a été accordé.');
+                return;
+            }
+
+            if (requestGeneration !== authorizationRequestGeneration) return;
+            currentAuthorization = authorization;
+
+            switch (authorization.state) {
+                case AUTHORIZATION_STATES.NO_SESSION:
+                    hideAllViews();
+                    loginView.classList.remove('hidden');
+                    return;
+
+                case AUTHORIZATION_STATES.SESSION_ERROR:
+                    showAccessStatus('Connexion indisponible', 'La session ne peut pas être vérifiée. Veuillez réessayer ultérieurement.');
+                    return;
+
+                case AUTHORIZATION_STATES.PROFILE_FETCH_ERROR:
+                    showAccessStatus('Profil indisponible', 'Votre profil ne peut pas être vérifié. Aucun accès n’a été accordé.');
+                    return;
+
+                case AUTHORIZATION_STATES.PROFILE_NOT_FOUND:
+                case AUTHORIZATION_STATES.PROFILE_INCOMPLETE:
+                    showOnboarding(authorization);
+                    return;
+
+                case AUTHORIZATION_STATES.ACCOUNT_BLOCKED:
+                    hideAllViews();
+                    blockedView.classList.remove('hidden');
+                    return;
+
+                case AUTHORIZATION_STATES.ENROLLMENT_PENDING_ADMIN:
+                case AUTHORIZATION_STATES.SERVER_TOKEN_MISSING:
+                    showAccessStatus(
+                        'Validation requise',
+                        'Votre compte a bien été créé. L’association de votre appareil doit être validée par ERMAS avant votre première utilisation.'
+                    );
+                    return;
+
+                case AUTHORIZATION_STATES.ENROLLMENT_ALLOWED:
+                    if (allowEnrollment) {
+                        await processAuthorizedEnrollment(authorization, requestGeneration);
+                    } else {
+                        showAccessStatus('Association non finalisée', 'L’appareil n’a pas pu être confirmé après la tentative d’association. Aucun accès n’a été accordé.');
+                    }
+                    return;
+
+                case AUTHORIZATION_STATES.LOCAL_TOKEN_MISSING:
+                    showAccessStatus('Appareil non reconnu', 'Le jeton de cet appareil est absent. Aucun nouveau jeton n’a été généré et l’accès est refusé.');
+                    return;
+
+                case AUTHORIZATION_STATES.DEVICE_MISMATCH:
+                    showAccessStatus('Appareil non autorisé', 'Ce compte est associé à un autre appareil. Contactez ERMAS si une intervention exceptionnelle est nécessaire.');
+                    return;
+
+                case AUTHORIZATION_STATES.INCONSISTENT_DEVICE_STATE:
+                    showAccessStatus('État du compte incohérent', 'L’état d’association de votre compte nécessite une intervention ERMAS. Aucun accès n’a été accordé.');
+                    return;
+
+                case AUTHORIZATION_STATES.AUTHORIZED:
+                    hideAllViews();
+                    appView.classList.remove('hidden');
+                    return;
+
+                default:
+                    showAccessStatus('Accès refusé', 'L’état de votre compte ne permet pas de garantir un accès sécurisé.');
+            }
         }
 
         function showJantesView() {
+            if (!hasAuthorizedAccess()) return;
+
             appView.classList.add('hidden');
             jumelagesView.classList.add('hidden');
             jumelagesTgdView.classList.add('hidden');
@@ -611,6 +749,8 @@
         }
 
         function showJumelagesView() {
+            if (!hasAuthorizedAccess()) return;
+
             appView.classList.add('hidden');
             jantesView.classList.add('hidden');
             jumelagesTgdView.classList.add('hidden');
@@ -622,6 +762,8 @@
         }
 
         function showRouesEtroitesView() {
+            if (!hasAuthorizedAccess()) return;
+
             appView.classList.add('hidden');
             jantesView.classList.add('hidden');
             jumelagesView.classList.add('hidden');
@@ -633,6 +775,8 @@
         }
 
         function showContactView() {
+            if (!hasAuthorizedAccess()) return;
+
             appView.classList.add('hidden');
             jantesView.classList.add('hidden');
             jumelagesView.classList.add('hidden');
@@ -644,6 +788,8 @@
         }
 
         function showDocumentsView() {
+            if (!hasAuthorizedAccess()) return;
+
             appView.classList.add('hidden');
             jantesView.classList.add('hidden');
             jumelagesView.classList.add('hidden');
@@ -656,6 +802,8 @@
         }
 
         function showHomeView() {
+            if (!hasAuthorizedAccess()) return;
+
             jantesView.classList.add('hidden');
             jumelagesView.classList.add('hidden');
             jumelagesTgdView.classList.add('hidden');
@@ -735,19 +883,23 @@
             const errBox = document.getElementById('onboarding-error-msg');
             errBox.classList.add('hidden');
 
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) return;
+            const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+            if (sessionError || !session?.user) {
+                errBox.textContent = 'Votre session ne peut pas être vérifiée.';
+                errBox.classList.remove('hidden');
+                return;
+            }
 
-            const currentDeviceToken = getDeviceToken();
+            const personalFields = {
+                email: session.user.email || '',
+                nom,
+                prenom,
+                entreprise
+            };
 
-            const { error } = await supabaseClient.from('profiles').upsert({
-                id: session.user.id,
-                email: session.user.email,
-                nom: nom,
-                prenom: prenom,
-                entreprise: entreprise,
-                device_token: currentDeviceToken
-            });
+            const { error } = onboardingMode === 'create'
+                ? await createOwnProfile(supabaseClient, personalFields)
+                : await updateOwnPersonalProfile(supabaseClient, personalFields);
 
             if (error) {
                 errBox.textContent = error.message;
@@ -839,6 +991,16 @@
                 }
             }
         });
+
+        window.logoutUser = logoutUser;
+        window.navigateToProtectedPage = navigateToProtectedPage;
+        window.selectGamme = selectGamme;
+        window.showJantesView = showJantesView;
+        window.showJumelagesView = showJumelagesView;
+        window.showRouesEtroitesView = showRouesEtroitesView;
+        window.showContactView = showContactView;
+        window.showDocumentsView = showDocumentsView;
+        window.showHomeView = showHomeView;
     </script>
 </body>
 </html>

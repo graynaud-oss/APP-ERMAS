@@ -1,6 +1,6 @@
 import { getSupabaseClient } from './supabase-client.js';
 import { getOwnProfile, isProfileBlocked, isProfileComplete } from './profile.js';
-import { readLocalDeviceToken } from './device-enrollment.js';
+import { confirmPendingDeviceEnrollment, readLocalDeviceToken } from './device-enrollment.js';
 
 export const AUTHORIZATION_STATES = Object.freeze({
     AUTHORIZED: 'AUTHORIZED',
@@ -41,7 +41,7 @@ export function evaluateAuthorization({
     if (!isProfileComplete(profile)) return result(AUTHORIZATION_STATES.PROFILE_INCOMPLETE, { session, user: session.user, profile });
 
     const serverToken = typeof profile.device_token === 'string'
-        ? profile.device_token.trim()
+        ? profile.device_token
         : '';
     const enrollmentAllowed = profile.device_enrollment_allowed === true;
 
@@ -86,7 +86,12 @@ export async function requireAuthorizedUser({
     }
 
     const { data: profile, error: profileError } = await getOwnProfile(client, session.user.id);
-    const localDeviceToken = readLocalDeviceToken(storage);
+    let localDeviceToken = readLocalDeviceToken(storage);
+
+    if (!profileError && profile && !localDeviceToken) {
+        const confirmation = confirmPendingDeviceEnrollment(profile, storage);
+        if (confirmation.confirmed) localDeviceToken = confirmation.token;
+    }
 
     return evaluateAuthorization({
         session,
@@ -95,4 +100,3 @@ export async function requireAuthorizedUser({
         profileError
     });
 }
-
