@@ -65,22 +65,21 @@
         &copy; 2026 ERMAS - Tous droits réservés.
     </footer>
 
-    <script>
-        const SUPABASE_URL = 'https://wtxmaolhztuvujtgouaw.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0eG1hb2xoenR1dnVqdGdvdWF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MjgzMDIsImV4cCI6MjEwMTQwNDMwMn0.ttuoJAutNJ98KDz45Te40VOqLyMIuda7n2CtaFK8IGg';
-        
+    <script type="module">
+        import { getSupabaseClient } from './js/supabase-client.js';
+        import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
+
         // URL CSV Tableau Correspondance Pneus
         const PNEU_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=139891043&single=true&output=csv';
         // URL CSV Tableau Tarifs Jantes
         const TARIFS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1966421754&single=true&output=csv';
 
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: { persistSession: true, autoRefreshToken: true }
-        });
+        const supabaseClient = getSupabaseClient();
 
         let pneuData = [];
         let tarifsData = [];
         let userRemise = 0;
+        let pageAuthorized = false;
 
         const selLargeurPneu = document.getElementById('select-largeur-pneu');
         const selRapport = document.getElementById('select-rapport');
@@ -89,21 +88,23 @@
         const resultsContent = document.getElementById('results-content');
 
         async function initPage() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
+            let context;
+            try {
+                context = await requireAuthorizedUser({ client: supabaseClient });
+            } catch (error) {
                 window.location.href = 'index.html';
                 return;
             }
 
-            const { data: profile } = await supabaseClient
-                .from('profiles')
-                .select('remise')
-                .eq('id', session.user.id)
-                .maybeSingle();
-
-            if (profile && profile.remise) {
-                userRemise = parseFloat(profile.remise) || 0;
+            if (context.state !== AUTHORIZATION_STATES.AUTHORIZED) {
+                window.location.href = 'index.html';
+                return;
             }
+
+            if (context.profile && context.profile.remise) {
+                userRemise = parseFloat(context.profile.remise) || 0;
+            }
+            pageAuthorized = true;
 
             try {
                 const [pneuRes, tarifsRes] = await Promise.all([
@@ -178,6 +179,8 @@
         }
 
         selLargeurPneu.addEventListener('change', () => {
+            if (!pageAuthorized) return;
+
             const chosenL = selLargeurPneu.value;
             selRapport.innerHTML = '<option value="">-- Sélectionnez un rapport --</option>';
             selDiametrePneu.innerHTML = '<option value="">Sélectionnez d\'abord un rapport</option>';
@@ -198,6 +201,8 @@
         });
 
         selRapport.addEventListener('change', () => {
+            if (!pageAuthorized) return;
+
             const chosenL = selLargeurPneu.value;
             const chosenR = selRapport.value;
             selDiametrePneu.innerHTML = '<option value="">-- Sélectionnez un diamètre --</option>';
@@ -217,6 +222,8 @@
         });
 
         selDiametrePneu.addEventListener('change', () => {
+            if (!pageAuthorized) return;
+
             const chosenL = selLargeurPneu.value;
             const chosenR = selRapport.value;
             const chosenD = selDiametrePneu.value;
@@ -369,11 +376,15 @@
         });
 
         window.ouvrirCalculateur = function(product) {
+            if (!pageAuthorized) return;
+
             sessionStorage.setItem('ermas_calc_product', JSON.stringify(product));
             window.location.href = 'calcul-voie.html';
         };
 
-        initPage();
+        initPage().catch(() => {
+            window.location.href = 'index.html';
+        });
     </script>
 </body>
 </html>
