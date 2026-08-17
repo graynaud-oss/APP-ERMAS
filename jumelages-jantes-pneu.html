@@ -65,10 +65,10 @@
         &copy; 2026 ERMAS - Tous droits réservés.
     </footer>
 
-    <script>
-        const SUPABASE_URL = 'https://wtxmaolhztuvujtgouaw.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0eG1hb2xoenR1dnVqdGdvdWF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MjgzMDIsImV4cCI6MjEwMTQwNDMwMn0.ttuoJAutNJ98KDz45Te40VOqLyMIuda7n2CtaFK8IGg';
-        
+    <script type="module">
+        import { getSupabaseClient } from './js/supabase-client.js';
+        import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
+
         const URLS_PNEU = {
             'EVO': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=139891043&single=true&output=csv',
             '360': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=139891043&single=true&output=csv'
@@ -79,18 +79,13 @@
             '360': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1287684735&single=true&output=csv'
         };
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const gammeType = urlParams.get('type') || 'EVO';
-
-        document.getElementById('page-title').textContent = `Recherche par taille de pneu (Gamme ${gammeType})`;
-
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: { persistSession: true, autoRefreshToken: true }
-        });
+        const supabaseClient = getSupabaseClient();
 
         let pneuData = [];
         let tarifsData = [];
         let userRemise = 0;
+        let gammeType = null;
+        let pageAuthorized = false;
 
         const selLargeurPneu = document.getElementById('select-largeur-pneu');
         const selRapport = document.getElementById('select-rapport');
@@ -99,21 +94,27 @@
         const resultsContent = document.getElementById('results-content');
 
         async function initPage() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
+            let context;
+            try {
+                context = await requireAuthorizedUser({ client: supabaseClient });
+            } catch (error) {
                 window.location.href = 'index.html';
                 return;
             }
 
-            const { data: profile } = await supabaseClient
-                .from('profiles')
-                .select('remise')
-                .eq('id', session.user.id)
-                .maybeSingle();
-
-            if (profile && profile.remise) {
-                userRemise = parseFloat(profile.remise) || 0;
+            if (context.state !== AUTHORIZATION_STATES.AUTHORIZED) {
+                window.location.href = 'index.html';
+                return;
             }
+
+            if (context.profile && context.profile.remise) {
+                userRemise = parseFloat(context.profile.remise) || 0;
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            gammeType = urlParams.get('type') || 'EVO';
+            document.getElementById('page-title').textContent = `Recherche par taille de pneu (Gamme ${gammeType})`;
+            pageAuthorized = true;
 
             try {
                 const [pneuRes, tarifsRes] = await Promise.all([
@@ -229,6 +230,8 @@
         }
 
         selLargeurPneu.addEventListener('change', () => {
+            if (!pageAuthorized) return;
+
             const chosenL = selLargeurPneu.value;
             selRapport.innerHTML = '<option value="">-- Sélectionnez un rapport --</option>';
             selDiametrePneu.innerHTML = '<option value="">Sélectionnez d\'abord un rapport</option>';
@@ -250,6 +253,8 @@
         });
 
         selRapport.addEventListener('change', () => {
+            if (!pageAuthorized) return;
+
             const chosenL = selLargeurPneu.value;
             const chosenR = selRapport.value;
             selDiametrePneu.innerHTML = '<option value="">-- Sélectionnez un diamètre --</option>';
@@ -270,6 +275,8 @@
         });
 
         selDiametrePneu.addEventListener('change', () => {
+            if (!pageAuthorized) return;
+
             const chosenL = selLargeurPneu.value;
             const chosenR = selRapport.value;
             const chosenD = selDiametrePneu.value;
@@ -451,12 +458,18 @@
         });
 
         function ouvrirCalculHorsTout(payloadEncoded) {
+            if (!pageAuthorized) return;
+
             const productData = JSON.parse(decodeURIComponent(payloadEncoded));
             sessionStorage.setItem('ermas_hors_tout_product', JSON.stringify(productData));
             window.location.href = `calcul-hors-tout.html?type=${gammeType}`;
         }
 
-        initPage();
+        window.ouvrirCalculHorsTout = ouvrirCalculHorsTout;
+
+        initPage().catch(() => {
+            window.location.href = 'index.html';
+        });
     </script>
 </body>
 </html>
