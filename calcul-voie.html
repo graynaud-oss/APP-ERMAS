@@ -66,13 +66,11 @@
         &copy; 2026 ERMAS - Tous droits réservés.
     </footer>
 
-    <script>
-        const SUPABASE_URL = 'https://wtxmaolhztuvujtgouaw.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0eG1hb2xoenR1dnVqdGdvdWF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MjgzMDIsImV4cCI6MjEwMTQwNDMwMn0.ttuoJAutNJ98KDz45Te40VOqLyMIuda7n2CtaFK8IGg';
+    <script type="module">
+        import { getSupabaseClient } from './js/supabase-client.js';
+        import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
 
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: { persistSession: true, autoRefreshToken: true }
-        });
+        const supabaseClient = getSupabaseClient();
 
         const productNameEl = document.getElementById('product-name');
         const inputFam = document.getElementById('input-fam');
@@ -83,10 +81,18 @@
 
         let dataI = 0;
         let dataJ = 0;
+        let pageAuthorized = false;
 
         async function init() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
+            let context;
+            try {
+                context = await requireAuthorizedUser({ client: supabaseClient });
+            } catch (error) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            if (context.state !== AUTHORIZATION_STATES.AUTHORIZED) {
                 window.location.href = 'index.html';
                 return;
             }
@@ -100,9 +106,12 @@
             productNameEl.textContent = selectedProduct.nom || 'Produit sans nom';
             dataI = parseFloat(selectedProduct.deportMaxI) || 0;
             dataJ = parseFloat(selectedProduct.deportMinJ) || 0;
+            pageAuthorized = true;
         }
 
         btnCalculer.addEventListener('click', () => {
+            if (!pageAuthorized) return;
+
             const fam = parseFloat(inputFam.value);
             if (isNaN(fam)) {
                 alert('Veuillez renseigner une valeur valide pour la FAM.');
