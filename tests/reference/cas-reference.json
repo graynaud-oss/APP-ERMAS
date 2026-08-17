@@ -1,0 +1,21 @@
+{
+  "calculVoie": [
+    { "nom": "valeurs entières", "fam": 1500, "deportMaxI": 100, "deportMinJ": 50, "voieMaxi": 1700, "voieMini": 1400 },
+    { "nom": "déports nuls", "fam": 1800, "deportMaxI": 0, "deportMinJ": 0, "voieMaxi": 1800, "voieMini": 1800 },
+    { "nom": "valeurs décimales", "fam": 1234.5, "deportMaxI": 25.25, "deportMinJ": 10.5, "voieMaxi": 1285, "voieMini": 1213.5 },
+    { "nom": "déports négatifs acceptés", "fam": 1000, "deportMaxI": -20, "deportMinJ": -30, "voieMaxi": 960, "voieMini": 1060 },
+    { "nom": "déports produit invalides convertis en zéro", "fam": 1500, "deportMaxI": "invalide", "deportMinJ": "", "voieMaxi": 1500, "voieMini": 1500 }
+  ],
+  "calculHorsTout": [
+    { "nom": "valeurs entières", "voie": 1500, "horsToutJumelage": 500, "horsToutJanteEngin": 200, "entretoise": 100, "emboitementJanteEngin": 50, "emboitementJumelage": 30, "resultat": 2440 },
+    { "nom": "valeurs nulles", "voie": 1600, "horsToutJumelage": 0, "horsToutJanteEngin": 0, "entretoise": 0, "emboitementJanteEngin": 0, "emboitementJumelage": 0, "resultat": 1600 },
+    { "nom": "valeurs décimales", "voie": 1425.5, "horsToutJumelage": 310.25, "horsToutJanteEngin": 120.5, "entretoise": 75.25, "emboitementJanteEngin": 40.5, "emboitementJumelage": 15.25, "resultat": 2015.75 },
+    { "nom": "géométrie produit invalide convertie en zéro", "voie": 1500, "horsToutJumelage": "invalide", "horsToutJanteEngin": 100, "entretoise": 50, "emboitementJanteEngin": 25, "emboitementJumelage": "", "resultat": 1750 }
+  ],
+  "prix": [
+    { "nom": "remise zéro", "prix": "100", "remise": 0, "net": 100, "affichage": "100.00" },
+    { "nom": "remise positive", "prix": "100", "remise": 20, "net": 80, "affichage": "80.00" },
+    { "nom": "prix décimal point", "prix": "123.45", "remise": 10, "net": 111.105, "affichage": "111.11" },
+    { "nom": "remise décimale", "prix": "199.99", "remise": 12.5, "net": 174.99125, "affichage": "174.99" }
+  ]
+}

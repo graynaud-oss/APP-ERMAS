@@ -1,0 +1,5 @@
+largeurJante,diametre,colC,colD,nom,tendeurs,prix,kitSansJantes,joncs,paireTendeurs,entretoises
+18,38,320,60,Jumelage Alpha,4,2500.00,1800,125.50,300,450
+20,42,350,65,"Jumelage, spécial",6,3100.75,,150,invalid,
+22,46,375,70,"Jumelage ""Démo""",8,,2200,175,350,500
+

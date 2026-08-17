@@ -1,0 +1,5 @@
+largeurJante,diametre,horsTout,emboitement,profil,nom,prixVF,prixVV,deportMaxI,deportMinJ
+12,28,210,45,Standard,Jante Alpha,1000,1250.50,80,40
+14,30,225,50,"Profil, spécial","Jante ""Démo""",,1400.25,90,45
+16,34,240,55,,Jante Sans Profil,invalide,,100,50
+

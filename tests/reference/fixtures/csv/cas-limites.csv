@@ -1,0 +1,7 @@
+type,valeur,note
+simple,Alpha,cellule simple
+virgule,"Alpha, Beta",virgule entre guillemets
+guillemets,"Produit ""Démo""",guillemets CSV doublés
+vide,,cellule vide
+decimal,123.45,prix décimal avec point
+
