@@ -65,18 +65,16 @@
         &copy; 2026 ERMAS - Tous droits réservés.
     </footer>
 
-    <script>
-        const SUPABASE_URL = 'https://wtxmaolhztuvujtgouaw.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0eG1hb2xoenR1dnVqdGdvdWF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MjgzMDIsImV4cCI6MjEwMTQwNDMwMn0.ttuoJAutNJ98KDz45Te40VOqLyMIuda7n2CtaFK8IGg';
-        
-        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1966421754&single=true&output=csv';
+    <script type="module">
+        import { getSupabaseClient } from './js/supabase-client.js';
+        import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
 
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: { persistSession: true, autoRefreshToken: true }
-        });
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1966421754&single=true&output=csv';
+        const supabaseClient = getSupabaseClient();
 
         let csvData = [];
         let userRemise = 0;
+        let pageAuthorized = false;
 
         const selDiametre = document.getElementById('select-diametre');
         const selLargeur = document.getElementById('select-largeur');
@@ -85,21 +83,23 @@
         const resultsContent = document.getElementById('results-content');
 
         async function initPage() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
+            let context;
+            try {
+                context = await requireAuthorizedUser({ client: supabaseClient });
+            } catch (error) {
                 window.location.href = 'index.html';
                 return;
             }
 
-            const { data: profile } = await supabaseClient
-                .from('profiles')
-                .select('remise')
-                .eq('id', session.user.id)
-                .maybeSingle();
-
-            if (profile && profile.remise) {
-                userRemise = parseFloat(profile.remise) || 0;
+            if (context.state !== AUTHORIZATION_STATES.AUTHORIZED) {
+                window.location.href = 'index.html';
+                return;
             }
+
+            if (context.profile && context.profile.remise) {
+                userRemise = parseFloat(context.profile.remise) || 0;
+            }
+            pageAuthorized = true;
 
             try {
                 const response = await fetch(SHEET_CSV_URL);
@@ -155,6 +155,8 @@
         }
 
         selDiametre.addEventListener('change', () => {
+            if (!pageAuthorized) return;
+
             const chosenD = selDiametre.value;
             selLargeur.innerHTML = '<option value="">-- Sélectionnez une largeur --</option>';
             selProfil.innerHTML = '<option value="">Sélectionnez d\'abord une largeur</option>';
@@ -175,6 +177,8 @@
         });
 
         selLargeur.addEventListener('change', () => {
+            if (!pageAuthorized) return;
+
             const chosenD = selDiametre.value;
             const chosenL = selLargeur.value;
             selProfil.innerHTML = '<option value="">-- Sélectionnez un profil --</option>';
@@ -194,6 +198,8 @@
         });
 
         selProfil.addEventListener('change', () => {
+            if (!pageAuthorized) return;
+
             const chosenD = selDiametre.value;
             const chosenL = selLargeur.value;
             const chosenP = selProfil.value;
@@ -319,11 +325,15 @@
         });
 
         window.ouvrirCalculateur = function(product) {
+            if (!pageAuthorized) return;
+
             sessionStorage.setItem('ermas_calc_product', JSON.stringify(product));
             window.location.href = 'calcul-voie.html';
         };
 
-        initPage();
+        initPage().catch(() => {
+            window.location.href = 'index.html';
+        });
     </script>
 </body>
 </html>
