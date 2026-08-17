@@ -1,0 +1,85 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+import test from 'node:test';
+
+import { AUTHORIZATION_STATES } from '../../js/auth-guard.js';
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(here, '..', '..');
+const source = await readFile(path.join(root, 'jumelages-choix.html'), 'utf8');
+
+function pilotDecision(state) {
+    return state === AUTHORIZATION_STATES.AUTHORIZED ? 'CONTINUE' : 'INDEX';
+}
+
+test('le garde complet précède toute lecture du type et toute logique métier', () => {
+    const guardPosition = source.indexOf('await requireAuthorizedUser({ client: supabaseClient })');
+    const authorizationPosition = source.indexOf('context.state !== AUTHORIZATION_STATES.AUTHORIZED');
+    const parameterPosition = source.indexOf('new URLSearchParams(window.location.search)');
+    const renderingPosition = source.indexOf("document.getElementById('page-title').textContent");
+
+    assert.ok(guardPosition >= 0, 'garde complet absent');
+    assert.ok(guardPosition < authorizationPosition);
+    assert.ok(authorizationPosition < parameterPosition);
+    assert.ok(parameterPosition < renderingPosition);
+});
+
+test('seul AUTHORIZED poursuit la logique de la page', () => {
+    assert.equal(pilotDecision(AUTHORIZATION_STATES.AUTHORIZED), 'CONTINUE');
+
+    for (const state of [
+        AUTHORIZATION_STATES.NO_SESSION,
+        AUTHORIZATION_STATES.SESSION_ERROR,
+        AUTHORIZATION_STATES.PROFILE_NOT_FOUND,
+        AUTHORIZATION_STATES.PROFILE_INCOMPLETE,
+        AUTHORIZATION_STATES.PROFILE_FETCH_ERROR,
+        AUTHORIZATION_STATES.ACCOUNT_BLOCKED,
+        AUTHORIZATION_STATES.SERVER_TOKEN_MISSING,
+        AUTHORIZATION_STATES.LOCAL_TOKEN_MISSING,
+        AUTHORIZATION_STATES.DEVICE_MISMATCH,
+        AUTHORIZATION_STATES.ENROLLMENT_PENDING_ADMIN,
+        AUTHORIZATION_STATES.ENROLLMENT_ALLOWED,
+        AUTHORIZATION_STATES.INCONSISTENT_DEVICE_STATE,
+        'UNKNOWN_STATE'
+    ]) {
+        assert.equal(pilotDecision(state), 'INDEX', `l’état ${state} doit être refusé`);
+    }
+
+    assert.ok(source.includes("window.location.href = 'index.html'"));
+});
+
+test('une exception du garde provoque un refus fermé', () => {
+    assert.match(source, /try\s*\{[\s\S]*await requireAuthorizedUser[\s\S]*\}\s*catch\s*\(error\)/);
+    assert.match(source, /init\(\)\.catch\(\(\) => \{\s*window\.location\.href = 'index\.html';/);
+});
+
+test('la page est strictement consommatrice du garde', () => {
+    assert.doesNotMatch(source, /initializeAuthorizedDeviceEnrollment|initialize_own_device_token/);
+    assert.doesNotMatch(source, /Math\.random|crypto\.getRandomValues|ermas_device_token_pending/);
+    assert.doesNotMatch(source, /\.from\(['"]profiles['"]\)[\s\S]*?\.(?:insert|update|upsert)\s*\(/);
+    assert.doesNotMatch(source, /device_enrollment_allowed\s*:|device_token\s*:|remise\s*:|blocage\s*:/);
+    assert.doesNotMatch(source, /resetDevice|changeDevice|enableEnrollment|clearServerToken/);
+});
+
+test('le client partagé remplace le client Supabase local', () => {
+    assert.ok(source.includes("import { getSupabaseClient } from './js/supabase-client.js'"));
+    assert.ok(source.includes('const supabaseClient = getSupabaseClient();'));
+    assert.doesNotMatch(source, /SUPABASE_URL|SUPABASE_ANON_KEY|supabase\.createClient/);
+});
+
+test('le comportement métier autorisé reste présent', () => {
+    for (const fragment of [
+        "urlParams.get('type') || 'EVO'",
+        "gammeType === 'TGD' || gammeType === 'TGD+'",
+        "redirigerVers('taille')",
+        "redirigerVers('pneu')",
+        'jumelages-jantes-taille.html?type=${gammeType}',
+        'jumelages-jantes-pneu.html?type=${gammeType}',
+        'Par taille de jantes',
+        'Par taille de pneus'
+    ]) {
+        assert.ok(source.includes(fragment), `comportement historique absent : ${fragment}`);
+    }
+});
