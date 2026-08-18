@@ -51,6 +51,12 @@ test('filtres et calculateur restent verrouillés avant autorisation', () => {
     assert.ok(source.split('if (!pageAuthorized) return;').length - 1 >= 4);
 });
 
+test('le retour utilise toujours la destination explicite du menu Roues étroites', () => {
+    assert.ok(source.includes("onclick=\"window.location.href = 'roues-etroites.html'\""));
+    assert.doesNotMatch(source, /(?:window\.)?history\.back\s*\(/);
+    assert.doesNotMatch(source, /document\.referrer/);
+});
+
 test('sources, parallélisme, parsers et colonnes restent inchangés', () => {
     const urls = source.match(/https:\/\/docs\.google\.com\/spreadsheets\/[^']+output=csv/g) || [];
     assert.equal(urls.length, 2);
