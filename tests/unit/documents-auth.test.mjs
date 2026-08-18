@@ -122,3 +122,20 @@ test('Documents ne contient ni écriture profil, ni remise, ni CSV, ni enrôleme
     assert.doesNotMatch(source, /remise|blocage|device_token|device_enrollment_allowed/);
     assert.doesNotMatch(source, /fetch\s*\(|\.csv|sessionStorage|localStorage|crypto\.getRandomValues|Math\.random/);
 });
+
+test('Documents utilise les fondations visuelles ERMAS locales', () => {
+    for (const fragment of [
+        'href="css/app-ermas.css"',
+        'href="assets/brand/favicon.png"',
+        'href="assets/brand/favicon.ico"',
+        'href="assets/brand/apple-touch-icon.png"',
+        'class="hidden app-shell catalog-page documents-page"',
+        'class="app-header"',
+        'class="app-page-panel documents-panel"',
+        'class="app-footer"',
+        'https://www.ermas.fr/mentions-legales',
+        'https://www.ermas.fr/politique-confidentialite'
+    ]) assert.ok(source.includes(fragment), `fondation visuelle absente : ${fragment}`);
+
+    assert.doesNotMatch(source, /fonts\.(?:googleapis|gstatic)\.com|googleusercontent\.com/);
+});

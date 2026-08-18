@@ -10,12 +10,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="css/app-ermas.css">
+    <script type="module" src="./js/logout.js"></script>
 </head>
 <body class="antialiased">
 <div class="app-shell catalog-page results-page">
     <header class="app-header">
         <div class="app-container app-header__inner">
-            <img class="app-logo" src="assets/brand/ermas-logo.png" alt="ERMAS">
+            <a class="app-logo-link" href="https://www.ermas.fr/" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le site ERMAS"><img class="app-logo" src="assets/brand/ermas-logo.png" alt=""></a>
+            <button type="button" class="app-logout-button" data-global-logout>Se déconnecter</button>
         </div>
     </header>
     <main class="catalog-page__body">
@@ -384,7 +386,7 @@
                         const finalOpt = userRemise > 0 ? baseOpt * (1 - userRemise / 100) : baseOpt;
 
                         html += `
-                            <div class="bg-gray-900/30 border border-gray-800/60 rounded-md p-2.5 flex flex-col justify-between text-xs">
+                            <div class="results-option-block flex flex-col justify-between text-xs">
                                 <span class="text-gray-400 text-[11px] mb-1">${opt.label}</span>
                         `;
 
@@ -410,7 +412,7 @@
                         html += `</div>`;
                     } else {
                         html += `
-                            <div class="bg-gray-900/30 border border-gray-800/60 rounded-md p-2.5 flex justify-between items-center text-xs">
+                            <div class="results-option-block flex justify-between items-center text-xs">
                                 <span class="text-gray-400 text-[11px]">${opt.label}</span>
                                 <span class="text-gray-500 italic">N/C</span>
                             </div>

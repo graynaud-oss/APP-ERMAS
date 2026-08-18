@@ -16,10 +16,11 @@ test('Contact utilise le client partagé et le garde complet', () => {
     assert.doesNotMatch(source, /supabase\.createClient|createClient\s*\(/);
 });
 
-test('le garde précède les actions, la carte et l’affichage', () => {
+test('le garde précède les actions, le consentement Maps et l’affichage', () => {
     const guardPosition = source.indexOf('context.state !== AUTHORIZATION_STATES.AUTHORIZED');
     const authorizationPosition = source.indexOf('pageAuthorized = true');
     const listenerPosition = source.indexOf("document.querySelectorAll('[data-protected-route]')");
+    const mapListenerPosition = source.indexOf("showMapButton.addEventListener('click'");
     const mapPosition = source.indexOf('contactMap.src = contactMap.dataset.mapSrc');
     const displayPosition = source.indexOf("contactView.classList.remove('hidden')");
 
@@ -27,7 +28,8 @@ test('le garde précède les actions, la carte et l’affichage', () => {
     assert.ok(guardPosition >= 0);
     assert.ok(guardPosition < authorizationPosition);
     assert.ok(authorizationPosition < listenerPosition);
-    assert.ok(listenerPosition < mapPosition);
+    assert.ok(listenerPosition < mapListenerPosition);
+    assert.ok(mapListenerPosition < mapPosition);
     assert.ok(mapPosition < displayPosition);
     assert.ok(source.includes('if (!pageAuthorized) return;'));
 });
@@ -62,13 +64,21 @@ test('les coordonnées et contenus historiques sont conservés', () => {
     }
 });
 
-test('la carte historique est conservée mais chargée seulement après autorisation', () => {
+test('la carte historique reste inactive avant le clic puis conserve son URL exacte', () => {
     assert.ok(source.includes('<iframe id="contact-map"'));
     assert.ok(source.includes('loading="lazy"'));
     assert.ok(source.includes('allowfullscreen'));
     assert.ok(source.includes('data-map-src="https://maps.google.com/maps?q=ERMAS+Soucy+ZA+Les+Pelletiers'));
     assert.doesNotMatch(source, /<iframe[^>]+\ssrc=/);
+    assert.ok(source.includes('id="map-consent-panel"'));
+    assert.ok(source.includes('id="show-map-button"'));
+    assert.ok(source.includes('Afficher la carte'));
+    assert.ok(source.includes("showMapButton.addEventListener('click'"));
+    assert.ok(source.includes('if (!pageAuthorized) return;'));
     assert.ok(source.includes('contactMap.src = contactMap.dataset.mapSrc'));
+    assert.ok(source.includes("mapConsentPanel.classList.add('hidden')"));
+    assert.ok(source.includes("contactMapContainer.classList.remove('hidden')"));
+    assert.ok(source.includes("}, { once: true });"));
 });
 
 test('Contact ne contient ni métier, ni profil, ni remise, ni CSV, ni Storage, ni enrôlement', () => {
@@ -82,4 +92,18 @@ test('Contact ne contient ni métier, ni profil, ni remise, ni CSV, ni Storage, 
 test('le bouton Contact de l’accueil pointe déjà vers la nouvelle page', () => {
     assert.ok(accueilSource.includes('data-protected-route="contact.html"'));
     assert.equal(accueilSource.match(/data-protected-route="contact\.html"/g)?.length, 1);
+});
+
+test('aucun consentement Maps n’est mémorisé et aucune écriture externe n’est ajoutée', () => {
+    assert.doesNotMatch(source, /localStorage|sessionStorage|document\.cookie|\.from\(['"]profiles['"]\)|\.rpc\s*\(/);
+});
+
+test('Contact utilise le design ERMAS commun et le footer juridique', () => {
+    for (const fragment of [
+        'css/app-ermas.css', 'assets/brand/favicon.png', 'assets/brand/favicon.ico',
+        'assets/brand/apple-touch-icon.png', 'app-shell catalog-page contact-page',
+        'class="app-header"', 'class="app-logo-link"', 'class="app-footer"',
+        'https://www.ermas.fr/mentions-legales', 'https://www.ermas.fr/politique-confidentialite',
+        'target="_blank" rel="noopener noreferrer"'
+    ]) assert.ok(source.includes(fragment), `fondation Contact absente : ${fragment}`);
 });

@@ -151,3 +151,14 @@ test('le bouton Estimer reste blanc sur bleu avec hover rouge réservé à la so
     assert.match(sharedStyles, /\.results-content button:focus-visible[\s\S]*?outline:/);
     assert.match(sharedStyles, /\.results-content button:active[\s\S]*?transform:/);
 });
+
+test('Jantes Taille croise la dimension technique uniquement lorsque VV est absente', () => {
+    assert.ok(source.includes("from './js/wheel-dimension-index.js'"));
+    assert.ok(source.includes('const hasValidVariablePrice = Boolean(match.prixVV && !isNaN(parseFloat(match.prixVV)));'));
+    assert.ok(source.includes('diameter: match.diametre'));
+    assert.ok(source.includes('width: match.largeurJante'));
+    assert.ok(source.includes('variableWayState === VARIABLE_WAY_STATES.PRICE'));
+    assert.ok(source.includes('variableWayState === VARIABLE_WAY_STATES.NARROW_WHEELS'));
+    assert.ok(source.includes('const baseVV = parseFloat(match.prixVV);'));
+    assert.ok(source.includes('const finalVV = userRemise > 0 ? baseVV * (1 - userRemise / 100) : baseVV;'));
+});

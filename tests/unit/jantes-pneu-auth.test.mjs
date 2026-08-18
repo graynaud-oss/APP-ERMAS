@@ -141,3 +141,15 @@ test('Jantes Pneu utilise le design commun et le footer légal', () => {
     assert.ok(source.includes('https://www.ermas.fr/mentions-legales'));
     assert.ok(source.includes('https://www.ermas.fr/politique-confidentialite'));
 });
+
+test('Jantes Pneu décide du fallback VV indépendamment pour chaque dimension de jante', () => {
+    assert.ok(source.includes("from './js/wheel-dimension-index.js'"));
+    assert.ok(source.includes('matchedTarifs.forEach(match => {'));
+    assert.ok(source.includes('const hasValidVariablePrice = Boolean(match.prixVV && !isNaN(parseFloat(match.prixVV)));'));
+    assert.ok(source.includes('diameter: match.diametre'));
+    assert.ok(source.includes('width: match.largeurJante'));
+    assert.ok(source.includes('variableWayState === VARIABLE_WAY_STATES.PRICE'));
+    assert.ok(source.includes('variableWayState === VARIABLE_WAY_STATES.NARROW_WHEELS'));
+    assert.ok(source.includes('const baseVV = parseFloat(match.prixVV);'));
+    assert.ok(source.includes('const finalVV = userRemise > 0 ? baseVV * (1 - userRemise / 100) : baseVV;'));
+});

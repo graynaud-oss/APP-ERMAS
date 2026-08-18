@@ -8,12 +8,13 @@
     <link rel="shortcut icon" href="assets/brand/favicon.ico">
     <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
     <link rel="stylesheet" href="css/app-ermas.css">
+    <script type="module" src="./js/logout.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div id="roues-etroites-view" class="hidden app-shell catalog-page">
-        <header class="app-header"><div class="app-container app-header__inner"><img class="app-logo" src="assets/brand/ermas-logo.png" alt="ERMAS"></div></header>
+<header class="app-header"><div class="app-container app-header__inner"><a class="app-logo-link" href="https://www.ermas.fr/" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le site ERMAS"><img class="app-logo" src="assets/brand/ermas-logo.png" alt=""></a><button type="button" class="app-logout-button" data-global-logout>Se déconnecter</button></div></header>
         <main class="catalog-page__body">
             <div class="app-container"><section class="app-page-panel" aria-labelledby="roues-title">
                 <div class="app-page-header">

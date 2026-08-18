@@ -108,3 +108,20 @@ test('les cinq cas historiques donnent exactement les mêmes résultats', () => 
         }, testCase.nom);
     }
 });
+
+test('le calculateur de voie utilise les fondations visuelles ERMAS locales', () => {
+    for (const fragment of [
+        'href="css/app-ermas.css"',
+        'href="assets/brand/favicon.png"',
+        'href="assets/brand/favicon.ico"',
+        'href="assets/brand/apple-touch-icon.png"',
+        'class="app-shell calculator-page"',
+        'class="app-header"',
+        'class="app-page-panel calculator-panel"',
+        'class="app-footer"',
+        'https://www.ermas.fr/mentions-legales',
+        'https://www.ermas.fr/politique-confidentialite'
+    ]) assert.ok(source.includes(fragment), `fondation visuelle absente : ${fragment}`);
+
+    assert.doesNotMatch(source, /fonts\.(?:googleapis|gstatic)\.com|googleusercontent\.com/);
+});

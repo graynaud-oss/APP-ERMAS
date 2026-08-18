@@ -8,11 +8,12 @@
     <link rel="shortcut icon" href="assets/brand/favicon.ico">
     <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
     <link rel="stylesheet" href="css/app-ermas.css">
+    <script type="module" src="./js/logout.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body><div class="app-shell catalog-page results-page">
-    <header class="app-header"><div class="app-container app-header__inner"><img class="app-logo" src="assets/brand/ermas-logo.png" alt="ERMAS"></div></header>
+<header class="app-header"><div class="app-container app-header__inner"><a class="app-logo-link" href="https://www.ermas.fr/" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le site ERMAS"><img class="app-logo" src="assets/brand/ermas-logo.png" alt=""></a><button type="button" class="app-logout-button" data-global-logout>Se déconnecter</button></div></header>
 
     <main class="catalog-page__body"><div class="app-container"><section class="app-page-panel results-page__panel">
             <div class="app-page-header">
@@ -24,7 +25,7 @@
                 <button onclick="window.location.href = 'roues-etroites.html'" class="app-back-button">Retour</button>
             </div>
 
-            <div class="results-search-panel">
+            <div id="tire-search-panel" class="results-search-panel">
             <!-- ÉTAPE 1 : LARGEUR PNEU -->
             <div class="mb-4">
                 <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">1. Largeur de pneu</label>
@@ -34,7 +35,7 @@
             </div>
 
             <!-- ÉTAPE 2 : RAPPORT HAUTEUR -->
-            <div class="mb-4">
+            <div id="rapport-field" class="mb-4">
                 <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">2. Rapport / Hauteur</label>
                 <select id="select-rapport" disabled class="w-full bg-[#070913] border border-gray-800 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition disabled:opacity-50">
                     <option value="">Sélectionnez d'abord une largeur de pneu</option>
@@ -43,7 +44,7 @@
 
             <!-- ÉTAPE 3 : DIAMÈTRE PNEU -->
             <div class="mb-6">
-                <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">3. Diamètre pneu</label>
+                <label id="diametre-label" class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">3. Diamètre pneu</label>
                 <select id="select-diametre-pneu" disabled class="w-full bg-[#070913] border border-gray-800 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition disabled:opacity-50">
                     <option value="">Sélectionnez d'abord un rapport</option>
                 </select>
@@ -75,10 +76,14 @@
         let userRemise = 0;
         let netPriceVisible = false;
         let pageAuthorized = false;
+        let selectedWidthHasRapports = true;
 
         const selLargeurPneu = document.getElementById('select-largeur-pneu');
         const selRapport = document.getElementById('select-rapport');
         const selDiametrePneu = document.getElementById('select-diametre-pneu');
+        const rapportField = document.getElementById('rapport-field');
+        const diametreLabel = document.getElementById('diametre-label');
+        const tireSearchPanel = document.getElementById('tire-search-panel');
         const resultsContainer = document.getElementById('results-container');
         const resultsContent = document.getElementById('results-content');
         const netPriceControl = document.getElementById('net-price-control');
@@ -245,6 +250,10 @@
             selDiametrePneu.innerHTML = '<option value="">Sélectionnez d\'abord un rapport</option>';
             selRapport.disabled = true;
             selDiametrePneu.disabled = true;
+            rapportField.classList.remove('hidden');
+            tireSearchPanel.classList.remove('results-search-panel--two-columns');
+            diametreLabel.textContent = '3. Diamètre pneu';
+            selectedWidthHasRapports = true;
             resultsContainer.classList.add('hidden');
 
             if (!chosenL) return;
@@ -252,6 +261,21 @@
             const filtered = pneuRows.filter(item => item.largeurPneu === chosenL);
             const rapports = [...new Set(filtered.map(item => item.rapport))].filter(Boolean);
             rapports.sort((a, b) => parseFloat(a) - parseFloat(b));
+
+            if (rapports.length === 0) {
+                selectedWidthHasRapports = false;
+                rapportField.classList.add('hidden');
+                tireSearchPanel.classList.add('results-search-panel--two-columns');
+                diametreLabel.textContent = '2. Diamètre pneu';
+                selDiametrePneu.innerHTML = '<option value="">-- Sélectionnez un diamètre --</option>';
+                const diametres = [...new Set(filtered.map(item => item.diametrePneu))].filter(Boolean);
+                diametres.sort((a, b) => parseFloat(a) - parseFloat(b));
+                diametres.forEach(d => {
+                    selDiametrePneu.innerHTML += `<option value="${d}">${d}</option>`;
+                });
+                selDiametrePneu.disabled = false;
+                return;
+            }
 
             rapports.forEach(r => {
                 selRapport.innerHTML += `<option value="${r}">${r}</option>`;
@@ -294,7 +318,7 @@
 
             const matchingPneus = pneuRows.filter(item => 
                 item.largeurPneu === chosenL && 
-                item.rapport === chosenR && 
+                (!selectedWidthHasRapports || item.rapport === chosenR) &&
                 item.diametrePneu === chosenD
             );
 

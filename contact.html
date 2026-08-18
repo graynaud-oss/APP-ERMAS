@@ -4,68 +4,84 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ERMAS - Nous contacter</title>
-    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/15om2TV_YaY4mP-dIn80LSdyeJJjG0PMF">
+    <link rel="icon" type="image/png" href="assets/brand/favicon.png">
+    <link rel="shortcut icon" href="assets/brand/favicon.ico">
+    <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #070913; color: #f3f4f6; }
-        .font-brand { font-family: 'Rajdhani', sans-serif; }
-    </style>
+    <link rel="stylesheet" href="css/app-ermas.css">
+    <script type="module" src="./js/logout.js"></script>
 </head>
-<body class="h-full flex flex-col justify-between antialiased">
-    <div id="contact-view" class="hidden h-full flex flex-col justify-between w-full">
-        <div class="flex-grow flex flex-col items-center justify-center px-4 py-8">
-            <div class="max-w-2xl w-full bg-[#0b101d] border border-gray-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="font-brand text-xl sm:text-2xl font-bold text-white">Nous contacter</h2>
-                    <button type="button" data-protected-route="accueil.html" class="text-xs text-gray-400 hover:text-white uppercase tracking-wider bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg transition">Retour</button>
+<body>
+    <div id="contact-view" class="hidden app-shell catalog-page contact-page">
+<header class="app-header"><div class="app-container app-header__inner"><a class="app-logo-link" href="https://www.ermas.fr/" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le site ERMAS"><img class="app-logo" src="assets/brand/ermas-logo.png" alt=""></a><button type="button" class="app-logout-button" data-global-logout>Se déconnecter</button></div></header>
+        <main class="catalog-page__body">
+            <div class="app-container">
+            <section class="app-page-panel contact-panel">
+                <div class="app-page-header">
+                    <div>
+                        <p class="app-page-eyebrow">Coordonnées ERMAS</p>
+                        <h1 class="app-page-title">Nous contacter</h1>
+                    </div>
+                    <button type="button" data-protected-route="accueil.html" class="app-back-button">Retour</button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div class="space-y-4 text-sm">
-                        <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl space-y-3">
-                            <div>
-                                <span class="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-0.5">Téléphone</span>
-                                <a href="tel:0386664722" class="text-white hover:text-red-500 font-medium transition flex items-center space-x-2">
+                <div class="contact-grid">
+                    <div class="contact-details">
+                            <div class="contact-detail">
+                                <span class="contact-detail__label">Téléphone</span>
+                                <a href="tel:0386664722" class="contact-detail__value">
                                     <svg class="w-4 h-4 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                                     <span>03 86 66 47 22</span>
                                 </a>
                             </div>
 
-                            <div>
-                                <span class="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-0.5">Email</span>
-                                <a href="mailto:contact@ermas.fr" class="text-white hover:text-red-500 font-medium transition flex items-center space-x-2">
+                            <div class="contact-detail">
+                                <span class="contact-detail__label">Email</span>
+                                <a href="mailto:contact@ermas.fr" class="contact-detail__value">
                                     <svg class="w-4 h-4 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                                     <span>contact@ermas.fr</span>
                                 </a>
                             </div>
 
-                            <div>
-                                <span class="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-0.5">Adresse</span>
-                                <p class="text-white text-xs leading-relaxed flex items-start space-x-2">
+                            <div class="contact-detail">
+                                <span class="contact-detail__label">Adresse</span>
+                                <p class="contact-detail__value">
                                     <svg class="w-4 h-4 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                     <span><strong>ERMAS</strong><br>ZA Les Pelletiers<br>89100 Soucy</span>
                                 </p>
                             </div>
-                        </div>
                     </div>
 
-                    <div class="bg-[#070913] border border-gray-800 rounded-xl overflow-hidden h-48 md:h-auto min-h-[180px]">
+                    <div class="contact-map-area">
+                        <div id="map-consent-panel" class="contact-map-consent">
+                            <h2>Carte Google Maps</h2>
+                            <p>Pour afficher la carte, le service Google Maps doit être chargé. Google peut alors traiter des données et utiliser des traceurs conformément à sa propre politique de confidentialité.</p>
+                            <button id="show-map-button" type="button" class="contact-map-button">Afficher la carte</button>
+                        </div>
+                        <div id="contact-map-container" class="contact-map-container hidden">
                         <iframe id="contact-map" width="100%" height="100%" style="border:0;" loading="lazy" allowfullscreen data-map-src="https://maps.google.com/maps?q=ERMAS+Soucy+ZA+Les+Pelletiers&amp;t=&amp;z=17&amp;ie=UTF8&amp;iwloc=&amp;output=embed"></iframe>
+                        </div>
                     </div>
                 </div>
 
-                <div class="text-center">
-                    <button type="button" data-protected-route="accueil.html" class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition tracking-wider uppercase text-xs shadow-lg shadow-red-950/50">
+                <div class="contact-actions">
+                    <button type="button" data-protected-route="accueil.html" class="auth-button auth-button--primary">
                         Retour à l'accueil
                     </button>
                 </div>
+            </section>
             </div>
-        </div>
+        </main>
 
-        <footer class="bg-[#0b101d] border-t border-gray-800 py-4 text-center text-xs text-gray-500">
-            &copy; 2026 ERMAS - Tous droits réservés.
+        <footer class="app-footer">
+            <div class="app-container app-footer__inner">
+                <p>&copy; 2026 ERMAS - Tous droits réservés.</p>
+                <nav class="app-footer__links" aria-label="Liens juridiques">
+                    <a href="https://www.ermas.fr/mentions-legales" target="_blank" rel="noopener noreferrer">Mentions légales</a>
+                    <a href="https://www.ermas.fr/politique-confidentialite" target="_blank" rel="noopener noreferrer">Politique de confidentialité</a>
+                </nav>
+            </div>
         </footer>
     </div>
 
@@ -76,6 +92,9 @@
         const supabaseClient = getSupabaseClient();
         const contactView = document.getElementById('contact-view');
         const contactMap = document.getElementById('contact-map');
+        const mapConsentPanel = document.getElementById('map-consent-panel');
+        const contactMapContainer = document.getElementById('contact-map-container');
+        const showMapButton = document.getElementById('show-map-button');
         let pageAuthorized = false;
 
         async function initPage() {
@@ -102,7 +121,12 @@
                 });
             });
 
-            contactMap.src = contactMap.dataset.mapSrc;
+            showMapButton.addEventListener('click', () => {
+                if (!pageAuthorized) return;
+                contactMap.src = contactMap.dataset.mapSrc;
+                mapConsentPanel.classList.add('hidden');
+                contactMapContainer.classList.remove('hidden');
+            }, { once: true });
             contactView.classList.remove('hidden');
         }
 

@@ -10,10 +10,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="./css/app-ermas.css">
+    <script type="module" src="./js/logout.js"></script>
 </head>
 <body>
     <div class="app-shell catalog-page results-page">
-    <header class="app-header"><div class="app-container app-header__inner"><img class="app-logo" src="assets/brand/ermas-logo.png" alt="ERMAS"></div></header>
+<header class="app-header"><div class="app-container app-header__inner"><a class="app-logo-link" href="https://www.ermas.fr/" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le site ERMAS"><img class="app-logo" src="assets/brand/ermas-logo.png" alt=""></a><button type="button" class="app-logout-button" data-global-logout>Se déconnecter</button></div></header>
 
     <!-- CONTENU PRINCIPAL -->
     <main class="catalog-page__body"><div class="app-container"><section class="app-page-panel results-page__panel">
@@ -78,6 +79,7 @@
         import { getSupabaseClient } from './js/supabase-client.js';
         import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
         import { isNetPriceVisible, setNetPriceVisible } from './js/net-price-visibility.js';
+        import { buildWheelDimensionIndex, getVariableWayState, NARROW_WHEELS_CSV_URL, VARIABLE_WAY_STATES } from './js/wheel-dimension-index.js';
 
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1966421754&single=true&output=csv';
         const supabaseClient = getSupabaseClient();
@@ -86,6 +88,7 @@
         let userRemise = 0;
         let netPriceVisible = false;
         let pageAuthorized = false;
+        let narrowWheelDimensions = new Set();
 
         const selDiametre = document.getElementById('select-diametre');
         const selLargeur = document.getElementById('select-largeur');
@@ -125,8 +128,19 @@
             pageAuthorized = true;
 
             try {
+                const narrowWheelIndexPromise = fetch(NARROW_WHEELS_CSV_URL)
+                    .then((response) => {
+                        if (!response.ok) throw new Error('Catalogue Roues étroites indisponible');
+                        return response.text();
+                    })
+                    .then((text) => buildWheelDimensionIndex(text))
+                    .catch(() => new Set());
                 const response = await fetch(SHEET_CSV_URL);
-                const text = await response.text();
+                const [text, loadedNarrowWheelDimensions] = await Promise.all([
+                    response.text(),
+                    narrowWheelIndexPromise
+                ]);
+                narrowWheelDimensions = loadedNarrowWheelDimensions;
                 parseCSV(text);
             } catch (err) {
                 selDiametre.innerHTML = '<option value="">Erreur de chargement des données</option>';
@@ -303,7 +317,15 @@
             }
 
             // VOIE VARIABLE
-            if (match.prixVV && !isNaN(parseFloat(match.prixVV))) {
+            const hasValidVariablePrice = Boolean(match.prixVV && !isNaN(parseFloat(match.prixVV)));
+            const variableWayState = getVariableWayState({
+                hasValidVariablePrice,
+                diameter: match.diametre,
+                width: match.largeurJante,
+                narrowWheelDimensions
+            });
+
+            if (variableWayState === VARIABLE_WAY_STATES.PRICE) {
                 const baseVV = parseFloat(match.prixVV);
                 const finalVV = userRemise > 0 ? baseVV * (1 - userRemise / 100) : baseVV;
                 
@@ -332,6 +354,14 @@
                     `;
                 }
                 html += `</div>`;
+            } else if (variableWayState === VARIABLE_WAY_STATES.NARROW_WHEELS) {
+                html += `
+                    <div class="results-price-block results-catalog-fallback">
+                        <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Voie variable</span>
+                        <span class="results-catalog-fallback__message">Cette dimension est disponible dans le catalogue Roues étroites.</span>
+                        <button type="button" onclick="window.location.href = 'roues-etroites.html'" class="results-catalog-fallback__action">Voir Roues étroites</button>
+                    </div>
+                `;
             } else {
                 html += `
                     <div class="results-price-block">

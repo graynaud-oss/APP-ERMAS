@@ -10,12 +10,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="./css/app-ermas.css">
+    <script type="module" src="./js/logout.js"></script>
 </head>
 <body>
     <div id="app-view" class="hidden app-shell">
         <header class="app-header">
             <div class="app-container app-header__inner">
-                <img src="./assets/brand/ermas-logo.png" alt="ERMAS" class="app-logo" width="525" height="123">
+                <a class="app-logo-link" href="https://www.ermas.fr/" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le site ERMAS"><img src="./assets/brand/ermas-logo.png" alt="" class="app-logo" width="525" height="123"></a>
+                <button type="button" class="app-logout-button" data-global-logout>Se déconnecter</button>
             </div>
         </header>
 

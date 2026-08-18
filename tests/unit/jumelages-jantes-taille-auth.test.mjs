@@ -151,7 +151,8 @@ test('Jumelages Taille utilise le design ERMAS et le titre singulier dynamique',
         'target="_blank" rel="noopener noreferrer"'
     ]) assert.ok(source.includes(fragment), `fondation visuelle absente : ${fragment}`);
     assert.doesNotMatch(source, /Par Taille de Jantes|Recherche par taille de jantes/);
-    assert.ok(source.includes('<img class="app-logo" src="assets/brand/ermas-logo.png" alt="ERMAS">'));
+    assert.ok(source.includes('<img class="app-logo" src="assets/brand/ermas-logo.png" alt="">'));
+    assert.ok(source.includes('class="app-logo-link" href="https://www.ermas.fr/"'));
     assert.doesNotMatch(source, /app-header__logo/);
 });
 
@@ -164,4 +165,15 @@ test('Jumelages Taille partage le switch NET et masque chaque NET indépendammen
         'Prix BRUT :', 'Prix NET', 'data-net-price'
     ]) assert.ok(source.includes(fragment), `contrat NET absent : ${fragment}`);
     assert.doesNotMatch(source, /localStorage|Remise\s+\d|Réduction|Économie/);
+});
+
+test('Jumelages Taille masque réellement les NET et harmonise les options', async () => {
+    const css = await readFile(path.join(root, 'css', 'app-ermas.css'), 'utf8');
+    assert.ok(css.includes('.results-content [data-net-price][hidden]'));
+    assert.match(css, /\.results-content \[data-net-price\]\[hidden\]\s*\{[\s\S]*?display:\s*none !important;/);
+    assert.ok(source.includes('class="results-option-block flex flex-col justify-between text-xs"'));
+    assert.ok(source.includes('class="results-option-block flex justify-between items-center text-xs"'));
+    assert.ok(source.includes('element.hidden = !netPriceVisible;'));
+    assert.ok(source.includes('const baseOpt = parseFloat(opt.val);'));
+    assert.ok(source.includes('const finalOpt = userRemise > 0 ? baseOpt * (1 - userRemise / 100) : baseOpt;'));
 });
