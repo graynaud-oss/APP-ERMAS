@@ -36,12 +36,12 @@
                         <span class="text-xs text-red-400 font-semibold mt-1">80 à 320 cv</span>
                     </button>
 
-                    <button type="button" data-information-view="jumelages-tgd-view" data-gamme="TGD" class="p-4 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
+                    <button type="button" data-protected-route="jumelages-information.html?type=TGD" data-gamme="TGD" class="p-4 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
                         <span class="font-brand text-lg font-bold tracking-wider text-white group-hover:text-red-500 transition">TGD</span>
                         <span class="text-xs text-red-400 font-semibold mt-1">120 à 250 cv</span>
                     </button>
 
-                    <button type="button" data-information-view="jumelages-tgd-plus-view" data-gamme="TGD+" class="p-4 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
+                    <button type="button" data-protected-route="jumelages-information.html?type=TGD%2B" data-gamme="TGD+" class="p-4 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
                         <span class="font-brand text-lg font-bold tracking-wider text-white group-hover:text-red-500 transition">TGD+</span>
                         <span class="text-xs text-red-400 font-semibold mt-1">160 à 400 cv</span>
                     </button>
@@ -60,98 +60,13 @@
         </footer>
     </div>
 
-    <div id="jumelages-tgd-view" class="hidden h-full flex flex-col justify-between w-full">
-        <div class="flex-grow flex flex-col items-center justify-center px-4 py-8">
-            <div class="max-w-xl w-full bg-[#0b101d] border border-gray-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 class="font-brand text-xl sm:text-2xl font-bold text-white">Catalogue Jumelages - TGD</h2>
-                        <p class="text-xs text-gray-400 mt-0.5">Sélectionnez une option :</p>
-                    </div>
-                    <button type="button" data-return-to-catalogue class="text-xs text-gray-400 hover:text-white uppercase tracking-wider bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg transition shrink-0">Retour</button>
-                </div>
-
-                <div class="space-y-4 mb-6">
-                    <div class="p-4 bg-[#070913] border border-gray-800 rounded-xl text-center text-gray-400 text-sm">
-                        Contenu de la rubrique Jumelages TGD en cours de configuration.
-                    </div>
-                </div>
-
-                <div class="text-center">
-                    <button type="button" data-return-to-catalogue class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition tracking-wider uppercase text-xs shadow-lg shadow-red-950/50">
-                        Retour au catalogue
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <footer class="bg-[#0b101d] border-t border-gray-800 py-4 text-center text-xs text-gray-500">
-            &copy; 2026 ERMAS - Tous droits réservés.
-        </footer>
-    </div>
-
-    <div id="jumelages-tgd-plus-view" class="hidden h-full flex flex-col justify-between w-full">
-        <div class="flex-grow flex flex-col items-center justify-center px-4 py-8">
-            <div class="max-w-xl w-full bg-[#0b101d] border border-gray-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 class="font-brand text-xl sm:text-2xl font-bold text-white">Catalogue Jumelages - TGD+</h2>
-                        <p class="text-xs text-gray-400 mt-0.5">Sélectionnez une option :</p>
-                    </div>
-                    <button type="button" data-return-to-catalogue class="text-xs text-gray-400 hover:text-white uppercase tracking-wider bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg transition shrink-0">Retour</button>
-                </div>
-
-                <div class="space-y-4 mb-6">
-                    <div class="p-4 bg-[#070913] border border-gray-800 rounded-xl text-center text-gray-400 text-sm">
-                        Contenu de la rubrique Jumelages TGD+ en cours de configuration.
-                    </div>
-                </div>
-
-                <div class="text-center">
-                    <button type="button" data-return-to-catalogue class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition tracking-wider uppercase text-xs shadow-lg shadow-red-950/50">
-                        Retour au catalogue
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <footer class="bg-[#0b101d] border-t border-gray-800 py-4 text-center text-xs text-gray-500">
-            &copy; 2026 ERMAS - Tous droits réservés.
-        </footer>
-    </div>
-
     <script type="module">
         import { getSupabaseClient } from './js/supabase-client.js';
         import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
 
         const supabaseClient = getSupabaseClient();
         const jumelagesView = document.getElementById('jumelages-view');
-        const tgdView = document.getElementById('jumelages-tgd-view');
-        const tgdPlusView = document.getElementById('jumelages-tgd-plus-view');
         let pageAuthorized = false;
-
-        function showCatalogue() {
-            if (!pageAuthorized) return;
-            tgdView.classList.add('hidden');
-            tgdPlusView.classList.add('hidden');
-            jumelagesView.classList.remove('hidden');
-        }
-
-        function showInformationView(viewId) {
-            if (!pageAuthorized) return;
-
-            const targetView = viewId === 'jumelages-tgd-view'
-                ? tgdView
-                : viewId === 'jumelages-tgd-plus-view'
-                    ? tgdPlusView
-                    : null;
-
-            if (!targetView) return;
-            jumelagesView.classList.add('hidden');
-            tgdView.classList.add('hidden');
-            tgdPlusView.classList.add('hidden');
-            targetView.classList.remove('hidden');
-        }
 
         async function initPage() {
             let context;
@@ -175,16 +90,6 @@
                     if (!pageAuthorized) return;
                     window.location.href = button.dataset.protectedRoute;
                 });
-            });
-
-            document.querySelectorAll('[data-information-view]').forEach((button) => {
-                button.addEventListener('click', () => {
-                    showInformationView(button.dataset.informationView);
-                });
-            });
-
-            document.querySelectorAll('[data-return-to-catalogue]').forEach((button) => {
-                button.addEventListener('click', showCatalogue);
             });
 
             jumelagesView.classList.remove('hidden');

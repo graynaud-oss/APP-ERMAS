@@ -23,8 +23,6 @@ test('le garde précède l’activation et l’affichage du catalogue', () => {
     const displayPosition = source.lastIndexOf("jumelagesView.classList.remove('hidden')");
 
     assert.ok(source.includes('id="jumelages-view" class="hidden'));
-    assert.ok(source.includes('id="jumelages-tgd-view" class="hidden'));
-    assert.ok(source.includes('id="jumelages-tgd-plus-view" class="hidden'));
     assert.ok(guardPosition >= 0);
     assert.ok(guardPosition < authorizationPosition);
     assert.ok(authorizationPosition < listenerPosition);
@@ -44,20 +42,17 @@ test('les parcours EVO et 360 sont exacts et fermés', () => {
     assert.doesNotMatch(source, /URLSearchParams|window\.location\.search/);
 });
 
-test('TGD et TGD+ conservent leurs valeurs et contenus informatifs', () => {
+test('TGD et TGD+ conservent leurs valeurs et utilisent les routes encodées', () => {
     assert.ok(source.includes('data-gamme="TGD"'));
     assert.ok(source.includes('data-gamme="TGD+"'));
-    assert.ok(source.includes('Catalogue Jumelages - TGD'));
-    assert.ok(source.includes('Catalogue Jumelages - TGD+'));
-    assert.ok(source.includes('Contenu de la rubrique Jumelages TGD en cours de configuration.'));
-    assert.ok(source.includes('Contenu de la rubrique Jumelages TGD+ en cours de configuration.'));
-    assert.ok(source.includes("viewId === 'jumelages-tgd-view'"));
-    assert.ok(source.includes("viewId === 'jumelages-tgd-plus-view'"));
+    assert.ok(source.includes('data-protected-route="jumelages-information.html?type=TGD"'));
+    assert.ok(source.includes('data-protected-route="jumelages-information.html?type=TGD%2B"'));
+    assert.doesNotMatch(source, /id="jumelages-tgd-view"|id="jumelages-tgd-plus-view"/);
+    assert.doesNotMatch(source, /data-information-view|data-return-to-catalogue|showInformationView|showCatalogue/);
 });
 
-test('les retours sont explicites et aucun history.back n’est utilisé', () => {
+test('le retour vers accueil reste explicite et aucun history.back n’est utilisé', () => {
     assert.ok(source.includes('data-protected-route="accueil.html"'));
-    assert.ok(source.match(/data-return-to-catalogue/g)?.length >= 4);
     assert.doesNotMatch(source, /history\.back\s*\(/);
 });
 
