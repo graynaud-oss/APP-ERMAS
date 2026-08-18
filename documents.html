@@ -101,7 +101,10 @@
                 });
 
             if (error) {
-                container.innerHTML = `<div class="p-4 bg-red-950/40 border border-red-900/40 text-red-400 text-xs rounded-xl text-center">Erreur lors du chargement : ${error.message}</div>`;
+                const errorPanel = document.createElement('div');
+                errorPanel.className = 'p-4 bg-red-950/40 border border-red-900/40 text-red-400 text-xs rounded-xl text-center';
+                errorPanel.textContent = `Erreur lors du chargement : ${error.message}`;
+                container.replaceChildren(errorPanel);
                 return;
             }
 
@@ -112,7 +115,7 @@
                 return;
             }
 
-            let html = '';
+            const documentItems = document.createDocumentFragment();
             for (const file of files) {
                 const { data: publicUrlData } = supabaseClient.storage
                     .from(DOCUMENTS_BUCKET)
@@ -121,31 +124,47 @@
                 const fileUrl = publicUrlData.publicUrl;
                 const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
 
-                html += `
-                    <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl flex items-center justify-between hover:border-gray-700 transition group">
-                        <div class="flex items-center space-x-3.5 overflow-hidden">
-                            <div class="w-10 h-10 rounded-lg bg-red-950/30 border border-red-900/40 flex items-center justify-center text-red-500 shrink-0">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                            </div>
-                            <div class="truncate">
-                                <h4 class="text-white text-sm font-medium uppercase tracking-wide truncate group-hover:text-red-400 transition">${cleanName}</h4>
-                                <span class="text-[10px] text-gray-500 uppercase tracking-widest">Format PDF</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2 shrink-0 ml-4">
-                            <a href="${fileUrl}" target="_blank" class="px-3 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 text-xs font-semibold rounded-lg transition">
-                                Voir
-                            </a>
-                            <a href="${fileUrl}" download class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition shadow-lg shadow-red-950/50 flex items-center space-x-1.5">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                <span>Télécharger</span>
-                            </a>
-                        </div>
-                    </div>
-                `;
+                const item = document.createElement('div');
+                item.className = 'bg-[#070913] border border-gray-800 p-4 rounded-xl flex items-center justify-between hover:border-gray-700 transition group';
+
+                const identity = document.createElement('div');
+                identity.className = 'flex items-center space-x-3.5 overflow-hidden';
+                const icon = document.createElement('div');
+                icon.className = 'w-10 h-10 rounded-lg bg-red-950/30 border border-red-900/40 flex items-center justify-center text-red-500 shrink-0';
+                icon.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>';
+
+                const labels = document.createElement('div');
+                labels.className = 'truncate';
+                const title = document.createElement('h4');
+                title.className = 'text-white text-sm font-medium uppercase tracking-wide truncate group-hover:text-red-400 transition';
+                title.textContent = cleanName;
+                const format = document.createElement('span');
+                format.className = 'text-[10px] text-gray-500 uppercase tracking-widest';
+                format.textContent = 'Format PDF';
+                labels.append(title, format);
+                identity.append(icon, labels);
+
+                const actions = document.createElement('div');
+                actions.className = 'flex items-center space-x-2 shrink-0 ml-4';
+                const viewLink = document.createElement('a');
+                viewLink.href = fileUrl;
+                viewLink.target = '_blank';
+                viewLink.rel = 'noopener noreferrer';
+                viewLink.className = 'px-3 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 text-xs font-semibold rounded-lg transition';
+                viewLink.textContent = 'Voir';
+
+                const downloadLink = document.createElement('a');
+                downloadLink.href = fileUrl;
+                downloadLink.download = '';
+                downloadLink.className = 'px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition shadow-lg shadow-red-950/50 flex items-center space-x-1.5';
+                downloadLink.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg><span>Télécharger</span>';
+                actions.append(viewLink, downloadLink);
+
+                item.append(identity, actions);
+                documentItems.append(item);
             }
 
-            container.innerHTML = html;
+            container.replaceChildren(documentItems);
         }
 
         initPage().catch(() => {

@@ -77,8 +77,10 @@ test('tous les retours utilisent la destination explicite du menu Jumelages', ()
 
 test('le comportement métier autorisé reste présent', () => {
     for (const fragment of [
-        "urlParams.get('type') || 'EVO'",
-        "gammeType === 'TGD' || gammeType === 'TGD+'",
+        "new Set(['EVO', '360'])",
+        "const requestedType = urlParams.get('type')",
+        'if (!allowedTypes.has(requestedType))',
+        'const gammeType = requestedType',
         "redirigerVers('taille')",
         "redirigerVers('pneu')",
         'jumelages-jantes-taille.html?type=${gammeType}',
@@ -89,6 +91,19 @@ test('le comportement métier autorisé reste présent', () => {
         assert.ok(source.includes(fragment), `comportement historique absent : ${fragment}`);
     }
     assert.doesNotMatch(source, /Par taille de jantes|Par taille de pneus/);
+});
+
+test('le paramètre type utilise une allowlist fermée sans fallback EVO implicite', () => {
+    const isAllowed = (value) => new Set(['EVO', '360']).has(value);
+
+    assert.equal(isAllowed('EVO'), true);
+    assert.equal(isAllowed('360'), true);
+    for (const value of [null, '', 'ABC', 'TGD', '360/../foo']) {
+        assert.equal(isAllowed(value), false);
+    }
+
+    assert.doesNotMatch(source, /urlParams\.get\('type'\) \|\| 'EVO'/);
+    assert.match(source, /if \(!allowedTypes\.has\(requestedType\)\) \{\s*window\.location\.href = 'jumelages\.html';\s*return;/);
 });
 
 test('la page de choix utilise les fondations visuelles ERMAS locales', () => {

@@ -80,6 +80,7 @@
         import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
         import { isNetPriceVisible, setNetPriceVisible } from './js/net-price-visibility.js';
         import { buildWheelDimensionIndex, getVariableWayState, NARROW_WHEELS_CSV_URL, VARIABLE_WAY_STATES } from './js/wheel-dimension-index.js';
+        import { escapeHtml } from './js/safe-dom.js';
 
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1966421754&single=true&output=csv';
         const supabaseClient = getSupabaseClient();
@@ -136,6 +137,7 @@
                     .then((text) => buildWheelDimensionIndex(text))
                     .catch(() => new Set());
                 const response = await fetch(SHEET_CSV_URL);
+                if (!response.ok) throw new Error('Catalogue Jantes indisponible');
                 const [text, loadedNarrowWheelDimensions] = await Promise.all([
                     response.text(),
                     narrowWheelIndexPromise
@@ -201,7 +203,7 @@
 
             selDiametre.innerHTML = '<option value="">-- Sélectionnez un diamètre --</option>';
             diametres.forEach(d => {
-                selDiametre.innerHTML += `<option value="${d}">${d}</option>`;
+                selDiametre.innerHTML += `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`;
             });
             selDiametre.disabled = false;
         }
@@ -223,7 +225,7 @@
             largeurs.sort((a, b) => parseFloat(a) - parseFloat(b));
 
             largeurs.forEach(l => {
-                selLargeur.innerHTML += `<option value="${l}">${l}</option>`;
+                selLargeur.innerHTML += `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`;
             });
             selLargeur.disabled = false;
         });
@@ -244,7 +246,7 @@
 
             profils.forEach(p => {
                 const label = p === "" ? "(Sans profil / Standard)" : p;
-                selProfil.innerHTML += `<option value="${p}">${label}</option>`;
+                selProfil.innerHTML += `<option value="${escapeHtml(p)}">${escapeHtml(label)}</option>`;
             });
             selProfil.disabled = false;
         });
@@ -271,7 +273,7 @@
                 <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl space-y-3">
                     <div>
                         <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Nom du produit</span>
-                        <div class="text-white text-base font-bold tracking-wide">${match.nom || 'N/A'}</div>
+                        <div class="text-white text-base font-bold tracking-wide">${escapeHtml(match.nom || 'N/A')}</div>
                     </div>
                     
                     <div class="grid grid-cols-2 gap-3 pt-2 border-t border-gray-800/80">
@@ -380,7 +382,7 @@
             if (hasValidI && hasValidJ) {
                 html += `
                     <div class="pt-2">
-                        <button onclick='ouvrirCalculateur(${JSON.stringify(match)})' class="results-primary-action">
+                        <button onclick='ouvrirCalculateur(${escapeHtml(JSON.stringify(match))})' class="results-primary-action">
                             Estimer la voie de travail
                         </button>
                     </div>

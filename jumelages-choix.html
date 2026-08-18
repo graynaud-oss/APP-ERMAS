@@ -69,7 +69,13 @@
 
             // Récupération du type uniquement après autorisation complète.
             const urlParams = new URLSearchParams(window.location.search);
-            const gammeType = urlParams.get('type') || 'EVO';
+            const allowedTypes = new Set(['EVO', '360']);
+            const requestedType = urlParams.get('type');
+            if (!allowedTypes.has(requestedType)) {
+                window.location.href = 'jumelages.html';
+                return;
+            }
+            const gammeType = requestedType;
 
             document.getElementById('page-title').textContent = `Catalogue Jumelages - Gamme ${gammeType}`;
 

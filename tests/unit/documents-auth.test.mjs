@@ -83,11 +83,15 @@ test('la logique Storage conserve tous les marqueurs fonctionnels de référence
         'Aucun document disponible pour le moment.',
         '.getPublicUrl(file.name)',
         'Erreur lors du chargement : ${error.message}',
+        'errorPanel.textContent',
+        'title.textContent = cleanName',
+        'viewLink.href = fileUrl',
+        "viewLink.target = '_blank'",
+        "viewLink.rel = 'noopener noreferrer'",
         'Format PDF',
-        'target="_blank"',
-        'download',
+        "downloadLink.download = ''",
         'Télécharger',
-        'container.innerHTML = html'
+        'container.replaceChildren(documentItems)'
     ]) {
         assert.ok(extracted.includes(marker), `marqueur extrait absent : ${marker}`);
     }

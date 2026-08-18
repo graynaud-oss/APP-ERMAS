@@ -91,6 +91,7 @@
         import { getSupabaseClient } from './js/supabase-client.js';
         import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
         import { isNetPriceVisible, setNetPriceVisible } from './js/net-price-visibility.js';
+        import { escapeHtml } from './js/safe-dom.js';
 
         const URLS_CSV = {
             'EVO': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1732806915&single=true&output=csv',
@@ -164,6 +165,7 @@
 
             try {
                 const response = await fetch(URLS_CSV[gammeType]);
+                if (!response.ok) throw new Error('Catalogue Jumelages indisponible');
                 const text = await response.text();
                 parseCSV(text);
                 restaurerSelections();
@@ -205,7 +207,7 @@
 
             selDiametre.innerHTML = '<option value="">-- Sélectionnez un diamètre --</option>';
             diametres.forEach(d => {
-                selDiametre.innerHTML += `<option value="${d}">${d}</option>`;
+                selDiametre.innerHTML += `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`;
             });
             selDiametre.disabled = false;
         }
@@ -255,7 +257,7 @@
             largeurs.sort((a, b) => parseFloat(a) - parseFloat(b));
 
             largeurs.forEach(l => {
-                selLargeur.innerHTML += `<option value="${l}">${l}</option>`;
+                selLargeur.innerHTML += `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`;
             });
             selLargeur.disabled = false;
         });
@@ -277,7 +279,7 @@
             tendeursList.sort((a, b) => parseInt(a) - parseInt(b));
 
             tendeursList.forEach(t => {
-                selTendeurs.innerHTML += `<option value="${t}">${t} tendeurs</option>`;
+                selTendeurs.innerHTML += `<option value="${escapeHtml(t)}">${escapeHtml(t)} tendeurs</option>`;
             });
             selTendeurs.disabled = false;
         });
@@ -323,7 +325,7 @@
                     <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl space-y-4 mb-3">
                         <div>
                             <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Nom du produit</span>
-                            <div class="text-white text-base font-bold tracking-wide mt-0.5">${match.nom || 'N/A'}</div>
+                            <div class="text-white text-base font-bold tracking-wide mt-0.5">${escapeHtml(match.nom || 'N/A')}</div>
                         </div>
                 `;
 
@@ -428,7 +430,7 @@
                 // BOUTON ACCÈS CALCULATEUR HORS-TOUT (pointant vers calcul-hors-tout.html)
                 html += `
                     <div class="pt-2 border-t border-gray-800/80">
-                        <button onclick='ouvrirCalculateurHorsTout(${JSON.stringify(match)})' class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-xs transition tracking-wide uppercase shadow-md shadow-red-950/50">
+                        <button onclick='ouvrirCalculateurHorsTout(${escapeHtml(JSON.stringify(match))})' class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-xs transition tracking-wide uppercase shadow-md shadow-red-950/50">
                             Calculer la largeur hors tout
                         </button>
                     </div>

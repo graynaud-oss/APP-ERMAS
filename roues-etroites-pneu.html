@@ -65,6 +65,7 @@
         import { getSupabaseClient } from './js/supabase-client.js';
         import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
         import { isNetPriceVisible, setNetPriceVisible } from './js/net-price-visibility.js';
+        import { escapeHtml } from './js/safe-dom.js';
 
         const PNEU_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=139891043&single=true&output=csv';
         const TARIFS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=21297594&single=true&output=csv';
@@ -123,6 +124,10 @@
                     fetch(PNEU_CSV_URL),
                     fetch(TARIFS_CSV_URL)
                 ]);
+
+                if (!pneuRes.ok || !tarifsRes.ok) {
+                    throw new Error('Catalogues Roues étroites indisponibles');
+                }
 
                 const pneuText = await pneuRes.text();
                 const tarifsText = await tarifsRes.text();
@@ -237,7 +242,7 @@
 
             selLargeurPneu.innerHTML = '<option value="">-- Sélectionnez une largeur de pneu --</option>';
             largeurs.forEach(l => {
-                selLargeurPneu.innerHTML += `<option value="${l}">${l}</option>`;
+                selLargeurPneu.innerHTML += `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`;
             });
             selLargeurPneu.disabled = false;
         }
@@ -271,14 +276,14 @@
                 const diametres = [...new Set(filtered.map(item => item.diametrePneu))].filter(Boolean);
                 diametres.sort((a, b) => parseFloat(a) - parseFloat(b));
                 diametres.forEach(d => {
-                    selDiametrePneu.innerHTML += `<option value="${d}">${d}</option>`;
+                    selDiametrePneu.innerHTML += `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`;
                 });
                 selDiametrePneu.disabled = false;
                 return;
             }
 
             rapports.forEach(r => {
-                selRapport.innerHTML += `<option value="${r}">${r}</option>`;
+                selRapport.innerHTML += `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`;
             });
             selRapport.disabled = false;
         });
@@ -299,7 +304,7 @@
             diametres.sort((a, b) => parseFloat(a) - parseFloat(b));
 
             diametres.forEach(d => {
-                selDiametrePneu.innerHTML += `<option value="${d}">${d}</option>`;
+                selDiametrePneu.innerHTML += `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`;
             });
             selDiametrePneu.disabled = false;
         });
@@ -349,8 +354,8 @@
                 html += `
                     <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl space-y-3 mb-3">
                         <div>
-                            <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Nom du produit (Jante ${match.largeurJante})</span>
-                            <div class="text-white text-base font-bold tracking-wide">${match.nom || 'N/A'}</div>
+                            <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Nom du produit (Jante ${escapeHtml(match.largeurJante)})</span>
+                            <div class="text-white text-base font-bold tracking-wide">${escapeHtml(match.nom || 'N/A')}</div>
                         </div>
                         
                         <div class="pt-2 border-t border-gray-800/80">
@@ -391,7 +396,7 @@
                 if (hasValidI && hasValidJ) {
                     html += `
                         <div class="pt-2">
-                            <button onclick='ouvrirCalculateur(${JSON.stringify(match)})' class="results-primary-action">
+                            <button onclick='ouvrirCalculateur(${escapeHtml(JSON.stringify(match))})' class="results-primary-action">
                                 Estimer la voie de travail
                             </button>
                         </div>

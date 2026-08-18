@@ -84,6 +84,7 @@
     <script type="module">
         import { getSupabaseClient } from './js/supabase-client.js';
         import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
+        import { escapeHtml } from './js/safe-dom.js';
 
         // URLs CSV adaptées selon la gamme (EVO ou 360)
         const URLS_JANTES_CSV = {
@@ -153,6 +154,7 @@
             try {
                 const csvUrl = URLS_JANTES_CSV[gammeType] || URLS_JANTES_CSV['EVO'];
                 const res = await fetch(csvUrl);
+                if (!res.ok) throw new Error('Catalogue Jumelages indisponible');
                 const text = await res.text();
                 parseJantesCSV(text);
             } catch (err) {
@@ -188,7 +190,7 @@
 
             selectJanteEngin.innerHTML = '<option value="">-- Sélectionnez une largeur de jante engin --</option>';
             uniqueTailles.forEach(taille => {
-                selectJanteEngin.innerHTML += `<option value="${taille}">${taille}</option>`;
+                selectJanteEngin.innerHTML += `<option value="${escapeHtml(taille)}">${escapeHtml(taille)}</option>`;
             });
         }
 
