@@ -89,3 +89,47 @@ test('le parser, les prix VF/VV et la navigation historique sont inchangés', ()
         assert.ok(source.includes(fragment), `fragment métier absent : ${fragment}`);
     }
 });
+
+test('le module commun pilote une préférence de session indépendante', () => {
+    assert.ok(source.includes("from './js/net-price-visibility.js'"));
+    assert.ok(source.includes('netPriceVisible = isNetPriceVisible();'));
+    assert.ok(source.includes('netPriceVisible = setNetPriceVisible(netPriceToggle.checked);'));
+    assert.doesNotMatch(source, /localStorage/);
+    assert.ok(source.includes('ermas_calc_product'));
+});
+
+test('un seul basculeur accessible contrôle tous les prix NET', () => {
+    assert.equal(source.match(/id="net-price-toggle"/g)?.length, 1);
+    assert.ok(source.includes('Prix NET'));
+    assert.ok(source.includes('aria-label="Afficher ou masquer les prix NET"'));
+    assert.ok(source.includes('type="checkbox" disabled'));
+    assert.ok(source.includes("resultsContent.querySelectorAll('[data-net-price]')"));
+    assert.ok(source.includes('element.hidden = !netPriceVisible'));
+    assert.ok(source.includes("netPriceControl.classList.toggle('hidden', !hasNetPrice)"));
+});
+
+test('les nouveaux résultats respectent la préférence sans flash du NET', () => {
+    assert.equal(source.match(/data-net-price \$\{netPriceVisible/g)?.length, 2);
+    assert.equal(source.match(/\$\{netPriceVisible \? '' : 'hidden'\}/g)?.length, 2);
+
+    const renderPosition = source.indexOf('resultsContent.innerHTML = html;');
+    const visibilityPosition = source.indexOf('updateNetPriceVisibility();', renderPosition);
+    const displayPosition = source.indexOf("resultsContainer.classList.remove('hidden');", renderPosition);
+
+    assert.ok(renderPosition >= 0);
+    assert.ok(renderPosition < visibilityPosition);
+    assert.ok(visibilityPosition < displayPosition);
+});
+
+test('le rendu emploie exclusivement Prix BRUT et Prix NET sans taux visible', () => {
+    assert.ok(source.match(/Prix BRUT/g)?.length >= 4);
+    assert.ok(source.match(/Prix NET/g)?.length >= 2);
+    assert.doesNotMatch(source, /Remise\s*:|Remise appliquée|Réduction|Économie|Prix NET\s*\([^)]*%/i);
+});
+
+test('le basculeur ne modifie ni les formules ni les sources tarifaires', () => {
+    assert.ok(source.includes('const finalVF = userRemise > 0 ? baseVF * (1 - userRemise / 100) : baseVF;'));
+    assert.ok(source.includes('const finalVV = userRemise > 0 ? baseVV * (1 - userRemise / 100) : baseVV;'));
+    assert.ok(source.includes('gid=1966421754&single=true&output=csv'));
+    assert.doesNotMatch(source, /history\.back|window\.history\.back|document\.referrer/);
+});

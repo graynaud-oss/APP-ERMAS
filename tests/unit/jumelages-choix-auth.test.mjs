@@ -89,3 +89,12 @@ test('le comportement métier autorisé reste présent', () => {
         assert.ok(source.includes(fragment), `comportement historique absent : ${fragment}`);
     }
 });
+
+test('la page de choix utilise les fondations visuelles ERMAS locales', () => {
+    assert.ok(source.includes('href="css/app-ermas.css"'));
+    assert.ok(source.includes('src="assets/brand/ermas-logo.png"'));
+    assert.ok(source.includes('assets/brand/favicon.ico'));
+    assert.ok(source.includes('class="app-page-panel"'));
+    assert.ok(source.includes('class="app-footer"'));
+    assert.doesNotMatch(source, /<img[^>]+(?:photo|unsplash|pexels)/i);
+});

@@ -8,6 +8,7 @@
     <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/15om2TV_YaY4mP-dIn80LSdyeJJjG0PMF">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="./css/app-ermas.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #070913; color: #f3f4f6; }
@@ -53,7 +54,17 @@
 
             <!-- RÉSULTATS (NOM & PRIX) -->
             <div id="results-container" class="hidden space-y-3 pt-4 border-t border-gray-800">
-                <h3 class="text-xs uppercase tracking-wider text-red-500 font-semibold mb-2">Produit correspondant :</h3>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+                    <h3 class="text-xs uppercase tracking-wider text-red-500 font-semibold">Produit correspondant :</h3>
+                    <div id="net-price-control" class="net-price-control hidden">
+                        <label class="net-price-toggle" for="net-price-toggle" aria-label="Afficher ou masquer les prix NET">
+                            <span>Prix NET</span>
+                            <input id="net-price-toggle" class="net-price-toggle__input" type="checkbox" disabled>
+                            <span class="net-price-toggle__track" aria-hidden="true"></span>
+                            <span id="net-price-toggle-state" class="net-price-toggle__state" aria-live="polite">OFF</span>
+                        </label>
+                    </div>
+                </div>
                 <div id="results-content" class="space-y-3">
                     <!-- Injecté dynamiquement -->
                 </div>
@@ -68,12 +79,14 @@
     <script type="module">
         import { getSupabaseClient } from './js/supabase-client.js';
         import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
+        import { isNetPriceVisible, setNetPriceVisible } from './js/net-price-visibility.js';
 
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1966421754&single=true&output=csv';
         const supabaseClient = getSupabaseClient();
 
         let csvData = [];
         let userRemise = 0;
+        let netPriceVisible = false;
         let pageAuthorized = false;
 
         const selDiametre = document.getElementById('select-diametre');
@@ -81,6 +94,9 @@
         const selProfil = document.getElementById('select-profil');
         const resultsContainer = document.getElementById('results-container');
         const resultsContent = document.getElementById('results-content');
+        const netPriceControl = document.getElementById('net-price-control');
+        const netPriceToggle = document.getElementById('net-price-toggle');
+        const netPriceToggleState = document.getElementById('net-price-toggle-state');
 
         async function initPage() {
             let context;
@@ -99,6 +115,15 @@
             if (context.profile && context.profile.remise) {
                 userRemise = parseFloat(context.profile.remise) || 0;
             }
+            netPriceVisible = isNetPriceVisible();
+            netPriceToggle.checked = netPriceVisible;
+            netPriceToggle.disabled = false;
+            updateNetPriceToggleState();
+            netPriceToggle.addEventListener('change', () => {
+                if (!pageAuthorized) return;
+                netPriceVisible = setNetPriceVisible(netPriceToggle.checked);
+                updateNetPriceVisibility();
+            });
             pageAuthorized = true;
 
             try {
@@ -141,6 +166,21 @@
                 }
             }
             populateDiametres();
+        }
+
+        function updateNetPriceToggleState() {
+            netPriceToggleState.textContent = netPriceVisible ? 'ON' : 'OFF';
+        }
+
+        function updateNetPriceVisibility() {
+            resultsContent.querySelectorAll('[data-net-price]').forEach((element) => {
+                element.hidden = !netPriceVisible;
+            });
+
+            const hasNetPrice = userRemise > 0 && resultsContent.querySelector('[data-net-price]');
+            netPriceControl.classList.toggle('hidden', !hasNetPrice);
+            netPriceToggle.checked = netPriceVisible;
+            updateNetPriceToggleState();
         }
 
         function populateDiametres() {
@@ -238,16 +278,16 @@
                 
                 if (userRemise > 0) {
                     html += `
-                            <div class="text-[10px] text-gray-400 mt-1 pb-2 border-b border-gray-800/60">Prix catalogue : <span class="text-white font-medium">${baseVF.toFixed(2)} €</span></div>
-                            <div class="text-[10px] uppercase tracking-wider text-red-400 font-semibold mt-2">Prix net</div>
+                            <div class="text-[10px] text-gray-400 mt-1">Prix BRUT : <span class="text-white font-medium">${baseVF.toFixed(2)} €</span></div>
                         </div>
-                        <div>
+                        <div data-net-price ${netPriceVisible ? '' : 'hidden'} class="mt-2 pt-2 border-t border-gray-800/60">
+                            <div class="text-[10px] uppercase tracking-wider text-red-400 font-semibold">Prix NET</div>
                             <div class="text-white font-bold text-sm">${finalVF.toFixed(2)} €</div>
                         </div>
                     `;
                 } else {
                     html += `
-                            <div class="text-[10px] uppercase tracking-wider text-gray-500 mt-1">Prix catalogue</div>
+                            <div class="text-[10px] uppercase tracking-wider text-gray-500 mt-1">Prix BRUT</div>
                         </div>
                         <div class="mt-2 pt-2 border-t border-gray-800/60">
                             <div class="text-white font-bold text-sm">${finalVF.toFixed(2)} €</div>
@@ -277,16 +317,16 @@
 
                 if (userRemise > 0) {
                     html += `
-                            <div class="text-[10px] text-gray-400 mt-1 pb-2 border-b border-gray-800/60">Prix catalogue : <span class="text-white font-medium">${baseVV.toFixed(2)} €</span></div>
-                            <div class="text-[10px] uppercase tracking-wider text-red-400 font-semibold mt-2">Prix net</div>
+                            <div class="text-[10px] text-gray-400 mt-1">Prix BRUT : <span class="text-white font-medium">${baseVV.toFixed(2)} €</span></div>
                         </div>
-                        <div>
+                        <div data-net-price ${netPriceVisible ? '' : 'hidden'} class="mt-2 pt-2 border-t border-gray-800/60">
+                            <div class="text-[10px] uppercase tracking-wider text-red-400 font-semibold">Prix NET</div>
                             <div class="text-white font-bold text-sm">${finalVV.toFixed(2)} €</div>
                         </div>
                     `;
                 } else {
                     html += `
-                            <div class="text-[10px] uppercase tracking-wider text-gray-500 mt-1">Prix catalogue</div>
+                            <div class="text-[10px] uppercase tracking-wider text-gray-500 mt-1">Prix BRUT</div>
                         </div>
                         <div class="mt-2 pt-2 border-t border-gray-800/60">
                             <div class="text-white font-bold text-sm">${finalVV.toFixed(2)} €</div>
@@ -321,6 +361,7 @@
 
             html += `</div>`;
             resultsContent.innerHTML = html;
+            updateNetPriceVisibility();
             resultsContainer.classList.remove('hidden');
         });
 

@@ -7,6 +7,17 @@ import test from 'node:test';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..', '..');
 const source = await readFile(path.join(root, 'accueil.html'), 'utf8');
+const redesignedPages = [
+    'accueil.html',
+    'jantes.html',
+    'roues-etroites.html',
+    'jumelages.html',
+    'jumelages-choix.html',
+    'jumelages-information.html'
+];
+const redesignedSources = await Promise.all(
+    redesignedPages.map(async (file) => [file, await readFile(path.join(root, file), 'utf8')])
+);
 
 test('accueil utilise le client Supabase partagé et le garde complet', () => {
     assert.ok(source.includes("from './js/supabase-client.js'"));
@@ -88,4 +99,15 @@ test('accueil ne contient aucune logique de profil, remise ou enrôlement', () =
     assert.doesNotMatch(source, /\.rpc\s*\(|initializeAuthorizedDeviceEnrollment|initialize_own_device_token/);
     assert.doesNotMatch(source, /(?:remise|blocage|device_token|device_enrollment_allowed)\s*:/);
     assert.doesNotMatch(source, /localStorage|sessionStorage|crypto\.getRandomValues|Math\.random/);
+});
+
+test('tous les footers refondus exposent les deux liens juridiques officiels sécurisés', () => {
+    const legalLink = '<a href="https://www.ermas.fr/mentions-legales" target="_blank" rel="noopener noreferrer">Mentions légales</a>';
+    const privacyLink = '<a href="https://www.ermas.fr/politique-confidentialite" target="_blank" rel="noopener noreferrer">Politique de confidentialité</a>';
+
+    for (const [file, pageSource] of redesignedSources) {
+        assert.ok(pageSource.includes(legalLink), `lien Mentions légales incorrect dans ${file}`);
+        assert.ok(pageSource.includes(privacyLink), `lien Politique de confidentialité incorrect dans ${file}`);
+        assert.equal(pageSource.match(/class="app-footer__links"/g)?.length, 1, `footer juridique dupliqué dans ${file}`);
+    }
 });

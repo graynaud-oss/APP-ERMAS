@@ -84,3 +84,12 @@ test('EVO et 360 restent inchangés et les anciennes sous-vues ont disparu', () 
     assert.doesNotMatch(menuSource, /id="jumelages-tgd-view"|id="jumelages-tgd-plus-view"/);
     assert.doesNotMatch(menuSource, /showInformationView|showCatalogue|data-information-view|data-return-to-catalogue/);
 });
+
+test('la page information utilise les fondations visuelles ERMAS locales', () => {
+    assert.ok(source.includes('href="css/app-ermas.css"'));
+    assert.ok(source.includes('src="assets/brand/ermas-logo.png"'));
+    assert.ok(source.includes('assets/brand/favicon.ico'));
+    assert.ok(source.includes('class="app-information-panel"'));
+    assert.ok(source.includes('class="app-footer"'));
+    assert.doesNotMatch(source, /<img[^>]+(?:photo|unsplash|pexels)/i);
+});
