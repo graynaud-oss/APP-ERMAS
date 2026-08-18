@@ -56,6 +56,23 @@ test('filtres, résultats et calculateur sont verrouillés avant autorisation', 
     assert.ok(source.includes('window.ouvrirCalculHorsTout = ouvrirCalculHorsTout;'));
 });
 
+test('le retour conserve uniquement EVO ou 360 et utilise un fallback sûr', () => {
+    const destinationFor = (type) => type === 'EVO' || type === '360'
+        ? `jumelages-choix.html?type=${type}`
+        : 'jumelages.html';
+
+    assert.equal(destinationFor('EVO'), 'jumelages-choix.html?type=EVO');
+    assert.equal(destinationFor('360'), 'jumelages-choix.html?type=360');
+    assert.equal(destinationFor('INCONNU'), 'jumelages.html');
+    assert.equal(destinationFor(null), 'jumelages.html');
+    assert.ok(source.includes("let backDestination = 'jumelages.html';"));
+    assert.ok(source.includes("requestedType === 'EVO' || requestedType === '360'"));
+    assert.ok(source.includes('`jumelages-choix.html?type=${requestedType}`'));
+    assert.ok(source.includes("window.location.href = backDestination;"));
+    assert.doesNotMatch(source, /(?:window\.)?history\.back\s*\(/);
+    assert.doesNotMatch(source, /document\.referrer/);
+});
+
 test('les quatre sources CSV, gammes et chargement parallèle restent présents', () => {
     const urls = source.match(/https:\/\/docs\.google\.com\/spreadsheets\/[^']+output=csv/g) || [];
     assert.equal(urls.length, 4);

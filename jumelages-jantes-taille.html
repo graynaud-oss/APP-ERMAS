@@ -24,7 +24,7 @@
                     <h2 id="page-title" class="font-brand text-xl sm:text-2xl font-bold text-white">Jumelages - Recherche par Jante</h2>
                     <p class="text-xs text-gray-400 mt-0.5">Sélectionnez les dimensions étape par étape</p>
                 </div>
-                <button onclick="history.back()" class="text-xs text-gray-400 hover:text-white uppercase tracking-wider bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg transition shrink-0">Retour</button>
+                <button onclick="retourJumelages()" class="text-xs text-gray-400 hover:text-white uppercase tracking-wider bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg transition shrink-0">Retour</button>
             </div>
 
             <!-- ÉTAPE 1 : DIAMÈTRE (Col B) -->
@@ -79,7 +79,12 @@
         let csvData = [];
         let userRemise = 0;
         let gammeType = null;
+        let backDestination = 'jumelages.html';
         let pageAuthorized = false;
+
+        window.retourJumelages = function() {
+            window.location.href = backDestination;
+        };
 
         const selDiametre = document.getElementById('select-diametre');
         const selLargeur = document.getElementById('select-largeur');
@@ -106,7 +111,11 @@
             }
 
             const urlParams = new URLSearchParams(window.location.search);
+            const requestedType = urlParams.get('type');
             gammeType = urlParams.get('type') || 'EVO';
+            backDestination = requestedType === 'EVO' || requestedType === '360'
+                ? `jumelages-choix.html?type=${requestedType}`
+                : 'jumelages.html';
             document.getElementById('page-title').textContent = `Jumelages (Gamme ${gammeType}) - Par Taille de Jantes`;
             pageAuthorized = true;
 

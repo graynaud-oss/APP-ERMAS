@@ -69,6 +69,12 @@ test('le client partagé remplace le client Supabase local', () => {
     assert.doesNotMatch(source, /SUPABASE_URL|SUPABASE_ANON_KEY|supabase\.createClient/);
 });
 
+test('tous les retours utilisent la destination explicite du menu Jumelages', () => {
+    assert.ok(source.split("window.location.href = 'jumelages.html'").length - 1 >= 2);
+    assert.doesNotMatch(source, /(?:window\.)?history\.back\s*\(/);
+    assert.doesNotMatch(source, /document\.referrer/);
+});
+
 test('le comportement métier autorisé reste présent', () => {
     for (const fragment of [
         "urlParams.get('type') || 'EVO'",
