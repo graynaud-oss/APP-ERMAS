@@ -51,6 +51,24 @@ test('le visuel et les textes de l’accueil historique sont conservés', () => 
     }
 });
 
+test('accueil charge localement les fondations visuelles et les actifs officiels', () => {
+    assert.ok(source.includes('href="./css/app-ermas.css"'));
+    assert.ok(source.includes('src="./assets/brand/ermas-logo.png"'));
+    assert.ok(source.includes('href="./assets/brand/favicon.png"'));
+    assert.ok(source.includes('href="./assets/brand/favicon.ico"'));
+    assert.ok(source.includes('href="./assets/brand/apple-touch-icon.png"'));
+    assert.doesNotMatch(source, /fonts\.googleapis\.com/);
+});
+
+test('accueil distingue trois cartes métier et deux accès secondaires', () => {
+    assert.equal(source.match(/class="nav-card"/g)?.length, 3);
+    assert.equal(source.match(/class="nav-card nav-card--secondary"/g)?.length, 2);
+    assert.ok(source.includes('class="home-primary-grid"'));
+    assert.ok(source.includes('class="home-secondary-grid"'));
+    assert.ok(source.includes('class="app-header"'));
+    assert.ok(source.includes('class="app-footer"'));
+});
+
 test('les cinq routes futures prévues sont préparées sans navigation anticipée', () => {
     for (const route of [
         'jantes.html',
