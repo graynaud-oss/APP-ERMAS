@@ -92,3 +92,24 @@ test('prix, stockage et calculateur restent inchangés', () => {
         "window.location.href = 'calcul-voie.html?source=roues-etroites-pneu'"
     ]) assert.ok(source.includes(fragment), `contrat historique absent : ${fragment}`);
 });
+
+test('Roues Étroites Pneu généralise le contrôle commun à toutes les cartes', () => {
+    assert.ok(source.includes("from './js/net-price-visibility.js'"));
+    assert.equal(source.match(/id="net-price-toggle"/g)?.length, 1);
+    assert.equal(source.match(/data-net-price \$\{netPriceVisible/g)?.length, 1);
+    assert.ok(source.includes('netPriceVisible = isNetPriceVisible();'));
+    assert.ok(source.includes('netPriceVisible = setNetPriceVisible(netPriceToggle.checked);'));
+    assert.ok(source.includes("resultsContent.querySelectorAll('[data-net-price]')"));
+    assert.ok(source.includes('updateNetPriceVisibility();\n            resultsContainer.classList.remove'));
+    assert.ok(source.includes('class="results-price-block"'));
+    assert.ok(source.includes('class="results-price-block__net"'));
+    assert.ok(source.includes('class="results-primary-action"'));
+    assert.doesNotMatch(source, /localStorage|Remise appliquée|Réduction|Économie|Prix NET\s*\([^)]*%/i);
+});
+
+test('Roues Étroites Pneu utilise le design commun et le footer légal', () => {
+    for (const fragment of ['css/app-ermas.css', 'assets/brand/ermas-logo.png', 'assets/brand/favicon.ico', 'results-search-panel', 'results-section', 'class="app-footer"']) assert.ok(source.includes(fragment));
+    assert.ok(source.includes('https://www.ermas.fr/mentions-legales'));
+    assert.ok(source.includes('https://www.ermas.fr/politique-confidentialite'));
+    assert.ok(source.includes('Recherche roues étroites par taille de pneu'));
+});

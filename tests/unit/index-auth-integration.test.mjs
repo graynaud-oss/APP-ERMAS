@@ -7,6 +7,7 @@ import test from 'node:test';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..', '..');
 const indexSource = await readFile(path.join(root, 'index.html'), 'utf8');
+const sharedStyles = await readFile(path.join(root, 'css', 'app-ermas.css'), 'utf8');
 
 test('index charge les quatre modules du Lot 1 comme modules ES', () => {
     assert.match(indexSource, /<script type="module">/);
@@ -129,4 +130,41 @@ test('index ne contient plus de responsabilité catalogue, documents, contact ou
     assert.doesNotMatch(indexSource, /SHEET_CSV_URL|PNEU_CSV_URL|TARIFS_CSV_URL|URLS_CSV|fetch\s*\(/);
     assert.doesNotMatch(indexSource, /calcul-voie\.html|calcul-hors-tout\.html|ermas_calc_product|ermas_hors_tout_product/);
     assert.doesNotMatch(indexSource, /getPublicUrl|\.list\s*\(/);
+});
+
+test('index utilise les fondations visuelles ERMAS locales et le footer juridique commun', () => {
+    for (const fragment of [
+        'href="css/app-ermas.css"', 'assets/brand/ermas-logo.png', 'class="app-logo"',
+        'assets/brand/favicon.png', 'assets/brand/favicon.ico', 'assets/brand/apple-touch-icon.png',
+        'class="app-shell auth-page"', 'class="app-header"', 'class="auth-main"',
+        'class="app-footer"', 'https://www.ermas.fr/mentions-legales',
+        'https://www.ermas.fr/politique-confidentialite', 'target="_blank" rel="noopener noreferrer"'
+    ]) assert.ok(indexSource.includes(fragment), `fondation visuelle absente : ${fragment}`);
+    assert.doesNotMatch(indexSource, /lh3\.googleusercontent\.com/);
+});
+
+test('connexion, onboarding et états partagent des composants Auth isolés', () => {
+    for (const fragment of [
+        'class="auth-panel"', 'class="auth-form"', 'class="auth-field"',
+        'auth-button auth-button--primary', 'auth-button auth-button--secondary',
+        'auth-status auth-status--error', 'auth-status auth-status--warning',
+        'auth-status__icon', 'auth-status__contact'
+    ]) assert.ok(indexSource.includes(fragment), `composant Auth absent : ${fragment}`);
+    assert.match(sharedStyles, /\.auth-page\s*\{[\s\S]*?min-height:\s*100vh/);
+    assert.match(sharedStyles, /@supports \(min-height: 100dvh\)[\s\S]*?\.auth-page/);
+    assert.match(sharedStyles, /\.auth-main\s*\{[\s\S]*?flex:\s*1/);
+    assert.match(sharedStyles, /@media \(hover: hover\) and \(pointer: fine\)[\s\S]*?\.auth-button--primary:hover/);
+});
+
+test('les identifiants, contraintes et contrôles fonctionnels Auth restent présents', () => {
+    for (const id of [
+        'auth-form', 'email', 'password-field-container', 'password', 'forgot-password-container',
+        'forgot-btn', 'submit-btn', 'toggle-mode', 'error-msg', 'success-msg',
+        'onboarding-form', 'profile-nom', 'profile-prenom', 'profile-entreprise',
+        'onboarding-error-msg', 'access-status-title', 'access-status-message'
+    ]) assert.match(indexSource, new RegExp(`id=["']${id}["']`), `identifiant Auth absent : ${id}`);
+    for (const id of ['email', 'password', 'profile-nom', 'profile-prenom', 'profile-entreprise']) {
+        assert.match(indexSource, new RegExp(`id=["']${id}["'][^>]*required`), `contrainte required absente : ${id}`);
+    }
+    assert.doesNotMatch(indexSource, /localStorage|ermas_show_net_prices/);
 });

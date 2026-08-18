@@ -4,135 +4,151 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ERMAS - Plateforme Technique</title>
-    <!-- Favicon personnalisé -->
-    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/15om2TV_YaY4mP-dIn80LSdyeJJjG0PMF">
+    <link rel="icon" type="image/png" href="assets/brand/favicon.png">
+    <link rel="shortcut icon" href="assets/brand/favicon.ico">
+    <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #070913; color: #f3f4f6; }
-        .font-brand { font-family: 'Rajdhani', sans-serif; }
-    </style>
+    <link rel="stylesheet" href="css/app-ermas.css">
 </head>
-<body class="h-full flex flex-col justify-between antialiased">
+<body>
+<div class="app-shell auth-page">
+    <header class="app-header">
+        <div class="app-container app-header__inner">
+            <img class="app-logo" src="assets/brand/ermas-logo.png" alt="ERMAS">
+        </div>
+    </header>
+    <main class="auth-main">
 
     <!-- 1. SECTION CONNEXION -->
-    <div id="login-view" class="h-full flex flex-col justify-center items-center px-4 py-8">
-        <div class="max-w-md w-full bg-[#0b101d] border border-gray-800 rounded-2xl p-8 shadow-2xl">
-            <div class="text-center mb-6">
-                <img src="https://lh3.googleusercontent.com/d/1w2dpsmjryA7CDj4GTeHww4stdl5bE8fR" alt="ERMAS Logo" class="h-12 w-auto mx-auto mb-4 object-contain">
-                <h1 class="font-brand text-2xl font-bold tracking-wider text-white">PLATEFORME TECHNIQUE</h1>
-                <p id="form-subtitle" class="text-xs text-gray-400 uppercase tracking-widest mt-1">Connexion à votre espace</p>
+    <section id="login-view" class="auth-view">
+        <div class="auth-panel">
+            <div class="auth-heading">
+                <p class="app-page-eyebrow">Espace professionnel</p>
+                <h1 class="auth-title">PLATEFORME TECHNIQUE</h1>
+                <p id="form-subtitle" class="auth-subtitle">Connexion à votre espace</p>
             </div>
 
-            <div class="mb-6 p-3 bg-blue-950/40 border border-blue-900/40 text-blue-300 text-xs rounded-lg leading-relaxed">
+            <div class="auth-notice auth-notice--info">
                 <strong>Sécurité compte :</strong> Le premier appareil connecté devient l'unique appareil autorisé. Pour changer de poste, veuillez contacter l'administrateur ERMAS.
             </div>
 
-            <div id="error-msg" class="hidden mb-6 p-3 bg-red-950/50 border border-red-900/50 text-red-400 text-xs rounded-lg text-center"></div>
-            <div id="success-msg" class="hidden mb-6 p-3 bg-green-950/50 border border-green-900/50 text-green-400 text-xs rounded-lg text-center"></div>
+            <div id="error-msg" class="auth-feedback auth-feedback--error hidden"></div>
+            <div id="success-msg" class="auth-feedback auth-feedback--success hidden"></div>
 
-            <form id="auth-form" class="space-y-4">
-                <div>
-                    <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">Email</label>
-                    <input type="email" id="email" required class="w-full bg-[#070913] border border-gray-800 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition">
-                </div>
-                
-                <div id="password-field-container">
-                    <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">Mot de passe</label>
-                    <input type="password" id="password" required class="w-full bg-[#070913] border border-gray-800 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition">
+            <form id="auth-form" class="auth-form">
+                <div class="auth-field">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
                 </div>
 
-                <div id="forgot-password-container" class="text-right">
-                    <button type="button" id="forgot-btn" class="text-xs text-gray-400 hover:text-white transition">Mot de passe oublié ?</button>
+                <div id="password-field-container" class="auth-field">
+                    <label for="password">Mot de passe</label>
+                    <input type="password" id="password" required>
                 </div>
 
-                <button type="submit" id="submit-btn" class="w-full mt-2 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition tracking-wider uppercase text-sm shadow-lg shadow-red-950/50">
+                <div id="forgot-password-container" class="auth-link-row">
+                    <button type="button" id="forgot-btn" class="auth-link">Mot de passe oublié ?</button>
+                </div>
+
+                <button type="submit" id="submit-btn" class="auth-button auth-button--primary">
                     Se connecter
                 </button>
             </form>
 
-            <div class="mt-6 text-center">
-                <button id="toggle-mode" class="text-xs text-gray-400 hover:text-white transition">
-                    Pas encore de compte ? <span class="text-red-500 font-semibold">Créer un compte</span>
+            <div class="auth-mode-switch">
+                <button id="toggle-mode" class="auth-link">
+                    Pas encore de compte ? <span>Créer un compte</span>
                 </button>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- 2. SECTION ONBOARDING -->
-    <div id="onboarding-view" class="hidden h-full flex flex-col justify-center items-center px-4 py-8">
-        <div class="max-w-md w-full bg-[#0b101d] border border-gray-800 rounded-2xl p-8 shadow-2xl">
-            <div class="text-center mb-6">
-                <h2 class="font-brand text-2xl font-bold tracking-wider text-white">Informations requises</h2>
-                <p class="text-xs text-gray-400 uppercase tracking-widest mt-1">Veuillez compléter votre profil pour continuer</p>
+    <section id="onboarding-view" class="auth-view hidden">
+        <div class="auth-panel">
+            <div class="auth-heading">
+                <p class="app-page-eyebrow">Configuration du compte</p>
+                <h2 class="auth-title">Informations requises</h2>
+                <p class="auth-subtitle">Veuillez compléter votre profil pour continuer</p>
             </div>
 
-            <div id="onboarding-error-msg" class="hidden mb-6 p-3 bg-red-950/50 border border-red-900/50 text-red-400 text-xs rounded-lg text-center"></div>
+            <div id="onboarding-error-msg" class="auth-feedback auth-feedback--error hidden"></div>
 
-            <form id="onboarding-form" class="space-y-4">
-                <div>
-                    <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">Nom</label>
-                    <input type="text" id="profile-nom" required class="w-full bg-[#070913] border border-gray-800 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition">
+            <form id="onboarding-form" class="auth-form">
+                <div class="auth-field">
+                    <label for="profile-nom">Nom</label>
+                    <input type="text" id="profile-nom" required>
                 </div>
-                <div>
-                    <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">Prénom</label>
-                    <input type="text" id="profile-prenom" required class="w-full bg-[#070913] border border-gray-800 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition">
+                <div class="auth-field">
+                    <label for="profile-prenom">Prénom</label>
+                    <input type="text" id="profile-prenom" required>
                 </div>
-                <div>
-                    <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-semibold">Entreprise</label>
-                    <input type="text" id="profile-entreprise" required class="w-full bg-[#070913] border border-gray-800 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition">
+                <div class="auth-field">
+                    <label for="profile-entreprise">Entreprise</label>
+                    <input type="text" id="profile-entreprise" required>
                 </div>
 
-                <button type="submit" class="w-full mt-4 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition tracking-wider uppercase text-sm shadow-lg shadow-red-950/50">
+                <button type="submit" class="auth-button auth-button--primary">
                     Enregistrer les informations
                 </button>
             </form>
         </div>
-    </div>
+    </section>
 
     <!-- 2.bis SECTION COMPTE BLOQUÉ -->
-    <div id="blocked-view" class="hidden h-full flex flex-col justify-center items-center px-4 py-8">
-        <div class="max-w-md w-full bg-[#0b101d] border border-red-900/40 rounded-2xl p-8 shadow-2xl text-center">
-            <div class="w-16 h-16 bg-red-950/60 border border-red-900/60 rounded-full flex items-center justify-center mx-auto mb-5 text-red-500">
+    <section id="blocked-view" class="auth-view hidden">
+        <div class="auth-panel auth-status auth-status--error">
+            <div class="auth-status__icon">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
             </div>
-            
-            <h2 class="font-brand text-2xl font-bold tracking-wider text-white mb-2">Accès suspendu</h2>
-            <p class="text-xs text-red-400 uppercase tracking-widest mb-6 font-semibold">Compte bloqué par l'administration</p>
 
-            <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl text-sm text-gray-300 leading-relaxed mb-6 text-left space-y-3">
+            <h2 class="auth-title">Accès suspendu</h2>
+            <p class="auth-status__label">Compte bloqué par l'administration</p>
+
+            <div class="auth-status__contact">
                 <p>Votre accès à la plateforme technique ERMAS a été temporairement restreint.</p>
                 <p>Pour régulariser votre situation ou demander le déblocage de votre compte, veuillez contacter notre équipe support :</p>
-                <div class="pt-2 border-t border-gray-800 space-y-1 text-xs">
-                    <p>📞 <a href="tel:0386664722" class="text-white hover:text-red-500 font-medium">03 86 66 47 22</a></p>
-                    <p>✉️ <a href="mailto:contact@ermas.fr" class="text-white hover:text-red-500 font-medium">contact@ermas.fr</a></p>
+                <div class="auth-status__coordinates">
+                    <p>📞 <a href="tel:0386664722">03 86 66 47 22</a></p>
+                    <p>✉️ <a href="mailto:contact@ermas.fr">contact@ermas.fr</a></p>
                 </div>
             </div>
 
-            <button onclick="logoutUser()" class="w-full py-3 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-lg transition tracking-wider uppercase text-xs">
+            <button onclick="logoutUser()" class="auth-button auth-button--secondary">
                 Se déconnecter
             </button>
         </div>
-    </div>
+    </section>
 
     <!-- 2.ter SECTION ÉTAT D'ACCÈS / ENRÔLEMENT -->
-    <div id="access-status-view" class="hidden h-full flex flex-col justify-center items-center px-4 py-8">
-        <div class="max-w-md w-full bg-[#0b101d] border border-gray-800 rounded-2xl p-8 shadow-2xl text-center">
-            <div class="w-16 h-16 bg-amber-950/40 border border-amber-900/50 rounded-full flex items-center justify-center mx-auto mb-5 text-amber-400">
+    <section id="access-status-view" class="auth-view hidden">
+        <div class="auth-panel auth-status auth-status--warning">
+            <div class="auth-status__icon">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
             </div>
-            <h2 id="access-status-title" class="font-brand text-2xl font-bold tracking-wider text-white mb-3">Accès en attente</h2>
-            <p id="access-status-message" class="text-sm text-gray-300 leading-relaxed mb-6"></p>
-            <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl text-xs text-gray-400 leading-relaxed mb-6">
-                Pour toute question, contactez ERMAS au <a href="tel:0386664722" class="text-white hover:text-red-500">03 86 66 47 22</a>
-                ou à <a href="mailto:contact@ermas.fr" class="text-white hover:text-red-500">contact@ermas.fr</a>.
+            <h2 id="access-status-title" class="auth-title">Accès en attente</h2>
+            <p id="access-status-message" class="auth-status__message"></p>
+            <div class="auth-status__contact">
+                Pour toute question, contactez ERMAS au <a href="tel:0386664722">03 86 66 47 22</a>
+                ou à <a href="mailto:contact@ermas.fr">contact@ermas.fr</a>.
             </div>
-            <button onclick="logoutUser()" class="w-full py-3 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-lg transition tracking-wider uppercase text-xs">
+            <button onclick="logoutUser()" class="auth-button auth-button--secondary">
                 Se déconnecter
             </button>
         </div>
-    </div>
+    </section>
+    </main>
+    <footer class="app-footer">
+        <div class="app-container app-footer__inner">
+            <p>&copy; 2026 ERMAS - Tous droits réservés.</p>
+            <nav class="app-footer__links" aria-label="Liens juridiques">
+                <a href="https://www.ermas.fr/mentions-legales" target="_blank" rel="noopener noreferrer">Mentions légales</a>
+                <a href="https://www.ermas.fr/politique-confidentialite" target="_blank" rel="noopener noreferrer">Politique de confidentialité</a>
+            </nav>
+        </div>
+    </footer>
+</div>
 
     <script type="module">
         import { getSupabaseClient } from './js/supabase-client.js';

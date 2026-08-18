@@ -83,11 +83,12 @@ test('le comportement métier autorisé reste présent', () => {
         "redirigerVers('pneu')",
         'jumelages-jantes-taille.html?type=${gammeType}',
         'jumelages-jantes-pneu.html?type=${gammeType}',
-        'Par taille de jantes',
-        'Par taille de pneus'
+        'Par taille de jante',
+        'Par taille de pneu'
     ]) {
         assert.ok(source.includes(fragment), `comportement historique absent : ${fragment}`);
     }
+    assert.doesNotMatch(source, /Par taille de jantes|Par taille de pneus/);
 });
 
 test('la page de choix utilise les fondations visuelles ERMAS locales', () => {

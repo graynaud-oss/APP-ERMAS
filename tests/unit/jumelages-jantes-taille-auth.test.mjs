@@ -141,3 +141,27 @@ test('persistance et calculateur hors-tout restent inchangés', () => {
         assert.ok(source.includes(fragment), `contrat de stockage absent : ${fragment}`);
     }
 });
+
+test('Jumelages Taille utilise le design ERMAS et le titre singulier dynamique', () => {
+    for (const fragment of [
+        'css/app-ermas.css', 'assets/brand/ermas-logo.png', 'app-shell catalog-page results-page',
+        'results-search-panel', 'results-section', "`Catalogue Jumelages — ${gammeType}`",
+        "textContent = 'Recherche par taille de jante'", 'class="app-footer"',
+        'https://www.ermas.fr/mentions-legales', 'https://www.ermas.fr/politique-confidentialite',
+        'target="_blank" rel="noopener noreferrer"'
+    ]) assert.ok(source.includes(fragment), `fondation visuelle absente : ${fragment}`);
+    assert.doesNotMatch(source, /Par Taille de Jantes|Recherche par taille de jantes/);
+    assert.ok(source.includes('<img class="app-logo" src="assets/brand/ermas-logo.png" alt="ERMAS">'));
+    assert.doesNotMatch(source, /app-header__logo/);
+});
+
+test('Jumelages Taille partage le switch NET et masque chaque NET indépendamment du BRUT', () => {
+    for (const fragment of [
+        "from './js/net-price-visibility.js'", 'isNetPriceVisible()',
+        'setNetPriceVisible(netPriceToggle.checked)', 'aria-label="Afficher ou masquer les prix NET"',
+        "netPriceStatus.textContent = netPriceVisible ? 'ON' : 'OFF'",
+        "document.querySelectorAll('[data-net-price]')", 'element.hidden = !netPriceVisible',
+        'Prix BRUT :', 'Prix NET', 'data-net-price'
+    ]) assert.ok(source.includes(fragment), `contrat NET absent : ${fragment}`);
+    assert.doesNotMatch(source, /localStorage|Remise\s+\d|Réduction|Économie/);
+});

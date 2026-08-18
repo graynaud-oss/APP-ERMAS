@@ -9,6 +9,7 @@ import { AUTHORIZATION_STATES } from '../../js/auth-guard.js';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..', '..');
 const source = await readFile(path.join(root, 'jantes-taille.html'), 'utf8');
+const sharedStyles = await readFile(path.join(root, 'css', 'app-ermas.css'), 'utf8');
 
 function pageDecision(state) {
     return state === AUTHORIZATION_STATES.AUTHORIZED ? 'LOAD' : 'INDEX';
@@ -124,6 +125,8 @@ test('les nouveaux résultats respectent la préférence sans flash du NET', () 
 test('le rendu emploie exclusivement Prix BRUT et Prix NET sans taux visible', () => {
     assert.ok(source.match(/Prix BRUT/g)?.length >= 4);
     assert.ok(source.match(/Prix NET/g)?.length >= 2);
+    assert.ok(source.match(/class="results-price-block"/g)?.length >= 4);
+    assert.ok(source.includes('class="results-primary-action"'));
     assert.doesNotMatch(source, /Remise\s*:|Remise appliquée|Réduction|Économie|Prix NET\s*\([^)]*%/i);
 });
 
@@ -132,4 +135,19 @@ test('le basculeur ne modifie ni les formules ni les sources tarifaires', () => 
     assert.ok(source.includes('const finalVV = userRemise > 0 ? baseVV * (1 - userRemise / 100) : baseVV;'));
     assert.ok(source.includes('gid=1966421754&single=true&output=csv'));
     assert.doesNotMatch(source, /history\.back|window\.history\.back|document\.referrer/);
+});
+
+test('Jantes Taille utilise le design commun et le footer légal', () => {
+    for (const fragment of ['css/app-ermas.css', 'assets/brand/ermas-logo.png', 'assets/brand/favicon.ico', 'results-search-panel', 'results-section', 'class="app-footer"']) {
+        assert.ok(source.includes(fragment), `fondation visuelle absente : ${fragment}`);
+    }
+    assert.ok(source.includes('href="https://www.ermas.fr/mentions-legales" target="_blank" rel="noopener noreferrer"'));
+    assert.ok(source.includes('href="https://www.ermas.fr/politique-confidentialite" target="_blank" rel="noopener noreferrer"'));
+});
+
+test('le bouton Estimer reste blanc sur bleu avec hover rouge réservé à la souris', () => {
+    assert.match(sharedStyles, /\.results-primary-action\s*\{[\s\S]*?background:\s*var\(--ermas-blue\);[\s\S]*?color:\s*#ffffff\s*!important;/);
+    assert.match(sharedStyles, /@media \(hover: hover\) and \(pointer: fine\)[\s\S]*?\.results-content button:hover[\s\S]*?background:\s*var\(--ermas-red\);/);
+    assert.match(sharedStyles, /\.results-content button:focus-visible[\s\S]*?outline:/);
+    assert.match(sharedStyles, /\.results-content button:active[\s\S]*?transform:/);
 });

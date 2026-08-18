@@ -48,9 +48,9 @@ test('le contenu historique de la vue Roues étroites est conservé', () => {
     for (const text of [
         'Catalogue Roues Étroites',
         'Choisissez votre mode de recherche :',
-        'Par taille',
+        'Par taille de jante',
         'Recherche directe par dimensions de jante étroite',
-        'Par taille de pneus',
+        'Par taille de pneu',
         'Recherche par dimension de pneu',
         'Avertissement important :',
         'Il est impératif de vérifier la correspondance et la faisabilité auprès des données techniques du manufacturier avant toute commande.',
@@ -58,6 +58,7 @@ test('le contenu historique de la vue Roues étroites est conservé', () => {
     ]) {
         assert.ok(source.includes(text), `contenu Roues étroites manquant : ${text}`);
     }
+    assert.doesNotMatch(source, /Par taille de jantes|Par taille de pneus/);
 });
 
 test('le menu ne contient ni métier, ni remise, ni CSV, ni enrôlement', () => {

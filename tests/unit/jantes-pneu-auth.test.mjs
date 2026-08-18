@@ -121,3 +121,23 @@ test('les prix VF/VV et le contrat calculateur restent inchangés', () => {
         assert.ok(source.includes(fragment), `contrat historique absent : ${fragment}`);
     }
 });
+
+test('Jantes Pneu généralise le contrôle commun BRUT NET sans taux visible', () => {
+    assert.ok(source.includes("from './js/net-price-visibility.js'"));
+    assert.equal(source.match(/id="net-price-toggle"/g)?.length, 1);
+    assert.equal(source.match(/data-net-price \$\{netPriceVisible/g)?.length, 2);
+    assert.ok(source.includes('netPriceVisible = isNetPriceVisible();'));
+    assert.ok(source.includes('netPriceVisible = setNetPriceVisible(netPriceToggle.checked);'));
+    assert.ok(source.includes("resultsContent.querySelectorAll('[data-net-price]')"));
+    assert.ok(source.includes("netPriceControl.classList.toggle('hidden', !hasNetPrice)"));
+    assert.ok(source.includes('updateNetPriceVisibility();\n            resultsContainer.classList.remove'));
+    assert.ok(source.match(/class="results-price-block"/g)?.length >= 4);
+    assert.ok(source.includes('class="results-primary-action"'));
+    assert.doesNotMatch(source, /localStorage|Remise appliquée|Réduction|Économie|Prix NET\s*\([^)]*%/i);
+});
+
+test('Jantes Pneu utilise le design commun et le footer légal', () => {
+    for (const fragment of ['css/app-ermas.css', 'assets/brand/ermas-logo.png', 'assets/brand/favicon.ico', 'results-search-panel', 'results-section', 'class="app-footer"']) assert.ok(source.includes(fragment));
+    assert.ok(source.includes('https://www.ermas.fr/mentions-legales'));
+    assert.ok(source.includes('https://www.ermas.fr/politique-confidentialite'));
+});
