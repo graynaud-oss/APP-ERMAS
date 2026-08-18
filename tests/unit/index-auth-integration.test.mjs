@@ -73,16 +73,35 @@ test('les réponses périmées de handleSession sont ignorées', () => {
     );
 });
 
-test('chaque navigation vers une page protégée exige une autorisation fraîche', () => {
-    const navigationFunction = indexSource.match(/async function navigateToProtectedPage\(path\) \{[\s\S]*?\n        \}/)?.[0] || '';
-    assert.ok(navigationFunction.includes('await requireAuthorizedUser({ client: supabaseClient })'));
-    assert.ok(navigationFunction.includes('authorization.state === AUTHORIZATION_STATES.AUTHORIZED'));
-    assert.ok(navigationFunction.includes('window.location.href = path'));
-    assert.ok(
-        navigationFunction.indexOf('authorization.state === AUTHORIZATION_STATES.AUTHORIZED')
-            < navigationFunction.indexOf('window.location.href = path'),
-        'la navigation doit rester après la revalidation AUTHORIZED'
-    );
+test('les anciennes vues et fonctions applicatives sont absentes', () => {
+    for (const viewId of [
+        'app-view',
+        'jantes-view',
+        'jumelages-view',
+        'jumelages-tgd-view',
+        'jumelages-tgd-plus-view',
+        'roues-etroites-view',
+        'contact-view',
+        'documents-view'
+    ]) {
+        assert.doesNotMatch(indexSource, new RegExp(`id=["']${viewId}["']`), `vue résiduelle : ${viewId}`);
+    }
+
+    for (const functionName of [
+        'showJantesView',
+        'showJumelagesView',
+        'showRouesEtroitesView',
+        'showDocumentsView',
+        'showContactView',
+        'showHomeView',
+        'selectGamme',
+        'navigateToProtectedPage',
+        'loadDocumentsFromStorage'
+    ]) {
+        assert.doesNotMatch(indexSource, new RegExp(`(?:function|window\\.)\\s*${functionName}`), `fonction résiduelle : ${functionName}`);
+    }
+
+    assert.doesNotMatch(indexSource, /DOCUMENTS_BUCKET|documents-list|\.storage\b/);
 });
 
 test('le chemin critique AUTHORIZED redirige uniquement vers accueil sans écriture', () => {
@@ -93,18 +112,21 @@ test('le chemin critique AUTHORIZED redirige uniquement vers accueil sans écrit
     assert.equal(indexSource.match(/window\.location\.href = 'accueil\.html'/g)?.length, 1);
 });
 
-test('les fonctions onclick nécessaires sont explicitement exposées par le module', () => {
-    for (const functionName of [
-        'logoutUser',
-        'navigateToProtectedPage',
-        'selectGamme',
-        'showJantesView',
-        'showJumelagesView',
-        'showRouesEtroitesView',
-        'showContactView',
-        'showDocumentsView',
-        'showHomeView'
-    ]) {
-        assert.ok(indexSource.includes(`window.${functionName} = ${functionName};`), `fonction globale manquante : ${functionName}`);
+test('les vues et parcours Auth requis restent présents', () => {
+    for (const viewId of ['login-view', 'onboarding-view', 'blocked-view', 'access-status-view']) {
+        assert.match(indexSource, new RegExp(`id=["']${viewId}["']`), `vue Auth manquante : ${viewId}`);
     }
+    for (const functionName of ['logoutUser', 'showAccessStatus', 'showOnboarding', 'processAuthorizedEnrollment', 'handleSession']) {
+        assert.match(indexSource, new RegExp(`function\\s+${functionName}\\s*\\(`), `fonction Auth manquante : ${functionName}`);
+    }
+    assert.ok(indexSource.includes('supabaseClient.auth.signInWithPassword({ email, password })'));
+    assert.ok(indexSource.includes('supabaseClient.auth.signUp({ email, password })'));
+    assert.ok(indexSource.includes('supabaseClient.auth.resetPasswordForEmail(email,'));
+    assert.ok(indexSource.includes('window.logoutUser = logoutUser;'));
+});
+
+test('index ne contient plus de responsabilité catalogue, documents, contact ou calcul', () => {
+    assert.doesNotMatch(indexSource, /SHEET_CSV_URL|PNEU_CSV_URL|TARIFS_CSV_URL|URLS_CSV|fetch\s*\(/);
+    assert.doesNotMatch(indexSource, /calcul-voie\.html|calcul-hors-tout\.html|ermas_calc_product|ermas_hors_tout_product/);
+    assert.doesNotMatch(indexSource, /getPublicUrl|\.list\s*\(/);
 });

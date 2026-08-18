@@ -7,7 +7,6 @@ import test from 'node:test';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..', '..');
 const source = await readFile(path.join(root, 'documents.html'), 'utf8');
-const indexSource = await readFile(path.join(root, 'index.html'), 'utf8');
 const accueilSource = await readFile(path.join(root, 'accueil.html'), 'utf8');
 
 function extractFunction(html, name) {
@@ -71,8 +70,7 @@ test('le filtre PDF, les noms et les URL publiques sont inchangés', () => {
     assert.ok(source.includes('file.name.replace(/\\.[^/.]+$/, "").replace(/[-_]/g, " ")'));
 });
 
-test('la logique Storage extraite conserve les marqueurs fonctionnels historiques', () => {
-    const historical = extractFunction(indexSource, 'loadDocumentsFromStorage');
+test('la logique Storage conserve tous les marqueurs fonctionnels de référence', () => {
     const extracted = extractFunction(source, 'loadDocumentsFromStorage');
 
     for (const marker of [
@@ -91,7 +89,6 @@ test('la logique Storage extraite conserve les marqueurs fonctionnels historique
         'Télécharger',
         'container.innerHTML = html'
     ]) {
-        assert.ok(historical.includes(marker), `marqueur historique absent : ${marker}`);
         assert.ok(extracted.includes(marker), `marqueur extrait absent : ${marker}`);
     }
 });
