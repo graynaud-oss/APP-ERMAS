@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERMAS - Documents Techniques</title>
+    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/15om2TV_YaY4mP-dIn80LSdyeJJjG0PMF">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #070913; color: #f3f4f6; }
+        .font-brand { font-family: 'Rajdhani', sans-serif; }
+    </style>
+</head>
+<body class="h-full flex flex-col justify-between antialiased">
+    <div id="documents-view" class="hidden h-full flex flex-col justify-between w-full">
+        <div class="flex-grow flex flex-col items-center justify-center px-4 py-8">
+            <div class="max-w-3xl w-full bg-[#0b101d] border border-gray-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="font-brand text-xl sm:text-2xl font-bold text-white">Documents Techniques</h2>
+                        <p class="text-xs text-gray-400 mt-0.5">Fiches techniques et documentations officielles en libre téléchargement.</p>
+                    </div>
+                    <button type="button" data-protected-route="accueil.html" class="text-xs text-gray-400 hover:text-white uppercase tracking-wider bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg transition shrink-0">Retour</button>
+                </div>
+
+                <div id="documents-list" class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                    <div class="text-center py-8 text-gray-500 text-xs uppercase tracking-wider">Chargement des documents...</div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="bg-[#0b101d] border-t border-gray-800 py-4 text-center text-xs text-gray-500">
+            &copy; 2026 ERMAS - Tous droits réservés.
+        </footer>
+    </div>
+
+    <script type="module">
+        import { getSupabaseClient } from './js/supabase-client.js';
+        import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
+
+        const DOCUMENTS_BUCKET = 'doc-app-ermas';
+        const supabaseClient = getSupabaseClient();
+        const documentsView = document.getElementById('documents-view');
+        let pageAuthorized = false;
+
+        async function initPage() {
+            let context;
+
+            try {
+                context = await requireAuthorizedUser({ client: supabaseClient });
+            } catch (error) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            if (context.state !== AUTHORIZATION_STATES.AUTHORIZED) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            pageAuthorized = true;
+
+            document.querySelectorAll('[data-protected-route]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    if (!pageAuthorized) return;
+                    window.location.href = button.dataset.protectedRoute;
+                });
+            });
+
+            documentsView.classList.remove('hidden');
+            await loadDocumentsFromStorage();
+        }
+
+        async function loadDocumentsFromStorage() {
+            const container = document.getElementById('documents-list');
+            container.innerHTML = '<div class="text-center py-8 text-gray-500 text-xs uppercase tracking-wider">Actualisation des documents...</div>';
+
+            const { data, error } = await supabaseClient.storage
+                .from(DOCUMENTS_BUCKET)
+                .list('', {
+                    limit: 100,
+                    sortBy: { column: 'name', order: 'asc' }
+                });
+
+            if (error) {
+                container.innerHTML = `<div class="p-4 bg-red-950/40 border border-red-900/40 text-red-400 text-xs rounded-xl text-center">Erreur lors du chargement : ${error.message}</div>`;
+                return;
+            }
+
+            const files = data ? data.filter(file => file.name && file.name.toLowerCase().endsWith('.pdf')) : [];
+
+            if (files.length === 0) {
+                container.innerHTML = '<div class="p-8 text-center bg-[#070913] border border-gray-800 rounded-xl text-gray-500 text-xs uppercase tracking-wider">Aucun document disponible pour le moment.</div>';
+                return;
+            }
+
+            let html = '';
+            for (const file of files) {
+                const { data: publicUrlData } = supabaseClient.storage
+                    .from(DOCUMENTS_BUCKET)
+                    .getPublicUrl(file.name);
+
+                const fileUrl = publicUrlData.publicUrl;
+                const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+
+                html += `
+                    <div class="bg-[#070913] border border-gray-800 p-4 rounded-xl flex items-center justify-between hover:border-gray-700 transition group">
+                        <div class="flex items-center space-x-3.5 overflow-hidden">
+                            <div class="w-10 h-10 rounded-lg bg-red-950/30 border border-red-900/40 flex items-center justify-center text-red-500 shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                            </div>
+                            <div class="truncate">
+                                <h4 class="text-white text-sm font-medium uppercase tracking-wide truncate group-hover:text-red-400 transition">${cleanName}</h4>
+                                <span class="text-[10px] text-gray-500 uppercase tracking-widest">Format PDF</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 shrink-0 ml-4">
+                            <a href="${fileUrl}" target="_blank" class="px-3 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 text-xs font-semibold rounded-lg transition">
+                                Voir
+                            </a>
+                            <a href="${fileUrl}" download class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition shadow-lg shadow-red-950/50 flex items-center space-x-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                <span>Télécharger</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        initPage().catch(() => {
+            pageAuthorized = false;
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>
