@@ -71,6 +71,12 @@ test('les filtres et le calculateur restent inactifs avant autorisation', () => 
     assert.ok(source.split('if (!pageAuthorized) return;').length - 1 >= 4);
 });
 
+test('le retour utilise toujours la destination explicite du menu Jantes', () => {
+    assert.ok(source.includes("onclick=\"window.location.href = 'jantes.html'\""));
+    assert.doesNotMatch(source, /(?:window\.)?history\.back\s*\(/);
+    assert.doesNotMatch(source, /document\.referrer/);
+});
+
 test('le parser, les prix VF/VV et la navigation historique sont inchangés', () => {
     for (const fragment of [
         "text.split('\\n')",

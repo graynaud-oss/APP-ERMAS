@@ -77,6 +77,12 @@ test('les filtres et le calculateur restent inactifs avant autorisation', () => 
     assert.ok(source.split('if (!pageAuthorized) return;').length - 1 >= 4);
 });
 
+test('le retour utilise toujours la destination explicite du menu Jantes', () => {
+    assert.ok(source.includes("onclick=\"window.location.href = 'jantes.html'\""));
+    assert.doesNotMatch(source, /(?:window\.)?history\.back\s*\(/);
+    assert.doesNotMatch(source, /document\.referrer/);
+});
+
 test('les deux sources et leur chargement parallèle restent inchangés', () => {
     const csvUrls = source.match(/https:\/\/docs\.google\.com\/spreadsheets\/[^']+output=csv/g) || [];
     assert.equal(csvUrls.length, 2);
