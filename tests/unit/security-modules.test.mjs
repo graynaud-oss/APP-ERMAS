@@ -4,10 +4,13 @@ import test from 'node:test';
 import { AUTHORIZATION_STATES, evaluateAuthorization, requireAuthorizedUser } from '../../js/auth-guard.js';
 import {
     DEVICE_ENROLLMENT_STATUSES,
-    DEVICE_TOKEN_STORAGE_KEY,
-    PENDING_DEVICE_TOKEN_STORAGE_KEY,
+    LEGACY_DEVICE_TOKEN_STORAGE_KEY,
+    LEGACY_PENDING_DEVICE_TOKEN_STORAGE_KEY,
     confirmPendingDeviceEnrollment,
+    getDeviceTokenStorageKey,
+    getPendingDeviceTokenStorageKey,
     initializeAuthorizedDeviceEnrollment,
+    migrateLegacyDeviceStorageForUser,
     readLocalDeviceToken,
     readPendingDeviceToken
 } from '../../js/device-enrollment.js';
@@ -30,8 +33,13 @@ function storage(initial = {}) {
     };
 }
 
+const USER_A = '11111111-1111-4111-8111-111111111111';
+const USER_B = '22222222-2222-4222-8222-222222222222';
+const USER_C = '33333333-3333-4333-8333-333333333333';
+
 function completeProfile(overrides = {}) {
     return {
+        id: USER_A,
         nom: 'Martin',
         prenom: 'Alice',
         entreprise: 'Exemple',
@@ -49,12 +57,112 @@ test('la lecture locale est pure et ne génère jamais de token', () => {
         setItem: () => { writes += 1; }
     };
 
-    assert.equal(readLocalDeviceToken(fakeStorage), null);
+    assert.equal(readLocalDeviceToken(USER_A, fakeStorage), null);
     assert.equal(writes, 0);
 });
 
+test('les clés appareil sont strictement liées au UUID utilisateur', () => {
+    assert.equal(getDeviceTokenStorageKey(USER_A), `ermas_device_token:${USER_A}`);
+    assert.equal(getPendingDeviceTokenStorageKey(USER_B), `ermas_device_token_pending:${USER_B}`);
+    assert.notEqual(getDeviceTokenStorageKey(USER_A), getDeviceTokenStorageKey(USER_B));
+    assert.throws(() => getDeviceTokenStorageKey(), /Identifiant utilisateur/);
+    assert.throws(() => getDeviceTokenStorageKey('user@example.test'), /Identifiant utilisateur/);
+});
+
+test('un userId absent ou invalide ferme l’enrôlement avant tout appel RPC', async () => {
+    let rpcCalls = 0;
+    await assert.rejects(
+        initializeAuthorizedDeviceEnrollment({
+            client: { rpc: async () => { rpcCalls += 1; } },
+            profile: completeProfile({ id: null, device_token: null, device_enrollment_allowed: true }),
+            storage: storage(),
+            cryptoProvider: { getRandomValues: () => {} }
+        }),
+        /Identifiant utilisateur/
+    );
+    assert.equal(rpcCalls, 0);
+});
+
+test('deux comptes du même navigateur ne lisent que leur propre token', () => {
+    const fakeStorage = storage({
+        [getDeviceTokenStorageKey(USER_A)]: 'dev_account_a',
+        [getDeviceTokenStorageKey(USER_B)]: 'dev_account_b'
+    });
+
+    assert.equal(readLocalDeviceToken(USER_A, fakeStorage), 'dev_account_a');
+    assert.equal(readLocalDeviceToken(USER_B, fakeStorage), 'dev_account_b');
+    assert.equal(readLocalDeviceToken(USER_C, fakeStorage), null);
+});
+
+test('un token legacy définitif ne migre que s’il correspond au serveur', () => {
+    const matchingStorage = storage({ [LEGACY_DEVICE_TOKEN_STORAGE_KEY]: 'dev_match' });
+    const migrated = migrateLegacyDeviceStorageForUser({
+        userId: USER_A,
+        serverDeviceToken: 'dev_match',
+        serverEnrollmentAllowed: false,
+        storage: matchingStorage
+    });
+    assert.equal(migrated.migrated, true);
+    assert.equal(readLocalDeviceToken(USER_A, matchingStorage), 'dev_match');
+    assert.equal(matchingStorage.has(LEGACY_DEVICE_TOKEN_STORAGE_KEY), false);
+
+    for (const serverDeviceToken of [null, 'dev_other']) {
+        const ambiguousStorage = storage({ [LEGACY_DEVICE_TOKEN_STORAGE_KEY]: 'dev_legacy' });
+        const result = migrateLegacyDeviceStorageForUser({
+            userId: USER_B,
+            serverDeviceToken,
+            serverEnrollmentAllowed: serverDeviceToken === null,
+            storage: ambiguousStorage
+        });
+        assert.equal(result.migrated, false);
+        assert.equal(readLocalDeviceToken(USER_B, ambiguousStorage), null);
+        assert.equal(ambiguousStorage.value(LEGACY_DEVICE_TOKEN_STORAGE_KEY), 'dev_legacy');
+    }
+});
+
+test('une clé utilisateur existante interdit toute migration legacy', () => {
+    const fakeStorage = storage({
+        [getDeviceTokenStorageKey(USER_A)]: 'dev_current',
+        [LEGACY_DEVICE_TOKEN_STORAGE_KEY]: 'dev_server'
+    });
+    const result = migrateLegacyDeviceStorageForUser({
+        userId: USER_A,
+        serverDeviceToken: 'dev_server',
+        serverEnrollmentAllowed: false,
+        storage: fakeStorage
+    });
+
+    assert.equal(result.migrated, false);
+    assert.equal(readLocalDeviceToken(USER_A, fakeStorage), 'dev_current');
+    assert.equal(fakeStorage.value(LEGACY_DEVICE_TOKEN_STORAGE_KEY), 'dev_server');
+});
+
+test('un pending legacy ambigu est ignoré et seul un pending confirmé peut être récupéré', () => {
+    const ambiguousStorage = storage({ [LEGACY_PENDING_DEVICE_TOKEN_STORAGE_KEY]: 'dev_pending_old' });
+    const ignored = migrateLegacyDeviceStorageForUser({
+        userId: USER_A,
+        serverDeviceToken: null,
+        serverEnrollmentAllowed: true,
+        storage: ambiguousStorage
+    });
+    assert.equal(ignored.migrated, false);
+    assert.equal(readLocalDeviceToken(USER_A, ambiguousStorage), null);
+    assert.equal(ambiguousStorage.value(LEGACY_PENDING_DEVICE_TOKEN_STORAGE_KEY), 'dev_pending_old');
+
+    const confirmedStorage = storage({ [LEGACY_PENDING_DEVICE_TOKEN_STORAGE_KEY]: 'dev_pending_confirmed' });
+    const recovered = migrateLegacyDeviceStorageForUser({
+        userId: USER_A,
+        serverDeviceToken: 'dev_pending_confirmed',
+        serverEnrollmentAllowed: false,
+        storage: confirmedStorage
+    });
+    assert.equal(recovered.migrated, true);
+    assert.equal(readLocalDeviceToken(USER_A, confirmedStorage), 'dev_pending_confirmed');
+    assert.equal(confirmedStorage.has(LEGACY_PENDING_DEVICE_TOKEN_STORAGE_KEY), false);
+});
+
 test('le garde refuse un token local absent ou différent', () => {
-    const session = { user: { id: 'user-a' } };
+    const session = { user: { id: USER_A } };
     const profile = completeProfile();
 
     assert.equal(evaluateAuthorization({ session, profile, localDeviceToken: null }).state, AUTHORIZATION_STATES.LOCAL_TOKEN_MISSING);
@@ -68,7 +176,7 @@ test('le garde refuse un token local absent ou différent', () => {
 });
 
 test('le garde distingue attente admin, enrôlement autorisé et état incohérent', () => {
-    const session = { user: { id: 'user-a' } };
+    const session = { user: { id: USER_A } };
 
     assert.equal(evaluateAuthorization({
         session,
@@ -90,7 +198,7 @@ test('le garde distingue attente admin, enrôlement autorisé et état incohére
 });
 
 test('le garde refuse profil incomplet et compte bloqué', () => {
-    const session = { user: { id: 'user-a' } };
+    const session = { user: { id: USER_A } };
     assert.equal(evaluateAuthorization({ session, profile: completeProfile({ nom: '' }) }).state, AUTHORIZATION_STATES.PROFILE_INCOMPLETE);
     assert.equal(evaluateAuthorization({ session, profile: completeProfile({ blocage: 'OUI' }) }).state, AUTHORIZATION_STATES.ACCOUNT_BLOCKED);
     assert.equal(isProfileComplete(completeProfile()), true);
@@ -98,7 +206,7 @@ test('le garde refuse profil incomplet et compte bloqué', () => {
 });
 
 test('les erreurs Supabase restent fermées', () => {
-    const session = { user: { id: 'user-a' } };
+    const session = { user: { id: USER_A } };
     assert.equal(evaluateAuthorization({
         session: null,
         sessionError: new Error('auth indisponible')
@@ -171,9 +279,75 @@ test('l’enrôlement autorisé utilise pending et ne promeut qu’après confir
     assert.equal(response.status, DEVICE_ENROLLMENT_STATUSES.INITIALIZED);
     assert.equal(rpcName, 'initialize_own_device_token');
     assert.equal(rpcArgs.p_token, response.token);
-    assert.equal(fakeStorage.value(DEVICE_TOKEN_STORAGE_KEY), response.token);
-    assert.equal(fakeStorage.has(PENDING_DEVICE_TOKEN_STORAGE_KEY), false);
+    assert.equal(fakeStorage.value(getDeviceTokenStorageKey(USER_A)), response.token);
+    assert.equal(fakeStorage.has(getPendingDeviceTokenStorageKey(USER_A)), false);
     assert.match(response.token, /^dev_[a-f0-9]{64}$/);
+});
+
+test('un nouvel utilisateur ignore le token global résiduel et enrôle sa propre clé', async () => {
+    let sentToken = null;
+    const fakeStorage = storage({ [LEGACY_DEVICE_TOKEN_STORAGE_KEY]: 'dev_old_account' });
+    const client = {
+        rpc: async (_name, args) => {
+            sentToken = args.p_token;
+            return { data: 'INITIALIZED', error: null };
+        },
+        from: () => ({
+            select() { return this; },
+            eq() { return this; },
+            maybeSingle: async () => ({
+                data: { device_token: sentToken, device_enrollment_allowed: false },
+                error: null
+            })
+        })
+    };
+
+    const response = await initializeAuthorizedDeviceEnrollment({
+        client,
+        profile: completeProfile({ id: USER_B, device_token: null, device_enrollment_allowed: true }),
+        storage: fakeStorage,
+        cryptoProvider: { getRandomValues: (bytes) => bytes.fill(13) }
+    });
+
+    assert.equal(response.status, DEVICE_ENROLLMENT_STATUSES.INITIALIZED);
+    assert.equal(readLocalDeviceToken(USER_B, fakeStorage), sentToken);
+    assert.notEqual(sentToken, 'dev_old_account');
+    assert.equal(fakeStorage.value(LEGACY_DEVICE_TOKEN_STORAGE_KEY), 'dev_old_account');
+});
+
+test('le garde migre invisiblement un utilisateur legacy confirmé', async () => {
+    const fakeStorage = storage({ [LEGACY_DEVICE_TOKEN_STORAGE_KEY]: 'dev_server' });
+    const profile = completeProfile();
+    const client = {
+        auth: { getSession: async () => ({ data: { session: { user: { id: USER_A } } }, error: null }) },
+        from: () => ({
+            select() { return this; },
+            eq() { return this; },
+            maybeSingle: async () => ({ data: profile, error: null })
+        })
+    };
+
+    const authorization = await requireAuthorizedUser({ client, storage: fakeStorage });
+    assert.equal(authorization.state, AUTHORIZATION_STATES.AUTHORIZED);
+    assert.equal(readLocalDeviceToken(USER_A, fakeStorage), 'dev_server');
+    assert.equal(fakeStorage.has(LEGACY_DEVICE_TOKEN_STORAGE_KEY), false);
+});
+
+test('un autre compte ou appareil ne peut pas emprunter une clé utilisateur existante', async () => {
+    const fakeStorage = storage({ [getDeviceTokenStorageKey(USER_C)]: 'dev_server' });
+    const client = {
+        auth: { getSession: async () => ({ data: { session: { user: { id: USER_A } } }, error: null }) },
+        from: () => ({
+            select() { return this; },
+            eq() { return this; },
+            maybeSingle: async () => ({ data: completeProfile(), error: null })
+        })
+    };
+
+    const authorization = await requireAuthorizedUser({ client, storage: fakeStorage });
+    assert.equal(authorization.state, AUTHORIZATION_STATES.LOCAL_TOKEN_MISSING);
+    assert.equal(readLocalDeviceToken(USER_A, fakeStorage), null);
+    assert.equal(readLocalDeviceToken(USER_C, fakeStorage), 'dev_server');
 });
 
 test('un refus RPC conserve le pending sans remplacer le token définitif', async () => {
@@ -192,29 +366,29 @@ test('un refus RPC conserve le pending sans remplacer le token définitif', asyn
 
     const response = await initializeAuthorizedDeviceEnrollment({
         client,
-        profile: completeProfile({ id: 'user-a', device_token: null, device_enrollment_allowed: true }),
+        profile: completeProfile({ device_token: null, device_enrollment_allowed: true }),
         storage: fakeStorage,
         cryptoProvider: { getRandomValues: (bytes) => bytes.fill(11) }
     });
 
     assert.equal(response.status, DEVICE_ENROLLMENT_STATUSES.ENROLLMENT_NOT_ALLOWED);
-    assert.equal(readLocalDeviceToken(fakeStorage), null);
-    assert.match(readPendingDeviceToken(fakeStorage), /^dev_[a-f0-9]{64}$/);
+    assert.equal(readLocalDeviceToken(USER_A, fakeStorage), null);
+    assert.match(readPendingDeviceToken(USER_A, fakeStorage), /^dev_[a-f0-9]{64}$/);
 });
 
 test('un pending confirmé est récupéré sans générer ni réécrire le token serveur', async () => {
     const pending = 'dev_pending_exact';
-    const fakeStorage = storage({ [PENDING_DEVICE_TOKEN_STORAGE_KEY]: pending });
+    const fakeStorage = storage({ [getPendingDeviceTokenStorageKey(USER_A)]: pending });
     const profile = completeProfile({ device_token: pending, device_enrollment_allowed: false });
 
-    const confirmation = confirmPendingDeviceEnrollment(profile, fakeStorage);
+    const confirmation = confirmPendingDeviceEnrollment(profile, USER_A, fakeStorage);
     assert.equal(confirmation.confirmed, true);
-    assert.equal(readLocalDeviceToken(fakeStorage), pending);
-    assert.equal(readPendingDeviceToken(fakeStorage), null);
+    assert.equal(readLocalDeviceToken(USER_A, fakeStorage), pending);
+    assert.equal(readPendingDeviceToken(USER_A, fakeStorage), null);
 
-    const authStorage = storage({ [PENDING_DEVICE_TOKEN_STORAGE_KEY]: pending });
+    const authStorage = storage({ [getPendingDeviceTokenStorageKey(USER_A)]: pending });
     const client = {
-        auth: { getSession: async () => ({ data: { session: { user: { id: 'user-a' } } }, error: null }) },
+        auth: { getSession: async () => ({ data: { session: { user: { id: USER_A } } }, error: null }) },
         from: () => ({
             select() { return this; },
             eq() { return this; },
@@ -223,7 +397,7 @@ test('un pending confirmé est récupéré sans générer ni réécrire le token
     };
     const authorization = await requireAuthorizedUser({ client, storage: authStorage });
     assert.equal(authorization.state, AUTHORIZATION_STATES.AUTHORIZED);
-    assert.equal(readLocalDeviceToken(authStorage), pending);
+    assert.equal(readLocalDeviceToken(USER_A, authStorage), pending);
 });
 
 test('une réponse RPC perdue est récupérée par la relecture serveur', async () => {
@@ -246,19 +420,19 @@ test('une réponse RPC perdue est récupérée par la relecture serveur', async 
 
     const response = await initializeAuthorizedDeviceEnrollment({
         client,
-        profile: completeProfile({ id: 'user-a', device_token: null, device_enrollment_allowed: true }),
+        profile: completeProfile({ device_token: null, device_enrollment_allowed: true }),
         storage: fakeStorage,
         cryptoProvider: { getRandomValues: (bytes) => bytes.fill(12) }
     });
 
     assert.equal(response.status, DEVICE_ENROLLMENT_STATUSES.INITIALIZED);
-    assert.equal(readLocalDeviceToken(fakeStorage), sentToken);
-    assert.equal(readPendingDeviceToken(fakeStorage), null);
+    assert.equal(readLocalDeviceToken(USER_A, fakeStorage), sentToken);
+    assert.equal(readPendingDeviceToken(USER_A, fakeStorage), null);
 });
 
 test('un token définitif existant interdit toute génération de pending', async () => {
     let randomCalls = 0;
-    const fakeStorage = storage({ [DEVICE_TOKEN_STORAGE_KEY]: 'dev_existing' });
+    const fakeStorage = storage({ [getDeviceTokenStorageKey(USER_A)]: 'dev_existing' });
     const response = await initializeAuthorizedDeviceEnrollment({
         client: { rpc: async () => { throw new Error('RPC interdite'); } },
         profile: completeProfile({ device_token: null, device_enrollment_allowed: true }),
@@ -268,8 +442,8 @@ test('un token définitif existant interdit toute génération de pending', asyn
 
     assert.equal(response.status, DEVICE_ENROLLMENT_STATUSES.ALREADY_INITIALIZED);
     assert.equal(randomCalls, 0);
-    assert.equal(readPendingDeviceToken(fakeStorage), null);
-    assert.equal(readLocalDeviceToken(fakeStorage), 'dev_existing');
+    assert.equal(readPendingDeviceToken(USER_A, fakeStorage), null);
+    assert.equal(readLocalDeviceToken(USER_A, fakeStorage), 'dev_existing');
 });
 
 function profileClient() {

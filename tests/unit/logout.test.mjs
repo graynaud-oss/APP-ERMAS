@@ -83,3 +83,18 @@ test('le helper ne touche ni appareil, ni profil, ni enrôlement', () => {
     assert.ok(logoutSource.includes("redirect('index.html')"));
     assert.doesNotMatch(logoutSource, /localStorage|sessionStorage|removeItem|device_token|device_enrollment|\.rpc\s*\(|profiles|remise|blocage/);
 });
+
+test('la déconnexion conserve les associations locales de plusieurs comptes', async () => {
+    const deviceStorage = new Map([
+        ['ermas_device_token:11111111-1111-4111-8111-111111111111', 'PRESENT_A'],
+        ['ermas_device_token:22222222-2222-4222-8222-222222222222', 'PRESENT_B']
+    ]);
+
+    await logoutCurrentSession({
+        client: { auth: { signOut: async () => {} } },
+        redirect: () => {}
+    });
+
+    assert.equal(deviceStorage.get('ermas_device_token:11111111-1111-4111-8111-111111111111'), 'PRESENT_A');
+    assert.equal(deviceStorage.get('ermas_device_token:22222222-2222-4222-8222-222222222222'), 'PRESENT_B');
+});
