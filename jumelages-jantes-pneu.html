@@ -471,7 +471,7 @@
 
             const productData = JSON.parse(decodeURIComponent(payloadEncoded));
             sessionStorage.setItem('ermas_hors_tout_product', JSON.stringify(productData));
-            window.location.href = `calcul-hors-tout.html?type=${gammeType}`;
+            window.location.href = `calcul-hors-tout.html?type=${gammeType}&source=pneu`;
         }
 
         window.ouvrirCalculHorsTout = ouvrirCalculHorsTout;

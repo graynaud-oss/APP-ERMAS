@@ -109,11 +109,15 @@ test('déduplication, prix principal et options restent inchangés', () => {
 });
 
 test('persistance et calculateur hors-tout restent inchangés', () => {
+    const calculatorUrl = (type) => `calcul-hors-tout.html?type=${type}&source=pneu`;
+    assert.equal(calculatorUrl('EVO'), 'calcul-hors-tout.html?type=EVO&source=pneu');
+    assert.equal(calculatorUrl('360'), 'calcul-hors-tout.html?type=360&source=pneu');
+
     for (const fragment of [
         "sessionStorage.setItem('ermas_pneu_largeur'", "sessionStorage.setItem('ermas_pneu_rapport'",
         "sessionStorage.setItem('ermas_pneu_diametre'", "sessionStorage.getItem('ermas_pneu_largeur')",
         "sessionStorage.getItem('ermas_pneu_rapport')", "sessionStorage.getItem('ermas_pneu_diametre')",
         "sessionStorage.setItem('ermas_hors_tout_product', JSON.stringify(productData))",
-        'JSON.parse(decodeURIComponent(payloadEncoded))', 'calcul-hors-tout.html?type=${gammeType}'
+        'JSON.parse(decodeURIComponent(payloadEncoded))', 'calcul-hors-tout.html?type=${gammeType}&source=pneu'
     ]) assert.ok(source.includes(fragment), `contrat de stockage absent : ${fragment}`);
 });

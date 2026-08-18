@@ -124,6 +124,10 @@ test('prix principal et options conservent leurs formules', () => {
 });
 
 test('persistance et calculateur hors-tout restent inchangés', () => {
+    const calculatorUrl = (type) => `calcul-hors-tout.html?type=${type}&source=taille`;
+    assert.equal(calculatorUrl('EVO'), 'calcul-hors-tout.html?type=EVO&source=taille');
+    assert.equal(calculatorUrl('360'), 'calcul-hors-tout.html?type=360&source=taille');
+
     for (const fragment of [
         "sessionStorage.setItem('ermas_jante_diametre'",
         "sessionStorage.setItem('ermas_jante_largeur'",
@@ -132,7 +136,7 @@ test('persistance et calculateur hors-tout restent inchangés', () => {
         "sessionStorage.getItem('ermas_jante_largeur')",
         "sessionStorage.getItem('ermas_jante_tendeurs')",
         "sessionStorage.setItem('ermas_hors_tout_product', JSON.stringify(product))",
-        'calcul-hors-tout.html?type=${gammeType}'
+        'calcul-hors-tout.html?type=${gammeType}&source=taille'
     ]) {
         assert.ok(source.includes(fragment), `contrat de stockage absent : ${fragment}`);
     }

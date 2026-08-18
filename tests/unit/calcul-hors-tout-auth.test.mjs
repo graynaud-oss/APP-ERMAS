@@ -45,6 +45,35 @@ test('le garde précède type, sessionStorage, produit et CSV', () => {
     assert.ok(positions[1] < source.indexOf('selectedProduct.colC'));
 });
 
+test('le retour combine uniquement les sources et types autorisés', () => {
+    const destinations = {
+        taille: {
+            EVO: 'jumelages-jantes-taille.html?type=EVO',
+            '360': 'jumelages-jantes-taille.html?type=360'
+        },
+        pneu: {
+            EVO: 'jumelages-jantes-pneu.html?type=EVO',
+            '360': 'jumelages-jantes-pneu.html?type=360'
+        }
+    };
+    const destinationFor = (sourceParam, typeParam) => destinations[sourceParam]?.[typeParam] || 'jumelages.html';
+
+    assert.equal(destinationFor('taille', 'EVO'), 'jumelages-jantes-taille.html?type=EVO');
+    assert.equal(destinationFor('taille', '360'), 'jumelages-jantes-taille.html?type=360');
+    assert.equal(destinationFor('pneu', 'EVO'), 'jumelages-jantes-pneu.html?type=EVO');
+    assert.equal(destinationFor('pneu', '360'), 'jumelages-jantes-pneu.html?type=360');
+    assert.equal(destinationFor(null, 'EVO'), 'jumelages.html');
+    assert.equal(destinationFor('taille', null), 'jumelages.html');
+    assert.equal(destinationFor('inconnue', 'EVO'), 'jumelages.html');
+    assert.equal(destinationFor('taille', 'inconnu'), 'jumelages.html');
+    assert.equal(destinationFor('https://example.test', 'EVO'), 'jumelages.html');
+
+    assert.ok(source.includes('const RETURN_DESTINATIONS = Object.freeze({'));
+    assert.ok(source.includes("backDestination = RETURN_DESTINATIONS[sourceParam]?.[typeParam] || 'jumelages.html';"));
+    assert.doesNotMatch(source, /(?:window\.)?history\.back\s*\(/);
+    assert.doesNotMatch(source, /document\.referrer/);
+});
+
 test('client partagé, refus fermé et verrou local sont présents', () => {
     assert.ok(source.includes("import { getSupabaseClient } from './js/supabase-client.js'"));
     assert.ok(source.includes('const supabaseClient = getSupabaseClient();'));
@@ -71,7 +100,7 @@ test('contrat produit, EVO/360, conversions et formules restent présents', () =
         '+ (2 * entretoiseSouhaitee)', '- (2 * emboitementJanteEngin)',
         '- (2 * emboitementJumelage);', "resultat.toFixed(1) + ' mm'",
         "alert('Veuillez remplir tous les champs correctement.')", "alert('Jante engin introuvable.')",
-        'window.history.back()'
+        "window.location.href = 'jumelages.html'"
     ]) assert.ok(source.includes(fragment), `contrat historique absent : ${fragment}`);
 });
 

@@ -402,7 +402,7 @@
             if (!pageAuthorized) return;
 
             sessionStorage.setItem('ermas_hors_tout_product', JSON.stringify(product));
-            window.location.href = `calcul-hors-tout.html?type=${gammeType}`;
+            window.location.href = `calcul-hors-tout.html?type=${gammeType}&source=taille`;
         };
 
         initPage().catch(() => {

@@ -25,7 +25,7 @@
                     <h2 class="font-brand text-xl sm:text-2xl font-bold text-white">Calcul de Largeur Hors Tout</h2>
                     <p id="product-name" class="text-xs text-amber-400 mt-0.5 font-medium">Chargement du produit...</p>
                 </div>
-                <button onclick="history.back()" class="text-xs text-gray-400 hover:text-white uppercase tracking-wider bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg transition shrink-0">Retour</button>
+                <button onclick="retourCalculHorsTout()" class="text-xs text-gray-400 hover:text-white uppercase tracking-wider bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg transition shrink-0">Retour</button>
             </div>
 
             <!-- CHAMPS DE SAISIE -->
@@ -72,6 +72,16 @@
             'EVO': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1732806915&single=true&output=csv',
             '360': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1287684735&single=true&output=csv'
         };
+        const RETURN_DESTINATIONS = Object.freeze({
+            taille: Object.freeze({
+                EVO: 'jumelages-jantes-taille.html?type=EVO',
+                '360': 'jumelages-jantes-taille.html?type=360'
+            }),
+            pneu: Object.freeze({
+                EVO: 'jumelages-jantes-pneu.html?type=EVO',
+                '360': 'jumelages-jantes-pneu.html?type=360'
+            })
+        });
 
         const supabaseClient = getSupabaseClient();
 
@@ -86,7 +96,12 @@
         let selectedProduct = null;
         let jantesEnginData = [];
         let gammeType = null;
+        let backDestination = 'jumelages.html';
         let pageAuthorized = false;
+
+        window.retourCalculHorsTout = function() {
+            window.location.href = backDestination;
+        };
 
         async function init() {
             let context;
@@ -103,11 +118,14 @@
             }
 
             const urlParams = new URLSearchParams(window.location.search);
+            const typeParam = urlParams.get('type');
+            const sourceParam = urlParams.get('source');
             gammeType = urlParams.get('type') || 'EVO';
+            backDestination = RETURN_DESTINATIONS[sourceParam]?.[typeParam] || 'jumelages.html';
 
             selectedProduct = JSON.parse(sessionStorage.getItem('ermas_hors_tout_product'));
             if (!selectedProduct) {
-                window.history.back();
+                window.location.href = 'jumelages.html';
                 return;
             }
 
