@@ -85,9 +85,12 @@ test('chaque navigation vers une page protégée exige une autorisation fraîche
     );
 });
 
-test('le chemin critique AUTHORIZED ne déclenche aucune synchronisation email', () => {
+test('le chemin critique AUTHORIZED redirige uniquement vers accueil sans écriture', () => {
     const authorizedCase = indexSource.match(/case AUTHORIZATION_STATES\.AUTHORIZED:[\s\S]*?default:/)?.[0] || '';
     assert.doesNotMatch(authorizedCase, /updateOwnPersonalProfile|\.update\s*\(/);
+    assert.ok(authorizedCase.includes("window.location.href = 'accueil.html'"));
+    assert.doesNotMatch(authorizedCase, /appView\.classList\.remove\(['"]hidden['"]\)/);
+    assert.equal(indexSource.match(/window\.location\.href = 'accueil\.html'/g)?.length, 1);
 });
 
 test('les fonctions onclick nécessaires sont explicitement exposées par le module', () => {

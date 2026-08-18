@@ -726,8 +726,7 @@
                     return;
 
                 case AUTHORIZATION_STATES.AUTHORIZED:
-                    hideAllViews();
-                    appView.classList.remove('hidden');
+                    window.location.href = 'accueil.html';
                     return;
 
                 default:
