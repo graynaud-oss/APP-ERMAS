@@ -44,6 +44,31 @@ test('le garde précède sessionStorage, JSON et données produit', () => {
     assert.ok(dataIPosition < dataJPosition);
 });
 
+test('le retour utilise une table fermée lue uniquement après autorisation', () => {
+    const destinations = {
+        'jantes-taille': 'jantes-taille.html',
+        'jantes-pneu': 'jantes-pneu.html',
+        'roues-etroites-taille': 'roues-etroites-taille.html',
+        'roues-etroites-pneu': 'roues-etroites-pneu.html'
+    };
+    const destinationFor = (sourceParam) => destinations[sourceParam] || 'accueil.html';
+
+    assert.equal(destinationFor('jantes-taille'), 'jantes-taille.html');
+    assert.equal(destinationFor('jantes-pneu'), 'jantes-pneu.html');
+    assert.equal(destinationFor('roues-etroites-taille'), 'roues-etroites-taille.html');
+    assert.equal(destinationFor('roues-etroites-pneu'), 'roues-etroites-pneu.html');
+    assert.equal(destinationFor(null), 'accueil.html');
+    assert.equal(destinationFor('https://example.test'), 'accueil.html');
+
+    const authorizedPosition = source.indexOf('context.state !== AUTHORIZATION_STATES.AUTHORIZED');
+    const sourceReadPosition = source.indexOf("urlParams.get('source')");
+    assert.ok(authorizedPosition < sourceReadPosition);
+    assert.ok(source.includes('const SOURCE_DESTINATIONS = Object.freeze({'));
+    assert.ok(source.includes("backDestination = SOURCE_DESTINATIONS[sourceParam] || 'accueil.html';"));
+    assert.doesNotMatch(source, /(?:window\.)?history\.back\s*\(/);
+    assert.doesNotMatch(source, /document\.referrer/);
+});
+
 test('client partagé, refus fermé et verrou local sont présents', () => {
     assert.ok(source.includes("import { getSupabaseClient } from './js/supabase-client.js'"));
     assert.ok(source.includes('const supabaseClient = getSupabaseClient();'));

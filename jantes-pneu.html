@@ -379,7 +379,7 @@
             if (!pageAuthorized) return;
 
             sessionStorage.setItem('ermas_calc_product', JSON.stringify(product));
-            window.location.href = 'calcul-voie.html';
+            window.location.href = 'calcul-voie.html?source=jantes-pneu';
         };
 
         initPage().catch(() => {

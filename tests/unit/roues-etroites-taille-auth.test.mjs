@@ -79,6 +79,6 @@ test('prix et contrat calculateur restent inchangés', () => {
         'const finalVV = userRemise > 0 ? baseVV * (1 - userRemise / 100) : baseVV;',
         'finalVV.toFixed(2)',
         "sessionStorage.setItem('ermas_calc_product', JSON.stringify(product))",
-        "window.location.href = 'calcul-voie.html'"
+        "window.location.href = 'calcul-voie.html?source=roues-etroites-taille'"
     ]) assert.ok(source.includes(fragment), `contrat historique absent : ${fragment}`);
 });

@@ -24,7 +24,7 @@
                     <h2 class="font-brand text-xl sm:text-2xl font-bold text-white">Calculateur de voie</h2>
                     <p class="text-xs text-gray-400 mt-0.5">Simulation basée sur le produit sélectionné</p>
                 </div>
-                <button onclick="history.back()" class="text-xs text-gray-400 hover:text-white uppercase tracking-wider bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg transition shrink-0">Retour</button>
+                <button onclick="retourCalculVoie()" class="text-xs text-gray-400 hover:text-white uppercase tracking-wider bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg transition shrink-0">Retour</button>
             </div>
 
             <!-- RAPPEL PRODUIT -->
@@ -71,6 +71,12 @@
         import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
 
         const supabaseClient = getSupabaseClient();
+        const SOURCE_DESTINATIONS = Object.freeze({
+            'jantes-taille': 'jantes-taille.html',
+            'jantes-pneu': 'jantes-pneu.html',
+            'roues-etroites-taille': 'roues-etroites-taille.html',
+            'roues-etroites-pneu': 'roues-etroites-pneu.html'
+        });
 
         const productNameEl = document.getElementById('product-name');
         const inputFam = document.getElementById('input-fam');
@@ -81,7 +87,12 @@
 
         let dataI = 0;
         let dataJ = 0;
+        let backDestination = 'accueil.html';
         let pageAuthorized = false;
+
+        window.retourCalculVoie = function() {
+            window.location.href = backDestination;
+        };
 
         async function init() {
             let context;
@@ -96,6 +107,10 @@
                 window.location.href = 'index.html';
                 return;
             }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const sourceParam = urlParams.get('source');
+            backDestination = SOURCE_DESTINATIONS[sourceParam] || 'accueil.html';
 
             const selectedProduct = JSON.parse(sessionStorage.getItem('ermas_calc_product'));
             if (!selectedProduct) {

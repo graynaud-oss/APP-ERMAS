@@ -84,7 +84,7 @@ test('le parser, les prix VF/VV et la navigation historique sont inchangés', ()
         'const finalVF = userRemise > 0 ? baseVF * (1 - userRemise / 100) : baseVF;',
         'const finalVV = userRemise > 0 ? baseVV * (1 - userRemise / 100) : baseVV;',
         "sessionStorage.setItem('ermas_calc_product', JSON.stringify(product))",
-        "window.location.href = 'calcul-voie.html'"
+        "window.location.href = 'calcul-voie.html?source=jantes-taille'"
     ]) {
         assert.ok(source.includes(fragment), `fragment métier absent : ${fragment}`);
     }
