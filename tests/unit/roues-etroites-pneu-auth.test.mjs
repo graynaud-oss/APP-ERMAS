@@ -67,8 +67,9 @@ test('sources, parallélisme, parsers et colonnes restent inchangés', () => {
         'function parseCSVLine(line)', 'function parseTarifsCSV(text)', 'function parsePneuCSV(text)',
         "let inQuotes = false", "char === ',' && !inQuotes", 'largeurJante: cols[0]',
         'diametre:     cols[1]', 'horsTout:     cols[2]', 'emboitement:  cols[3]',
-        'profil:       cols[4]', 'nom:          cols[5]', 'prixVV:       cols[6]',
-        'deportMaxI:   cols[8]', 'deportMinJ:   cols[9]'
+        'profil:       cols[4]', 'nom:          cols[5]',
+        'const prices = getNarrowWheelPricesFromColumns(cols)', 'prixVV:       prices.prixEco',
+        'deportMaxI:   cols[9]', 'deportMinJ:   cols[10]'
     ]) assert.ok(source.includes(fragment), `fragment CSV absent : ${fragment}`);
 });
 
@@ -83,11 +84,11 @@ test('correspondance, normalisation, filtres et déduplication restent inchangé
     ]) assert.ok(source.includes(fragment), `règle métier absente : ${fragment}`);
 });
 
-test('prix, stockage et calculateur restent inchangés', () => {
+test('trois tarifs, stockage et calculateur restent présents', () => {
     for (const fragment of [
-        "const baseVV = parseFloat(match.prixVV.replace(',', '.')) || 0;",
-        'const finalVV = userRemise > 0 ? baseVV * (1 - userRemise / 100) : baseVV;',
-        'finalVV.toFixed(2)', 'match.deportMaxI', 'match.deportMinJ',
+        "from './js/narrow-wheel-pricing.js'",
+        'renderNarrowWheelPriceOffers(match, userRemise, netPriceVisible)',
+        'prixVV:       prices.prixEco', 'match.deportMaxI', 'match.deportMinJ',
         "sessionStorage.setItem('ermas_calc_product', JSON.stringify(product))",
         "window.location.href = 'calcul-voie.html?source=roues-etroites-pneu'"
     ]) assert.ok(source.includes(fragment), `contrat historique absent : ${fragment}`);
@@ -96,13 +97,11 @@ test('prix, stockage et calculateur restent inchangés', () => {
 test('Roues Étroites Pneu généralise le contrôle commun à toutes les cartes', () => {
     assert.ok(source.includes("from './js/net-price-visibility.js'"));
     assert.equal(source.match(/id="net-price-toggle"/g)?.length, 1);
-    assert.equal(source.match(/data-net-price \$\{netPriceVisible/g)?.length, 1);
     assert.ok(source.includes('netPriceVisible = isNetPriceVisible();'));
     assert.ok(source.includes('netPriceVisible = setNetPriceVisible(netPriceToggle.checked);'));
     assert.ok(source.includes("resultsContent.querySelectorAll('[data-net-price]')"));
     assert.ok(source.includes('updateNetPriceVisibility();\n            resultsContainer.classList.remove'));
-    assert.ok(source.includes('class="results-price-block"'));
-    assert.ok(source.includes('class="results-price-block__net"'));
+    assert.ok(source.includes('renderNarrowWheelPriceOffers(match, userRemise, netPriceVisible)'));
     assert.ok(source.includes('class="results-primary-action"'));
     assert.doesNotMatch(source, /localStorage|Remise appliquée|Réduction|Économie|Prix NET\s*\([^)]*%/i);
 });

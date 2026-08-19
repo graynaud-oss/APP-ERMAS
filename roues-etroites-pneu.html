@@ -66,6 +66,7 @@
         import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
         import { isNetPriceVisible, setNetPriceVisible } from './js/net-price-visibility.js';
         import { escapeHtml } from './js/safe-dom.js';
+        import { getNarrowWheelPricesFromColumns, renderNarrowWheelPriceOffers } from './js/narrow-wheel-pricing.js';
 
         const PNEU_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=139891043&single=true&output=csv';
         const TARIFS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=21297594&single=true&output=csv';
@@ -183,6 +184,7 @@
                 const cols = parseCSVLine(line);
                 
                 if (cols.length >= 7) {
+                    const prices = getNarrowWheelPricesFromColumns(cols);
                     tarifsData.push({
                         largeurJante: cols[0], // Col A
                         diametre:     cols[1], // Col B
@@ -190,9 +192,10 @@
                         emboitement:  cols[3], // Col D
                         profil:       cols[4], // Col E
                         nom:          cols[5], // Col F
-                        prixVV:       cols[6], // Col G (Prix roue étroite)
-                        deportMaxI:   cols[8] || '',
-                        deportMinJ:   cols[9] || ''
+                        ...prices,
+                        prixVV:       prices.prixEco, // Alias historique conservé pour le contrat calculateur
+                        deportMaxI:   cols[9] || '',
+                        deportMinJ:   cols[10] || ''
                     });
                 }
             }
@@ -361,34 +364,7 @@
                         <div class="pt-2 border-t border-gray-800/80">
                 `;
 
-                const baseVV = parseFloat(match.prixVV.replace(',', '.')) || 0;
-                const finalVV = userRemise > 0 ? baseVV * (1 - userRemise / 100) : baseVV;
-                
-                html += `
-                    <div class="results-price-block">
-                        <div>
-                            <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Voie variable (Roue étroite)</span>
-                `;
-
-                if (userRemise > 0) {
-                    html += `
-                            <div class="text-[10px] text-gray-400 mt-0.5">Prix BRUT : <span class="text-white font-medium">${baseVV.toFixed(2)} €</span></div>
-                        </div>
-                        <div data-net-price ${netPriceVisible ? '' : 'hidden'} class="results-price-block__net">
-                            <div class="text-[10px] uppercase tracking-wider text-red-400 font-semibold">Prix NET</div>
-                            <div class="text-white font-bold text-base">${finalVV.toFixed(2)} €</div>
-                        </div>
-                    `;
-                } else {
-                    html += `
-                            <div class="text-[10px] uppercase tracking-wider text-gray-500 mt-0.5">Prix BRUT</div>
-                        </div>
-                        <div class="results-price-block__net">
-                            <div class="text-white font-bold text-base">${finalVV.toFixed(2)} €</div>
-                        </div>
-                    `;
-                }
-                html += `</div></div>`;
+                html += `${renderNarrowWheelPriceOffers(match, userRemise, netPriceVisible)}</div>`;
 
                 const hasValidI = match.deportMaxI && !isNaN(parseFloat(match.deportMaxI));
                 const hasValidJ = match.deportMinJ && !isNaN(parseFloat(match.deportMinJ));

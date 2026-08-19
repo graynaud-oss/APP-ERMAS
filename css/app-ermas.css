@@ -1621,6 +1621,95 @@ button {
     text-align: left;
 }
 
+.results-tier-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.results-tier-card {
+    min-width: 0;
+    min-height: 126px;
+    padding: 14px;
+    border: 1px solid var(--app-border);
+    border-radius: 4px;
+    background: var(--app-surface-muted);
+}
+
+.results-tier-card__title {
+    margin: 0 0 12px;
+    color: var(--ermas-blue);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+
+.results-tier-card__gross,
+.results-tier-card__net {
+    display: grid;
+    gap: 4px;
+}
+
+.results-tier-card__gross span,
+.results-tier-card__net span {
+    color: var(--app-text-muted);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.results-tier-card__gross strong,
+.results-tier-card__net strong {
+    color: var(--app-text);
+    font-size: 1rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.results-tier-card__net {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--app-border);
+}
+
+.results-tier-card__net span { color: var(--ermas-blue); }
+.results-tier-card__unavailable { margin: 0; color: var(--app-text-muted); font-size: 0.82rem; }
+
+.catalog-info-section {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--app-border);
+}
+
+.catalog-info-section__title {
+    margin: 0 0 14px;
+    color: var(--ermas-anthracite);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.catalog-info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.catalog-info-card {
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid var(--app-border);
+    border-radius: 4px;
+    background: var(--app-surface-muted);
+}
+
+.catalog-info-card h3 { margin: 0 0 12px; color: var(--ermas-blue); font-size: 0.82rem; }
+.catalog-info-card h4 { margin: 10px 0 3px; color: var(--app-text); font-size: 0.65rem; letter-spacing: 0.05em; text-transform: uppercase; }
+.catalog-info-card p { margin: 0; color: var(--app-text-muted); font-size: 0.72rem; line-height: 1.45; }
+.catalog-note-list { display: grid; gap: 4px; margin-top: 12px; }
+.catalog-note-list p { margin: 0; color: var(--app-text-muted); font-size: 0.7rem; line-height: 1.45; }
+
 .results-option-block {
     min-height: 90px;
     padding: 12px;
@@ -1728,6 +1817,13 @@ button {
     .results-content .grid-cols-2 {
         grid-template-columns: 1fr;
     }
+
+    .results-tier-grid,
+    .catalog-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .results-tier-card { min-height: 0; }
 }
 
 /* Technical calculators and document library */

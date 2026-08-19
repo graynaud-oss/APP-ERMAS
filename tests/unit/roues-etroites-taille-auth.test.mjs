@@ -67,17 +67,18 @@ test('source, parser, champs, filtres et tri restent présents', () => {
         'function parseCSV(text)', "const lines = text.split('\\n')", "let inQuotes = false",
         "char === ',' && !inQuotes", 'largeurJante: cols[0]', 'diametre:     cols[1]',
         'horsTout:     cols[2]', 'emboitement:  cols[3]', 'profil:       cols[4]',
-        'nom:          cols[5]', 'prixVV:       cols[6]', 'deportMaxI:   cols[8]',
-        'deportMinJ:   cols[9]', 'diametres.sort((a, b) => parseFloat(a) - parseFloat(b))',
+        'nom:          cols[5]', 'const prices = getNarrowWheelPricesFromColumns(cols)',
+        'prixVV:       prices.prixEco', 'deportMaxI:   cols[9]',
+        'deportMinJ:   cols[10]', 'diametres.sort((a, b) => parseFloat(a) - parseFloat(b))',
         'item.diametre === chosenD', 'item.largeurJante === chosenL', 'item.profil === chosenP'
     ]) assert.ok(source.includes(fragment), `fragment métier absent : ${fragment}`);
 });
 
-test('prix et contrat calculateur restent inchangés', () => {
+test('trois tarifs et contrat calculateur restent présents', () => {
     for (const fragment of [
-        "const baseVV = parseFloat(match.prixVV.replace(',', '.')) || 0;",
-        'const finalVV = userRemise > 0 ? baseVV * (1 - userRemise / 100) : baseVV;',
-        'finalVV.toFixed(2)',
+        "from './js/narrow-wheel-pricing.js'",
+        'renderNarrowWheelPriceOffers(match, userRemise, netPriceVisible)',
+        'prixVV:       prices.prixEco',
         "sessionStorage.setItem('ermas_calc_product', JSON.stringify(product))",
         "window.location.href = 'calcul-voie.html?source=roues-etroites-taille'"
     ]) assert.ok(source.includes(fragment), `contrat historique absent : ${fragment}`);
@@ -86,13 +87,10 @@ test('prix et contrat calculateur restent inchangés', () => {
 test('Roues Étroites Taille généralise le contrôle commun BRUT NET sans modifier la coercition', () => {
     assert.ok(source.includes("from './js/net-price-visibility.js'"));
     assert.equal(source.match(/id="net-price-toggle"/g)?.length, 1);
-    assert.equal(source.match(/data-net-price \$\{netPriceVisible/g)?.length, 1);
     assert.ok(source.includes('netPriceVisible = isNetPriceVisible();'));
     assert.ok(source.includes('netPriceVisible = setNetPriceVisible(netPriceToggle.checked);'));
     assert.ok(source.includes("resultsContent.querySelectorAll('[data-net-price]')"));
-    assert.ok(source.includes("const baseVV = parseFloat(match.prixVV.replace(',', '.')) || 0;"));
-    assert.ok(source.includes('class="results-price-block"'));
-    assert.ok(source.includes('class="results-price-block__net"'));
+    assert.ok(source.includes('renderNarrowWheelPriceOffers(match, userRemise, netPriceVisible)'));
     assert.ok(source.includes('class="results-primary-action"'));
     assert.doesNotMatch(source, /localStorage|Remise appliquée|Réduction|Économie|Prix NET\s*\([^)]*%/i);
 });

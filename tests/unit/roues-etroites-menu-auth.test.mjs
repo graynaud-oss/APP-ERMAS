@@ -52,6 +52,13 @@ test('le contenu historique de la vue Roues étroites est conservé', () => {
         'Recherche directe par dimensions de jante étroite',
         'Par taille de pneu',
         'Recherche par dimension de pneu',
+        'Gamme ECO',
+        'Gamme PRO',
+        'Gamme ELITE',
+        '8 × 2 trous à Ø700.',
+        '8 × 3 trous à Ø950.',
+        'boulons renforcés classe 10.9 et des rondelles HLE',
+        'Les jantes 30&quot; sont fournies sans centre interchangeable.',
         'Avertissement important :',
         'Il est impératif de vérifier la correspondance et la faisabilité auprès des données techniques du manufacturier avant toute commande.',
         '&copy; 2026 ERMAS - Tous droits réservés.'
