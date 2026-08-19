@@ -13,7 +13,9 @@ const redesignedPages = [
     'roues-etroites.html',
     'jumelages.html',
     'jumelages-choix.html',
-    'jumelages-information.html'
+    'jumelages-information.html',
+    'jumelages-pieces-evo.html',
+    'jumelages-pieces-360.html'
 ];
 const redesignedSources = await Promise.all(
     redesignedPages.map(async (file) => [file, await readFile(path.join(root, file), 'utf8')])

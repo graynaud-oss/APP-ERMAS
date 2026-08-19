@@ -20,6 +20,8 @@ const headerLogoPages = [
     'jumelages-information.html',
     'jumelages-jantes-taille.html',
     'jumelages-jantes-pneu.html',
+    'jumelages-pieces-evo.html',
+    'jumelages-pieces-360.html',
     'contact.html',
     'calcul-voie.html',
     'calcul-hors-tout.html',
@@ -40,6 +42,6 @@ test('tous les logos de header ouvrent le site officiel dans un nouvel onglet s�
     }
 });
 
-test('les dix-sept pages avec header partagent le même lien de marque', () => {
-    assert.equal(headerLogoPages.length, 17);
+test('les dix-neuf pages avec header partagent le même lien de marque', () => {
+    assert.equal(headerLogoPages.length, 19);
 });

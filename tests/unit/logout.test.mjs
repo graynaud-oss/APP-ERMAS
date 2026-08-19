@@ -20,6 +20,8 @@ const protectedPages = [
     'jumelages-information.html',
     'jumelages-jantes-taille.html',
     'jumelages-jantes-pneu.html',
+    'jumelages-pieces-evo.html',
+    'jumelages-pieces-360.html',
     'calcul-voie.html',
     'calcul-hors-tout.html',
     'documents.html',
@@ -32,8 +34,8 @@ const sources = new Map(await Promise.all(protectedPages.map(async (file) => [
 const logoutSource = await readFile(path.join(root, 'js', 'logout.js'), 'utf8');
 const indexSource = await readFile(path.join(root, 'index.html'), 'utf8');
 
-test('les seize pages protégées exposent exactement un bouton de déconnexion global', () => {
-    assert.equal(protectedPages.length, 16);
+test('les dix-huit pages protégées exposent exactement un bouton de déconnexion global', () => {
+    assert.equal(protectedPages.length, 18);
     for (const [file, source] of sources) {
         assert.equal(source.match(/data-global-logout/g)?.length, 1, `${file} doit contenir un bouton global`);
         assert.equal(source.match(/Se déconnecter/g)?.length, 1, `${file} doit afficher le libellé exact`);

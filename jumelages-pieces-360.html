@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERMAS - Pièces détachées Jumelages 360</title>
+    <link rel="icon" type="image/png" href="assets/brand/favicon.png">
+    <link rel="shortcut icon" href="assets/brand/favicon.ico">
+    <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/app-ermas.css">
+    <script type="module" src="./js/logout.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body data-parts-catalog-gamme="360">
+<div class="app-shell catalog-page parts-page">
+    <header class="app-header"><div class="app-container app-header__inner"><a class="app-logo-link" href="https://www.ermas.fr/" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le site ERMAS"><img class="app-logo" src="assets/brand/ermas-logo.png" alt=""></a><button type="button" class="app-logout-button" data-global-logout>Se déconnecter</button></div></header>
+    <main class="catalog-page__body"><div class="app-container">
+        <section class="app-page-panel parts-page__panel" aria-labelledby="page-title">
+            <div class="app-page-header"><div><p class="app-page-eyebrow">Catalogue Jumelages — 360</p><h1 id="page-title" class="app-page-title">Pièces détachées &amp; quincaillerie</h1><p class="app-page-subtitle">Identifiez une pièce directement sur l'éclaté 360.</p></div><button type="button" onclick="window.location.href='jumelages-choix.html?type=360'" class="app-back-button">Retour</button></div>
+            <div id="parts-protected-content" hidden>
+                <div class="parts-toolbar"><p id="parts-status" class="parts-status" role="status"></p></div>
+                <div class="parts-layout">
+                    <div class="parts-diagram-scroll" tabindex="0" aria-label="Schéma éclaté interactif 360"><div class="parts-diagram"><picture><source media="(max-width: 560px)" srcset="assets/jumelages/360-pieces-mobile.png"><img src="assets/jumelages/360-pieces.png" alt="Éclaté du jumelage 360 avec repères de pièces"></picture><div id="parts-hotspots" class="parts-hotspots"></div></div></div>
+                    <div class="parts-net-control-row"><div id="net-price-control" class="net-price-control"><label class="net-price-toggle" for="net-price-toggle" aria-label="Afficher ou masquer les prix NET"><span>Prix NET</span><input id="net-price-toggle" class="net-price-toggle__input" type="checkbox"><span class="net-price-toggle__track" aria-hidden="true"></span><span id="net-price-toggle-state" class="net-price-toggle__state" aria-live="polite">OFF</span></label></div></div>
+                    <aside id="parts-detail" class="parts-detail" aria-live="polite"><p class="parts-detail__instruction">Sélectionnez une pièce pour afficher ses caractéristiques et son prix.</p></aside>
+                </div>
+            </div>
+        </section>
+    </div></main>
+    <footer class="app-footer"><div class="app-container app-footer__inner"><p>&copy; 2026 ERMAS - Tous droits réservés.</p><nav class="app-footer__links" aria-label="Informations juridiques"><a href="https://www.ermas.fr/mentions-legales" target="_blank" rel="noopener noreferrer">Mentions légales</a><span aria-hidden="true">|</span><a href="https://www.ermas.fr/politique-confidentialite" target="_blank" rel="noopener noreferrer">Politique de confidentialité</a></nav></div></footer>
+</div>
+<script type="module" src="./js/jumelages-parts-page.js"></script>
+</body>
+</html>

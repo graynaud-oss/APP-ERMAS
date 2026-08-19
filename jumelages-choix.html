@@ -107,6 +107,15 @@
                         La recherche par taille de pneus est fournie à titre purement indicatif. Il est impératif de vérifier la correspondance et la faisabilité auprès des données techniques du manufacturier avant toute commande.
                     </div>
                 </div>
+
+                ${gammeType === 'EVO' || gammeType === '360' ? `
+                <div class="parts-access-block">
+                    <p class="parts-access-block__eyebrow">Service de la gamme</p>
+                    <button type="button" onclick="ouvrirCataloguePieces()" class="parts-access-button">
+                        <span class="parts-access-button__icon" aria-hidden="true">+</span>
+                        <span><strong>Quincaillerie &amp; pièces détachées</strong><small>Identifier une pièce sur l'éclaté et consulter son prix</small></span>
+                    </button>
+                </div>` : ''}
             `;
 
             window.redirigerVers = (mode) => {
@@ -121,6 +130,14 @@
                     window.location.href = `jumelages-jantes-pneu.html?type=${encodedType}`;
                 }
             };
+
+            if (gammeType === 'EVO' || gammeType === '360') {
+                window.ouvrirCataloguePieces = () => {
+                    window.location.href = gammeType === 'EVO'
+                        ? 'jumelages-pieces-evo.html'
+                        : 'jumelages-pieces-360.html';
+                };
+            }
         }
 
         init().catch(() => {
