@@ -45,8 +45,8 @@ test('les parcours EVO et 360 sont exacts et fermés', () => {
 test('TGD et TGD+ conservent leurs valeurs et utilisent les routes encodées', () => {
     assert.ok(source.includes('data-gamme="TGD"'));
     assert.ok(source.includes('data-gamme="TGD+"'));
-    assert.ok(source.includes('data-protected-route="jumelages-information.html?type=TGD"'));
-    assert.ok(source.includes('data-protected-route="jumelages-information.html?type=TGD%2B"'));
+    assert.ok(source.includes('data-protected-route="jumelages-choix.html?type=TGD"'));
+    assert.ok(source.includes('data-protected-route="jumelages-choix.html?type=TGD%2B"'));
     assert.doesNotMatch(source, /id="jumelages-tgd-view"|id="jumelages-tgd-plus-view"/);
     assert.doesNotMatch(source, /data-information-view|data-return-to-catalogue|showInformationView|showCatalogue/);
 });

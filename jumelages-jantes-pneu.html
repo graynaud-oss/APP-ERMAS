@@ -83,16 +83,16 @@
         import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
         import { isNetPriceVisible, setNetPriceVisible } from './js/net-price-visibility.js';
         import { escapeHtml } from './js/safe-dom.js';
-
-        const URLS_PNEU = {
-            'EVO': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=139891043&single=true&output=csv',
-            '360': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=139891043&single=true&output=csv'
-        };
-
-        const URLS_TARIFS = {
-            'EVO': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1732806915&single=true&output=csv',
-            '360': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1287684735&single=true&output=csv'
-        };
+        import {
+            filterTiresByAvailableCatalogDimensions,
+            findCatalogProductsForTires,
+            getEncodedJumelagesType,
+            getJumelagesCatalogUrl,
+            isAllowedJumelagesType,
+            isTgdJumelagesType,
+            JUMELAGES_TIRE_CSV_URL,
+            parseTgdCatalogCsv
+        } from './js/jumelages-catalog.js';
 
         const supabaseClient = getSupabaseClient();
 
@@ -104,6 +104,7 @@
         let pageAuthorized = false;
         let netPriceVisible = isNetPriceVisible();
         let selectedWidthHasRapports = true;
+        let simplifiedCatalog = false;
 
         window.retourJumelages = function() {
             window.location.href = backDestination;
@@ -150,10 +151,13 @@
 
             const urlParams = new URLSearchParams(window.location.search);
             const requestedType = urlParams.get('type');
-            gammeType = urlParams.get('type') || 'EVO';
-            backDestination = requestedType === 'EVO' || requestedType === '360'
-                ? `jumelages-choix.html?type=${requestedType}`
-                : 'jumelages.html';
+            if (!isAllowedJumelagesType(requestedType)) {
+                window.location.href = 'jumelages.html';
+                return;
+            }
+            gammeType = requestedType;
+            simplifiedCatalog = isTgdJumelagesType(gammeType);
+            backDestination = `jumelages-choix.html?type=${getEncodedJumelagesType(gammeType)}`;
             document.getElementById('page-eyebrow').textContent = `Catalogue Jumelages — ${gammeType}`;
             document.getElementById('page-title').textContent = 'Recherche par taille de pneu';
             netPriceToggle.addEventListener('change', () => {
@@ -166,8 +170,8 @@
 
             try {
                 const [pneuRes, tarifsRes] = await Promise.all([
-                    fetch(URLS_PNEU[gammeType]),
-                    fetch(URLS_TARIFS[gammeType])
+                    fetch(JUMELAGES_TIRE_CSV_URL),
+                    fetch(getJumelagesCatalogUrl(gammeType))
                 ]);
 
                 if (!pneuRes.ok || !tarifsRes.ok) {
@@ -208,6 +212,10 @@
         }
 
         function parseTarifsCSV(text) {
+            if (simplifiedCatalog) {
+                tarifsData = parseTgdCatalogCsv(text);
+                return;
+            }
             const lines = text.split('\n');
             tarifsData = [];
 
@@ -235,12 +243,7 @@
 
         let filteredPneuData = [];
         function filtrerPneusDisponibles() {
-            filteredPneuData = pneuData.filter(pneu => {
-                return tarifsData.some(tarif => 
-                    tarif.largeurJante.toLowerCase() === pneu.largeurJante.toLowerCase() &&
-                    tarif.diametre.toLowerCase() === pneu.diametrePneu.toLowerCase()
-                );
-            });
+            filteredPneuData = filterTiresByAvailableCatalogDimensions(pneuData, tarifsData);
         }
 
         function populateLargeursPneu() {
@@ -373,27 +376,26 @@
                 return;
             }
 
-            const uniqueLargeursJantes = [...new Set(matchingPneus.map(item => item.largeurJante))].filter(Boolean);
-            
-            // Collecte de tous les tarifs correspondants
-            let allMatchedTarifs = [];
-            uniqueLargeursJantes.forEach(targetLargeurJante => {
-                const matchedTarifs = tarifsData.filter(t => 
-                    t.largeurJante.toLowerCase() === targetLargeurJante.toLowerCase() && 
-                    t.diametre.toLowerCase() === chosenD.toLowerCase()
-                );
-                allMatchedTarifs.push(...matchedTarifs);
-            });
-
-            // Filtrage des doublons / triples basé sur le NOM (colonne E) et le NOMBRE DE TENDEURS (colonne F)
-            const uniqueTarifsMap = new Map();
-            allMatchedTarifs.forEach(match => {
-                const uniqueKey = `${(match.nom || '').trim().toLowerCase()}_${(match.tendeurs || '').trim().toLowerCase()}`;
-                if (!uniqueTarifsMap.has(uniqueKey)) {
-                    uniqueTarifsMap.set(uniqueKey, match);
-                }
-            });
-            const finalMatchedTarifs = Array.from(uniqueTarifsMap.values());
+            let finalMatchedTarifs;
+            if (simplifiedCatalog) {
+                finalMatchedTarifs = findCatalogProductsForTires(matchingPneus, tarifsData);
+            } else {
+                const uniqueLargeursJantes = [...new Set(matchingPneus.map(item => item.largeurJante))].filter(Boolean);
+                let allMatchedTarifs = [];
+                uniqueLargeursJantes.forEach(targetLargeurJante => {
+                    const matchedTarifs = tarifsData.filter(t =>
+                        t.largeurJante.toLowerCase() === targetLargeurJante.toLowerCase()
+                        && t.diametre.toLowerCase() === chosenD.toLowerCase()
+                    );
+                    allMatchedTarifs.push(...matchedTarifs);
+                });
+                const uniqueTarifsMap = new Map();
+                allMatchedTarifs.forEach(match => {
+                    const uniqueKey = `${(match.nom || '').trim().toLowerCase()}_${(match.tendeurs || '').trim().toLowerCase()}`;
+                    if (!uniqueTarifsMap.has(uniqueKey)) uniqueTarifsMap.set(uniqueKey, match);
+                });
+                finalMatchedTarifs = Array.from(uniqueTarifsMap.values());
+            }
 
             let html = '';
 
@@ -456,8 +458,9 @@
                     `;
                 }
 
-                // OPTIONS DISCRÈTES (H, I, J, K)
-                html += `
+                // Les options et calculateurs concernent uniquement EVO / 360.
+                if (!simplifiedCatalog) {
+                    html += `
                     <div class="pt-2 border-t border-gray-800/80">
                         <span class="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-2">Options / Suppléments</span>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -510,7 +513,7 @@
                     }
                 });
 
-                html += `
+                    html += `
                         </div>
                     </div>
 
@@ -521,6 +524,9 @@
                         </button>
                     </div>
                 </div>`;
+                } else {
+                    html += `</div>`;
+                }
             });
 
             if (!html) {
@@ -534,7 +540,7 @@
         });
 
         function ouvrirCalculHorsTout(payloadEncoded) {
-            if (!pageAuthorized) return;
+            if (!pageAuthorized || simplifiedCatalog) return;
 
             const productData = JSON.parse(decodeURIComponent(payloadEncoded));
             sessionStorage.setItem('ermas_hors_tout_product', JSON.stringify(productData));

@@ -9,6 +9,7 @@ import { AUTHORIZATION_STATES } from '../../js/auth-guard.js';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..', '..');
 const source = await readFile(path.join(root, 'jumelages-jantes-taille.html'), 'utf8');
+const catalogSource = await readFile(path.join(root, 'js', 'jumelages-catalog.js'), 'utf8');
 
 function pageDecision(state) {
     return state === AUTHORIZATION_STATES.AUTHORIZED ? 'LOAD' : 'INDEX';
@@ -27,7 +28,7 @@ test('le garde précède remise, type, CSV et restauration', () => {
     const authorizedPosition = source.indexOf('context.state !== AUTHORIZATION_STATES.AUTHORIZED');
     const remisePosition = source.indexOf('context.profile.remise');
     const typePosition = source.indexOf('new URLSearchParams(window.location.search)');
-    const fetchPosition = source.indexOf('fetch(URLS_CSV[gammeType])');
+    const fetchPosition = source.indexOf('fetch(getJumelagesCatalogUrl(gammeType))');
     const restoreCallPosition = source.indexOf('restaurerSelections();');
 
     assert.ok(guardPosition >= 0);
@@ -61,34 +62,36 @@ test('le client partagé remplace la configuration locale', () => {
 test('les filtres et le calculateur restent inactifs avant autorisation', () => {
     assert.ok(source.includes('let pageAuthorized = false;'));
     assert.ok(source.includes('pageAuthorized = true;'));
-    assert.ok(source.split('if (!pageAuthorized) return;').length - 1 >= 4);
+    assert.ok(source.split('if (!pageAuthorized) return;').length - 1 >= 3);
+    assert.ok(source.includes('if (!pageAuthorized || simplifiedCatalog) return;'));
 });
 
-test('le retour conserve uniquement EVO ou 360 et utilise un fallback sûr', () => {
-    const destinationFor = (type) => type === 'EVO' || type === '360'
-        ? `jumelages-choix.html?type=${type}`
+test('le retour conserve les quatre types autorisés et encode TGD+', () => {
+    const destinationFor = (type) => ['EVO', '360', 'TGD', 'TGD+'].includes(type)
+        ? `jumelages-choix.html?type=${encodeURIComponent(type)}`
         : 'jumelages.html';
 
     assert.equal(destinationFor('EVO'), 'jumelages-choix.html?type=EVO');
     assert.equal(destinationFor('360'), 'jumelages-choix.html?type=360');
+    assert.equal(destinationFor('TGD'), 'jumelages-choix.html?type=TGD');
+    assert.equal(destinationFor('TGD+'), 'jumelages-choix.html?type=TGD%2B');
     assert.equal(destinationFor('INCONNU'), 'jumelages.html');
     assert.equal(destinationFor(null), 'jumelages.html');
     assert.ok(source.includes("let backDestination = 'jumelages.html';"));
-    assert.ok(source.includes("requestedType === 'EVO' || requestedType === '360'"));
-    assert.ok(source.includes('`jumelages-choix.html?type=${requestedType}`'));
+    assert.ok(source.includes('if (!isAllowedJumelagesType(requestedType))'));
+    assert.ok(source.includes('`jumelages-choix.html?type=${getEncodedJumelagesType(gammeType)}`'));
     assert.ok(source.includes("window.location.href = backDestination;"));
     assert.doesNotMatch(source, /(?:window\.)?history\.back\s*\(/);
     assert.doesNotMatch(source, /document\.referrer/);
 });
 
-test('les gammes et les sources CSV historiques restent inchangées', () => {
-    const csvUrls = source.match(/https:\/\/docs\.google\.com\/spreadsheets\/[^']+output=csv/g) || [];
-    assert.equal(csvUrls.length, 2);
-    assert.ok(source.includes("'EVO':"));
-    assert.ok(source.includes("'360':"));
-    assert.ok(source.includes('gid=1732806915&single=true&output=csv'));
-    assert.ok(source.includes('gid=1287684735&single=true&output=csv'));
-    assert.ok(source.includes("urlParams.get('type') || 'EVO'"));
+test('les sources historiques et TGD sont centralisées sans URL construite depuis la query', () => {
+    for (const gid of ['1732806915', '1287684735', '1649910681', '801659039']) {
+        assert.ok(catalogSource.includes(`gid=${gid}&single=true&output=csv`));
+    }
+    assert.ok(source.includes("from './js/jumelages-catalog.js'"));
+    assert.ok(source.includes('fetch(getJumelagesCatalogUrl(gammeType))'));
+    assert.doesNotMatch(source, /fetch\([^)]*requestedType/);
 });
 
 test('parser, champs, filtres et déduplication restent présents', () => {

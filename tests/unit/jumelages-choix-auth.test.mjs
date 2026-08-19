@@ -5,6 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 
 import { AUTHORIZATION_STATES } from '../../js/auth-guard.js';
+import { getEncodedJumelagesType, isAllowedJumelagesType } from '../../js/jumelages-catalog.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..', '..');
@@ -77,14 +78,14 @@ test('tous les retours utilisent la destination explicite du menu Jumelages', ()
 
 test('le comportement métier autorisé reste présent', () => {
     for (const fragment of [
-        "new Set(['EVO', '360'])",
+        "from './js/jumelages-catalog.js'",
         "const requestedType = urlParams.get('type')",
-        'if (!allowedTypes.has(requestedType))',
+        'if (!isAllowedJumelagesType(requestedType))',
         'const gammeType = requestedType',
         "redirigerVers('taille')",
         "redirigerVers('pneu')",
-        'jumelages-jantes-taille.html?type=${gammeType}',
-        'jumelages-jantes-pneu.html?type=${gammeType}',
+        'jumelages-jantes-taille.html?type=${encodedType}',
+        'jumelages-jantes-pneu.html?type=${encodedType}',
         'Par taille de jante',
         'Par taille de pneu'
     ]) {
@@ -94,16 +95,16 @@ test('le comportement métier autorisé reste présent', () => {
 });
 
 test('le paramètre type utilise une allowlist fermée sans fallback EVO implicite', () => {
-    const isAllowed = (value) => new Set(['EVO', '360']).has(value);
-
-    assert.equal(isAllowed('EVO'), true);
-    assert.equal(isAllowed('360'), true);
-    for (const value of [null, '', 'ABC', 'TGD', '360/../foo']) {
-        assert.equal(isAllowed(value), false);
+    for (const value of ['EVO', '360', 'TGD', 'TGD+']) {
+        assert.equal(isAllowedJumelagesType(value), true);
     }
+    for (const value of [null, '', 'ABC', 'TGD++', 'tgd', '360/../foo']) {
+        assert.equal(isAllowedJumelagesType(value), false);
+    }
+    assert.equal(getEncodedJumelagesType('TGD+'), 'TGD%2B');
 
     assert.doesNotMatch(source, /urlParams\.get\('type'\) \|\| 'EVO'/);
-    assert.match(source, /if \(!allowedTypes\.has\(requestedType\)\) \{\s*window\.location\.href = 'jumelages\.html';\s*return;/);
+    assert.match(source, /if \(!isAllowedJumelagesType\(requestedType\)\) \{\s*window\.location\.href = 'jumelages\.html';\s*return;/);
 });
 
 test('la page de choix utilise les fondations visuelles ERMAS locales', () => {

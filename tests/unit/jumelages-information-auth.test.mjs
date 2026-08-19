@@ -44,10 +44,11 @@ test('seules les valeurs TGD et TGD+ sont acceptées', () => {
     assert.doesNotMatch(source, /innerHTML/);
 });
 
-test('les routes TGD et TGD+ utilisent les valeurs et encodages exacts', () => {
-    assert.ok(menuSource.includes('jumelages-information.html?type=TGD"'));
-    assert.ok(menuSource.includes('jumelages-information.html?type=TGD%2B"'));
-    assert.doesNotMatch(menuSource, /jumelages-information\.html\?type=TGD\+"/);
+test('le menu dirige désormais TGD et TGD+ vers le choix de recherche encodé', () => {
+    assert.ok(menuSource.includes('jumelages-choix.html?type=TGD"'));
+    assert.ok(menuSource.includes('jumelages-choix.html?type=TGD%2B"'));
+    assert.doesNotMatch(menuSource, /jumelages-choix\.html\?type=TGD\+"/);
+    assert.doesNotMatch(menuSource, /jumelages-information\.html\?type=/);
 });
 
 test('les deux contenus informatifs historiques et puissances sont conservés', () => {

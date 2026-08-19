@@ -8,6 +8,7 @@ import { AUTHORIZATION_STATES } from '../../js/auth-guard.js';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..', '..');
 const source = await readFile(path.join(root, 'jumelages-jantes-pneu.html'), 'utf8');
+const catalogSource = await readFile(path.join(root, 'js', 'jumelages-catalog.js'), 'utf8');
 
 test('seul AUTHORIZED permet la logique Jumelage par pneu', () => {
     for (const state of [...Object.values(AUTHORIZATION_STATES), 'UNKNOWN_STATE']) {
@@ -23,8 +24,8 @@ test('le garde précède remise, type, deux fetchs et restauration', () => {
         'context.state !== AUTHORIZATION_STATES.AUTHORIZED',
         'context.profile.remise',
         'new URLSearchParams(window.location.search)',
-        'fetch(URLS_PNEU[gammeType])',
-        'fetch(URLS_TARIFS[gammeType])',
+        'fetch(JUMELAGES_TIRE_CSV_URL)',
+        'fetch(getJumelagesCatalogUrl(gammeType))',
         'restaurerSelections();'
     ].map((fragment) => source.indexOf(fragment));
     assert.ok(positions.every((position) => position >= 0));
@@ -52,35 +53,35 @@ test('aucune écriture administrative ni enrôlement n’est introduit', () => {
 test('filtres, résultats et calculateur sont verrouillés avant autorisation', () => {
     assert.ok(source.includes('let pageAuthorized = false;'));
     assert.ok(source.includes('pageAuthorized = true;'));
-    assert.ok(source.split('if (!pageAuthorized) return;').length - 1 >= 4);
+    assert.ok(source.split('if (!pageAuthorized) return;').length - 1 >= 3);
+    assert.ok(source.includes('if (!pageAuthorized || simplifiedCatalog) return;'));
     assert.ok(source.includes('window.ouvrirCalculHorsTout = ouvrirCalculHorsTout;'));
 });
 
-test('le retour conserve uniquement EVO ou 360 et utilise un fallback sûr', () => {
-    const destinationFor = (type) => type === 'EVO' || type === '360'
-        ? `jumelages-choix.html?type=${type}`
+test('le retour conserve les quatre types et encode TGD+', () => {
+    const destinationFor = (type) => ['EVO', '360', 'TGD', 'TGD+'].includes(type)
+        ? `jumelages-choix.html?type=${encodeURIComponent(type)}`
         : 'jumelages.html';
 
     assert.equal(destinationFor('EVO'), 'jumelages-choix.html?type=EVO');
     assert.equal(destinationFor('360'), 'jumelages-choix.html?type=360');
+    assert.equal(destinationFor('TGD'), 'jumelages-choix.html?type=TGD');
+    assert.equal(destinationFor('TGD+'), 'jumelages-choix.html?type=TGD%2B');
     assert.equal(destinationFor('INCONNU'), 'jumelages.html');
     assert.equal(destinationFor(null), 'jumelages.html');
     assert.ok(source.includes("let backDestination = 'jumelages.html';"));
-    assert.ok(source.includes("requestedType === 'EVO' || requestedType === '360'"));
-    assert.ok(source.includes('`jumelages-choix.html?type=${requestedType}`'));
+    assert.ok(source.includes('if (!isAllowedJumelagesType(requestedType))'));
+    assert.ok(source.includes('`jumelages-choix.html?type=${getEncodedJumelagesType(gammeType)}`'));
     assert.ok(source.includes("window.location.href = backDestination;"));
     assert.doesNotMatch(source, /(?:window\.)?history\.back\s*\(/);
     assert.doesNotMatch(source, /document\.referrer/);
 });
 
-test('les quatre sources CSV, gammes et chargement parallèle restent présents', () => {
-    const urls = source.match(/https:\/\/docs\.google\.com\/spreadsheets\/[^']+output=csv/g) || [];
-    assert.equal(urls.length, 4);
-    for (const gid of ['139891043', '1732806915', '1287684735']) {
-        assert.ok(source.includes(`gid=${gid}&single=true&output=csv`));
+test('les sources CSV sont centralisées et le chargement parallèle reste protégé', () => {
+    for (const gid of ['139891043', '1732806915', '1287684735', '1649910681', '801659039']) {
+        assert.ok(catalogSource.includes(`gid=${gid}&single=true&output=csv`));
     }
-    assert.ok(source.includes("urlParams.get('type') || 'EVO'"));
-    assert.match(source, /Promise\.all\(\[\s*fetch\(URLS_PNEU\[gammeType\]\),\s*fetch\(URLS_TARIFS\[gammeType\]\)\s*\]\)/);
+    assert.match(source, /Promise\.all\(\[\s*fetch\(JUMELAGES_TIRE_CSV_URL\),\s*fetch\(getJumelagesCatalogUrl\(gammeType\)\)\s*\]\)/);
 });
 
 test('parsers, colonnes, disponibilité et jointure restent inchangés', () => {
@@ -89,8 +90,7 @@ test('parsers, colonnes, disponibilité et jointure restent inchangés', () => {
         'largeurPneu: cols[0]', 'rapport: cols[1]', 'diametrePneu: cols[2]',
         'largeurJante: cols[3]', 'prix: cols[6]', 'entretoises: cols[10]',
         'function filtrerPneusDisponibles()',
-        'tarif.largeurJante.toLowerCase() === pneu.largeurJante.toLowerCase()',
-        'tarif.diametre.toLowerCase() === pneu.diametrePneu.toLowerCase()',
+        'filterTiresByAvailableCatalogDimensions(pneuData, tarifsData)',
         't.largeurJante.toLowerCase() === targetLargeurJante.toLowerCase()',
         't.diametre.toLowerCase() === chosenD.toLowerCase()'
     ]) assert.ok(source.includes(fragment), `fragment métier absent : ${fragment}`);

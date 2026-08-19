@@ -50,6 +50,7 @@
     <script type="module">
         import { getSupabaseClient } from './js/supabase-client.js';
         import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
+        import { getEncodedJumelagesType, isAllowedJumelagesType } from './js/jumelages-catalog.js';
 
         const supabaseClient = getSupabaseClient();
 
@@ -69,9 +70,8 @@
 
             // Récupération du type uniquement après autorisation complète.
             const urlParams = new URLSearchParams(window.location.search);
-            const allowedTypes = new Set(['EVO', '360']);
             const requestedType = urlParams.get('type');
-            if (!allowedTypes.has(requestedType)) {
+            if (!isAllowedJumelagesType(requestedType)) {
                 window.location.href = 'jumelages.html';
                 return;
             }
@@ -81,22 +81,7 @@
 
             const contentContainer = document.getElementById('content-container');
 
-            if (gammeType === 'TGD' || gammeType === 'TGD+') {
-                contentContainer.innerHTML = `
-                <div class="space-y-4 mb-6">
-                    <div class="p-4 bg-[#070913] border border-gray-800 rounded-xl text-center text-gray-400 text-sm">
-                        Contenu de la rubrique Jumelages ${gammeType} en cours de configuration.
-                    </div>
-                </div>
-
-                <div class="text-center">
-                    <button onclick="window.location.href = 'jumelages.html'" class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition tracking-wider uppercase text-xs shadow-lg shadow-red-950/50">
-                        Retour à l'accueil
-                    </button>
-                </div>
-                `;
-            } else {
-                contentContainer.innerHTML = `
+            contentContainer.innerHTML = `
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                     <button onclick="redirigerVers('taille')" class="p-5 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
                         <div class="w-12 h-12 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-400 group-hover:text-red-500 group-hover:border-red-600/50 transition mb-3">
@@ -122,14 +107,18 @@
                         La recherche par taille de pneus est fournie à titre purement indicatif. Il est impératif de vérifier la correspondance et la faisabilité auprès des données techniques du manufacturier avant toute commande.
                     </div>
                 </div>
-                `;
-            }
+            `;
 
             window.redirigerVers = (mode) => {
+                const encodedType = getEncodedJumelagesType(gammeType);
+                if (!encodedType) {
+                    window.location.href = 'jumelages.html';
+                    return;
+                }
                 if (mode === 'taille') {
-                    window.location.href = `jumelages-jantes-taille.html?type=${gammeType}`;
+                    window.location.href = `jumelages-jantes-taille.html?type=${encodedType}`;
                 } else if (mode === 'pneu') {
-                    window.location.href = `jumelages-jantes-pneu.html?type=${gammeType}`;
+                    window.location.href = `jumelages-jantes-pneu.html?type=${encodedType}`;
                 }
             };
         }
