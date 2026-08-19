@@ -18,7 +18,7 @@
 
     <!-- CONTENU PRINCIPAL -->
     <main class="catalog-page__body"><div class="app-container">
-        <section class="app-page-panel" aria-labelledby="page-title">
+        <section class="app-page-panel" data-jumelages-choice-panel aria-labelledby="page-title">
             <div class="app-page-header">
                 <div>
                     <p class="app-page-eyebrow">Mode de recherche</p>
@@ -29,7 +29,7 @@
             </div>
 
             <!-- CONTENU CONDITIONNEL (OPTIONS DE RECHERCHE OU EN COURS DE CONFIGURATION) -->
-            <div id="content-container">
+            <div id="content-container" class="jumelages-choice-content">
                 <!-- Injecté dynamiquement selon la gamme -->
             </div>
         </section>
@@ -82,25 +82,25 @@
             const contentContainer = document.getElementById('content-container');
 
             contentContainer.innerHTML = `
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                    <button onclick="redirigerVers('taille')" class="p-5 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
+                <div class="jumelages-search-grid grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                    <button onclick="redirigerVers('taille')" class="jumelages-search-card p-5 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
                         <div class="w-12 h-12 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-400 group-hover:text-red-500 group-hover:border-red-600/50 transition mb-3">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
                         </div>
-                        <span class="font-brand text-base font-bold tracking-wider text-white group-hover:text-red-500 transition">Par taille de jante</span>
-                        <span class="text-[11px] text-gray-400 mt-1">Recherche directe par dimensions de jante</span>
+                        <span class="jumelages-search-card__copy"><span class="font-brand text-base font-bold tracking-wider text-white group-hover:text-red-500 transition">Par taille de jante</span>
+                        <span class="text-[11px] text-gray-400 mt-1">Recherche directe par dimensions de jante</span></span>
                     </button>
 
-                    <button onclick="redirigerVers('pneu')" class="p-5 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
+                    <button onclick="redirigerVers('pneu')" class="jumelages-search-card p-5 bg-[#070913] hover:bg-red-950/30 border border-gray-800 hover:border-red-600/50 rounded-xl flex flex-col items-center text-center transition group">
                         <div class="w-12 h-12 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-400 group-hover:text-red-500 group-hover:border-red-600/50 transition mb-3">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
                         </div>
-                        <span class="font-brand text-base font-bold tracking-wider text-white group-hover:text-red-500 transition">Par taille de pneu</span>
-                        <span class="text-[11px] text-gray-400 mt-1">Recherche indicative par dimension de pneu</span>
+                        <span class="jumelages-search-card__copy"><span class="font-brand text-base font-bold tracking-wider text-white group-hover:text-red-500 transition">Par taille de pneu</span>
+                        <span class="text-[11px] text-gray-400 mt-1">Recherche indicative par dimension de pneu</span></span>
                     </button>
                 </div>
 
-                <div class="p-3.5 bg-amber-950/30 border border-amber-900/40 rounded-xl flex items-start space-x-3 text-amber-300 text-xs leading-relaxed">
+                <div class="jumelages-tire-warning p-3.5 bg-amber-950/30 border border-amber-900/40 rounded-xl flex items-start space-x-3 text-amber-300 text-xs leading-relaxed">
                     <svg class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                     <div>
                         <strong class="font-semibold block mb-0.5 text-amber-200">Avertissement important :</strong>

@@ -97,6 +97,7 @@ button {
 .parts-access-button small { display: block; }
 .parts-access-button strong { font-size: 0.9rem; text-transform: uppercase; }
 .parts-access-button small { margin-top: 2px; color: var(--app-text-muted); }
+.jumelages-search-card__copy { display: contents; }
 
 .parts-page .app-container { width: min(100% - 64px, 1320px); }
 .parts-page__panel { max-width: none; }
@@ -1415,6 +1416,62 @@ button {
     #content-container > .grid { grid-template-columns: 1fr; }
     .app-choice-card,
     #content-container > .grid > button { min-height: 132px; }
+
+    [data-jumelages-choice-panel] .app-page-header {
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .jumelages-choice-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .jumelages-choice-content .jumelages-search-grid {
+        order: 1;
+        gap: 8px;
+        margin-bottom: 0;
+    }
+
+    #content-container.jumelages-choice-content .jumelages-search-card {
+        min-height: 72px;
+        flex-direction: row;
+        gap: 12px;
+        padding: 10px 12px;
+        text-align: left;
+    }
+
+    .jumelages-choice-content .jumelages-search-card > div {
+        width: 38px;
+        height: 38px;
+        margin-bottom: 0;
+    }
+
+    .jumelages-search-card__copy,
+    .jumelages-search-card__copy > span {
+        display: block;
+    }
+
+    .jumelages-choice-content .parts-access-block {
+        order: 2;
+        margin-top: 10px;
+        padding-top: 10px;
+    }
+
+    .jumelages-choice-content .parts-access-block__eyebrow {
+        margin-bottom: 5px;
+    }
+
+    .jumelages-choice-content .parts-access-button {
+        min-height: 58px;
+        padding-block: 9px;
+    }
+
+    .jumelages-choice-content .jumelages-tire-warning {
+        order: 3;
+        margin-top: 12px;
+        padding: 10px 12px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
