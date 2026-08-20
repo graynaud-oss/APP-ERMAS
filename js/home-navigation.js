@@ -6,7 +6,15 @@ const addHomeLink = () => {
     link.textContent = 'Accueil';
     link.dataset.homeLink = 'true';
     link.className = 'app-back-button';
-    const actions = header.querySelector('.app-page-actions') || header;
+    let actions = header.querySelector(':scope > .app-page-actions');
+    if (!actions) {
+        actions = document.createElement('div');
+        actions.className = 'app-page-actions';
+        Array.from(header.children)
+            .filter((child) => child.classList.contains('app-back-button'))
+            .forEach((button) => actions.append(button));
+        header.append(actions);
+    }
     actions.append(link);
 };
 addHomeLink();

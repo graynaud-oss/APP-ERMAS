@@ -15,11 +15,13 @@ test('MANIPRO est accessible depuis l’accueil avec son GIF local', () => {
 });
 
 test('MANIPRO utilise le garde partagé et reste fermé avant autorisation', () => {
+    assert.match(page, /cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@2/);
     assert.match(page, /getSupabaseClient\(\)/);
     assert.match(page, /requireAuthorizedUser/);
     assert.match(page, /AUTHORIZATION_STATES\.AUTHORIZED/);
     assert.match(page, /location\.href='index\.html'/);
     assert.match(page, /class="hidden app-shell/);
+    assert.ok(page.indexOf('context.state!==AUTHORIZATION_STATES.AUTHORIZED') < page.indexOf("view.classList.remove('hidden')"));
 });
 
 test('tarifs, option et lien officiel sont exacts', () => {
@@ -44,6 +46,16 @@ test('retours, accueil, charte et responsive sont présents', () => {
     assert.match(page, /app-footer/);
     assert.match(css, /manipro-layout/);
     assert.match(css, /@media \(max-width: 620px\)[\s\S]*manipro-layout/);
+});
+
+test('navigation et accueil utilisent les structures compactes communes', () => {
+    const homeNavigation = read('js/home-navigation.js');
+    assert.match(homeNavigation, /actions\.className = 'app-page-actions'/);
+    assert.match(homeNavigation, /child\.classList\.contains\('app-back-button'\)/);
+    assert.match(homeNavigation, /link\.href = 'index\.html'/);
+    assert.match(css, /\.home-primary-grid\s*\{\s*grid-template-columns: repeat\(4,/);
+    assert.match(css, /@media \(max-width: 900px\)[\s\S]*\.home-primary-grid\s*\{\s*grid-template-columns: repeat\(2,/);
+    assert.doesNotMatch(css, /(?:^|[;{])\s*height:\s*100vh/m);
 });
 
 test('les gammes utilisent les couleurs validées', () => {
