@@ -37,14 +37,14 @@ export function renderNarrowWheelPriceOffers(prices, remise, netVisible) {
     const cards = NARROW_WHEEL_PRICE_TIERS.map(({ key, label }) => {
         const grossPrice = parseNarrowWheelPrice(prices[key]);
         if (grossPrice === null) {
-            return `<article class="results-tier-card"><h3 class="results-tier-card__title">${label}</h3><p class="results-tier-card__unavailable">Non disponible</p></article>`;
+            return `<article class="results-tier-card results-tier-card--${label.toLowerCase()}"><h3 class="results-tier-card__title">${label}</h3><p class="results-tier-card__unavailable">Non disponible</p></article>`;
         }
 
         const netPrice = calculateNarrowWheelNetPrice(grossPrice, remise);
         const netBlock = hasRemise
             ? `<div data-net-price ${netVisible ? '' : 'hidden'} class="results-tier-card__net"><span>Prix NET</span><strong>${formatNarrowWheelPrice(netPrice)}</strong></div>`
             : '';
-        return `<article class="results-tier-card"><h3 class="results-tier-card__title">${label}</h3><div class="results-tier-card__gross"><span>Prix BRUT</span><strong>${formatNarrowWheelPrice(grossPrice)}</strong></div>${netBlock}</article>`;
+        return `<article class="results-tier-card results-tier-card--${label.toLowerCase()}"><h3 class="results-tier-card__title">${label}</h3><div class="results-tier-card__gross"><span>Prix BRUT</span><strong>${formatNarrowWheelPrice(grossPrice)}</strong></div>${netBlock}</article>`;
     }).join('');
 
     return `<div class="results-tier-grid" aria-label="Comparaison des tarifs ECO, PRO et ELITE">${cards}</div>`;

@@ -41,7 +41,7 @@ test('la navigation Roues étroites est explicite et déterministe', () => {
     assert.ok(source.includes('data-protected-route="roues-etroites-taille.html"'));
     assert.ok(source.includes('data-protected-route="roues-etroites-pneu.html"'));
     assert.doesNotMatch(source, /history\.back\s*\(/);
-    assert.equal(source.match(/data-protected-route=/g)?.length, 3);
+    assert.equal(source.match(/data-protected-route=/g)?.length, 4);
 });
 
 test('le contenu historique de la vue Roues étroites est conservé', () => {

@@ -1,0 +1,56 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import test from 'node:test';
+const root = new URL('../../', import.meta.url);
+const read = path => fs.readFileSync(new URL(path, root), 'utf8');
+const accueil = read('accueil.html');
+const page = read('manipro.html');
+const css = read('css/app-ermas.css');
+
+test('MANIPRO est accessible depuis l’accueil avec son GIF local', () => {
+    assert.match(accueil, /data-protected-route="manipro\.html"/);
+    assert.match(accueil, /assets\/manipro\/manipro\.gif/);
+    assert.match(page, /assets\/manipro\/manipro\.gif/);
+    assert.doesNotMatch(page, /src="assets\/manipro\/[^\"]+\.(png|jpg|webp)"/);
+});
+
+test('MANIPRO utilise le garde partagé et reste fermé avant autorisation', () => {
+    assert.match(page, /getSupabaseClient\(\)/);
+    assert.match(page, /requireAuthorizedUser/);
+    assert.match(page, /AUTHORIZATION_STATES\.AUTHORIZED/);
+    assert.match(page, /location\.href='index\.html'/);
+    assert.match(page, /class="hidden app-shell/);
+});
+
+test('tarifs, option et lien officiel sont exacts', () => {
+    assert.match(page, /3 619,00 €/);
+    assert.match(page, /395,00 €/);
+    assert.match(page, /https:\/\/www\.ermas\.fr\/produits\/manipro/);
+    assert.match(page, /target="_blank" rel="noopener noreferrer"/);
+});
+
+test('le switch Prix NET commun pilote les deux montants', () => {
+    for (const cls of ['net-price-control','net-price-toggle','net-price-toggle__input','net-price-toggle__track','net-price-toggle__state']) assert.match(page, new RegExp(cls));
+    assert.equal(page.match(/<div data-net-price/g)?.length, 2);
+    assert.match(page, /isNetPriceVisible/);
+    assert.match(page, /setNetPriceVisible/);
+    assert.match(page, /3619/);
+    assert.match(page, /395/);
+});
+
+test('retours, accueil, charte et responsive sont présents', () => {
+    assert.match(page, /window\.location\.href='accueil\.html'/);
+    assert.match(page, /window\.location\.href='index\.html'/);
+    assert.match(page, /app-footer/);
+    assert.match(css, /manipro-layout/);
+    assert.match(css, /@media \(max-width: 620px\)[\s\S]*manipro-layout/);
+});
+
+test('les gammes utilisent les couleurs validées', () => {
+    assert.match(css, /#E53935/);
+    assert.match(css, /#1E88E5/);
+    assert.match(css, /#F1B43C/);
+    assert.match(css, /rgba\(229,57,53,.07\)/);
+    assert.match(css, /rgba\(30,136,229,.07\)/);
+    assert.match(css, /rgba\(241,180,60,.07\)/);
+});

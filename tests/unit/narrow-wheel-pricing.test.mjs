@@ -42,7 +42,7 @@ test('le rendu conserve toujours les trois cartes dans le bon ordre', () => {
     const html = renderNarrowWheelPriceOffers({ prixEco: '100', prixPro: '120', prixElite: '150' }, 0, false);
     assert.ok(html.indexOf('>ECO<') < html.indexOf('>PRO<'));
     assert.ok(html.indexOf('>PRO<') < html.indexOf('>ELITE<'));
-    assert.equal(html.match(/class="results-tier-card"/g)?.length, 3);
+    assert.equal(html.match(/class="results-tier-card(?: results-tier-card--[^"]+)?"/g)?.length, 3);
 });
 
 test('chaque gamme vide reste visible avec Non disponible sans 0 euro', () => {
@@ -51,7 +51,7 @@ test('chaque gamme vide reste visible avec Non disponible sans 0 euro', () => {
         const html = renderNarrowWheelPriceOffers(prices, 20, true);
         assert.match(html, /Non disponible/);
         assert.doesNotMatch(html, />0\.00 €</);
-        assert.equal(html.match(/class="results-tier-card"/g)?.length, 3);
+        assert.equal(html.match(/class="results-tier-card(?: results-tier-card--[^"]+)?"/g)?.length, 3);
     }
 });
 
@@ -90,7 +90,7 @@ test('les deux recherches utilisent le même mapping tarifaire sans choix de gam
 });
 
 test('l’accueil présente trois cartes descriptives et les notes techniques', () => {
-    assert.equal(menu.match(/class="catalog-info-card"/g)?.length, 3);
+    assert.equal(menu.match(/class="catalog-info-card(?: catalog-info-card--[^"]+)?"/g)?.length, 3);
     for (const text of ['Gamme ECO', 'Gamme PRO', 'Gamme ELITE', 'classe 10.9', '30&quot;']) assert.ok(menu.includes(text));
 });
 

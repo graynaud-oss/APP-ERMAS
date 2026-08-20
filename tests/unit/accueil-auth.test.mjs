@@ -74,7 +74,7 @@ test('accueil charge localement les fondations visuelles et les actifs officiels
 });
 
 test('accueil distingue trois cartes métier et deux accès secondaires', () => {
-    assert.equal(source.match(/class="nav-card"/g)?.length, 3);
+    assert.equal(source.match(/class="nav-card"/g)?.length, 4);
     assert.equal(source.match(/class="nav-card nav-card--secondary"/g)?.length, 2);
     assert.ok(source.includes('class="home-primary-grid"'));
     assert.ok(source.includes('class="home-secondary-grid"'));
@@ -93,7 +93,7 @@ test('les cinq routes futures prévues sont préparées sans navigation anticip�
         assert.ok(source.includes(`data-protected-route="${route}"`), `route manquante : ${route}`);
     }
 
-    assert.equal(source.match(/data-protected-route=/g)?.length, 5);
+    assert.equal(source.match(/data-protected-route=/g)?.length, 6);
 });
 
 test('accueil ne contient aucune logique de profil, remise ou enrôlement', () => {

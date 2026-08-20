@@ -41,7 +41,7 @@ test('la navigation Jantes est explicite et déterministe', () => {
     assert.ok(source.includes('data-protected-route="jantes-taille.html"'));
     assert.ok(source.includes('data-protected-route="jantes-pneu.html"'));
     assert.doesNotMatch(source, /history\.back\s*\(/);
-    assert.equal(source.match(/data-protected-route=/g)?.length, 3);
+    assert.equal(source.match(/data-protected-route=/g)?.length, 4);
 });
 
 test('le contenu historique de la vue Jantes est conservé', () => {
