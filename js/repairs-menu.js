@@ -23,7 +23,9 @@ export function renderRepairMenu({ onNavigate }) {
     familyGrid.replaceChildren(...REPAIR_FAMILIES.map((family) => createRouteButton(
         family.label,
         family.description,
-        `reparations-famille.html?family=${encodeURIComponent(family.id)}`
+        family.id === 'deplacement'
+            ? 'reparations-prestation.html?type=deplacement-voile'
+            : `reparations-famille.html?family=${encodeURIComponent(family.id)}`
     )));
 
     document.querySelectorAll('[data-repair-route]').forEach((button) => {

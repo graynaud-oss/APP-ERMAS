@@ -226,12 +226,18 @@ test('la page principale contient uniquement les quatre familles et aucune prest
     assert.ok(menu.includes('id="repair-family-grid"'));
     assert.doesNotMatch(menu, /repair-services-section|repair-services-grid|reparations-prestation\.html/);
     assert.match(menuModule, /reparations-famille\.html\?family=/);
-    assert.doesNotMatch(menuModule, /getRepairServicesByFamily|reparations-prestation\.html/);
+    assert.doesNotMatch(menuModule, /getRepairServicesByFamily/);
 });
 
 test('chaque famille ouvre une URL dédiée contrôlée', () => {
-    for (const family of REPAIR_FAMILIES) assert.ok(menuModule.includes('reparations-famille.html?family='));
+    for (const family of REPAIR_FAMILIES.filter(({ id }) => id !== 'deplacement')) assert.ok(menuModule.includes('reparations-famille.html?family='));
     assert.equal(REPAIR_FAMILIES.length, 4);
+});
+
+test('Déplacement de voile ouvre directement sa prestation sans page famille intermédiaire', () => {
+    assert.ok(menuModule.includes("family.id === 'deplacement'"));
+    assert.ok(menuModule.includes("'reparations-prestation.html?type=deplacement-voile'"));
+    assert.doesNotMatch(menuModule, /family\.id\s*===\s*['"]deplacement['"][\s\S]{0,160}reparations-famille\.html\?family=deplacement/);
 });
 
 test('la page famille rend uniquement les prestations de la famille', () => {
@@ -242,7 +248,16 @@ test('la page famille rend uniquement les prestations de la famille', () => {
 
 test('le Retour prestation pointe vers sa famille contrôlée', () => {
     assert.ok(pageModule.includes('reparations-famille.html?family=${encodeURIComponent(service.family)}'));
+    assert.ok(pageModule.includes("service.id === 'deplacement-voile'"));
+    assert.ok(pageModule.includes("? 'reparations-modifications.html'"));
     assert.ok(familyPage.includes('data-protected-route="reparations-modifications.html"'));
+});
+
+test('le message tarifaire est absent en fonctionnement normal et visible uniquement en erreur', () => {
+    assert.match(page, /id="repair-service-status" class="app-notice hidden" role="status" hidden/);
+    assert.ok(pageModule.includes("status.classList.add('hidden')"));
+    assert.ok(pageModule.includes("status.classList.remove('hidden')"));
+    assert.ok(pageModule.indexOf("status.textContent = 'Tarifs temporairement indisponibles.'") < pageModule.indexOf("status.classList.remove('hidden')"));
 });
 
 test('un seul Accueil est produit par le mécanisme global sur chaque page', () => {

@@ -31,7 +31,10 @@ export function initializeRepairServicePage({ serviceId, remise = 0 }) {
     title.textContent = service.label;
     subtitle.textContent = service.description;
     status.hidden = true;
-    back.dataset.protectedRoute = `reparations-famille.html?family=${encodeURIComponent(service.family)}`;
+    status.classList.add('hidden');
+    back.dataset.protectedRoute = service.id === 'deplacement-voile'
+        ? 'reparations-modifications.html'
+        : `reparations-famille.html?family=${encodeURIComponent(service.family)}`;
 
     if (service.image) {
         const image = createElement('img', 'repair-service-image');
@@ -130,12 +133,15 @@ export function showRepairCatalogUnavailable(serviceId) {
     if (!service) return false;
     document.getElementById('repair-service-title').textContent = service.label;
     document.getElementById('repair-service-description').textContent = service.description;
-    document.getElementById('repair-service-back').dataset.protectedRoute = `reparations-famille.html?family=${encodeURIComponent(service.family)}`;
+    document.getElementById('repair-service-back').dataset.protectedRoute = service.id === 'deplacement-voile'
+        ? 'reparations-modifications.html'
+        : `reparations-famille.html?family=${encodeURIComponent(service.family)}`;
     document.getElementById('repair-service-form').replaceChildren();
     document.getElementById('repair-service-result').hidden = true;
     document.getElementById('net-price-control').classList.add('hidden');
     const status = document.getElementById('repair-service-status');
     status.textContent = 'Tarifs temporairement indisponibles.';
     status.hidden = false;
+    status.classList.remove('hidden');
     return true;
 }
