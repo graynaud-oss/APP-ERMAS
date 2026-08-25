@@ -69,7 +69,7 @@ test('navigation et accueil utilisent les structures compactes communes', () => 
     assert.match(homeNavigation, /actions\.className = 'app-page-actions'/);
     assert.match(homeNavigation, /child\.classList\.contains\('app-back-button'\)/);
     assert.match(homeNavigation, /link\.href = 'index\.html'/);
-    assert.match(css, /\.home-primary-grid\s*\{\s*grid-template-columns: repeat\(4,/);
+    assert.match(css, /\.home-primary-grid\s*\{\s*grid-template-columns: repeat\(3,/);
     assert.match(css, /@media \(max-width: 900px\)[\s\S]*\.home-primary-grid\s*\{\s*grid-template-columns: repeat\(2,/);
     assert.doesNotMatch(css, /(?:^|[;{])\s*height:\s*100vh/m);
 });

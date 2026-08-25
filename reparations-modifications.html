@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERMAS - Réparations &amp; modifications</title>
+    <link rel="icon" type="image/png" href="assets/brand/favicon.png">
+    <link rel="shortcut icon" href="assets/brand/favicon.ico">
+    <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/app-ermas.css">
+    <script type="module" src="./js/logout.js"></script><script type="module" src="./js/home-navigation.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div id="repairs-view" class="hidden app-shell catalog-page">
+        <header class="app-header"><div class="app-container app-header__inner"><a class="app-logo-link" href="https://www.ermas.fr/" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le site ERMAS"><img class="app-logo" src="assets/brand/ermas-logo.png" alt=""></a><button type="button" class="app-logout-button" data-global-logout>Se déconnecter</button></div></header>
+        <main class="catalog-page__body"><div class="app-container"><section class="app-page-panel" aria-labelledby="repairs-title">
+            <div class="app-page-header"><div><p class="app-page-eyebrow">Services techniques</p><h1 id="repairs-title" class="app-page-title">Réparations &amp; modifications</h1><p class="app-page-subtitle">Sélectionnez le type d’intervention souhaité.</p></div><div class="app-page-actions"><button type="button" data-protected-route="accueil.html" class="app-back-button">Retour</button></div></div>
+            <div class="app-notice">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <div>
+                    <strong>Transport des jantes</strong>
+                    ERMAS peut organiser le transport de vos jantes pour leur prise en charge et leur retour après intervention. Les frais de transport étant variables, <a href="contact.html">contactez-nous</a> afin d'obtenir un chiffrage adapté.
+                    <br>Vous pouvez également organiser vous-même l'expédition et le retour de vos jantes.
+                </div>
+            </div>
+            <div id="repair-family-grid" class="app-choice-grid repair-family-grid" aria-label="Familles de prestations"></div>
+            <div class="app-resource-row"><button type="button" data-protected-route="documents.html" class="app-resource-link">Consulter les fiches produits &amp; documentations techniques &rarr;</button></div>
+        </section></div></main>
+        <footer class="app-footer"><div class="app-container app-footer__inner"><p>&copy; 2026 ERMAS - Tous droits réservés.</p><nav class="app-footer__links" aria-label="Informations juridiques"><a href="https://www.ermas.fr/mentions-legales" target="_blank" rel="noopener noreferrer">Mentions légales</a><span aria-hidden="true">|</span><a href="https://www.ermas.fr/politique-confidentialite" target="_blank" rel="noopener noreferrer">Politique de confidentialité</a></nav></div></footer>
+    </div>
+    <script type="module">
+        import { getSupabaseClient } from './js/supabase-client.js';
+        import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
+        import { renderRepairMenu } from './js/repairs-menu.js';
+
+        const client = getSupabaseClient();
+        const view = document.getElementById('repairs-view');
+        let pageAuthorized = false;
+
+        async function initPage() {
+            const context = await requireAuthorizedUser({ client });
+            if (context.state !== AUTHORIZATION_STATES.AUTHORIZED) { window.location.href = 'index.html'; return; }
+            pageAuthorized = true;
+            renderRepairMenu({ onNavigate: (route) => { if (pageAuthorized) window.location.href = route; } });
+            document.querySelectorAll('[data-protected-route]').forEach((button) => button.addEventListener('click', () => { if (pageAuthorized) window.location.href = button.dataset.protectedRoute; }));
+            view.classList.remove('hidden');
+        }
+
+        initPage().catch(() => { pageAuthorized = false; window.location.href = 'index.html'; });
+    </script>
+</body>
+</html>

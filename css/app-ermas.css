@@ -355,7 +355,7 @@ button {
 }
 
 .home-primary-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .home-secondary-grid {
@@ -731,6 +731,162 @@ button {
         max-width: 100%;
         gap: 8px;
         text-align: center;
+    }
+}
+
+/* Repairs and modifications catalogue */
+.repair-family-grid {
+    margin-top: 18px;
+}
+
+.repair-services-section {
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid var(--app-border);
+}
+
+.repair-services-section[hidden],
+.repair-service-media[hidden],
+#repair-service-result[hidden] {
+    display: none;
+}
+
+.repair-service-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.repair-service-media {
+    margin: 0;
+    padding: 12px;
+    overflow: hidden;
+    border: 1px solid var(--app-border);
+    border-radius: 8px;
+    background: var(--app-surface-muted);
+    box-shadow: var(--app-shadow-subtle);
+}
+
+.repair-service-image {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: 300px;
+    object-fit: contain;
+}
+
+.repair-service-selection,
+.repair-service-form {
+    display: grid;
+    gap: 14px;
+}
+
+.repair-field {
+    display: grid;
+    gap: 6px;
+}
+
+.repair-field__label {
+    color: var(--app-text);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.repair-field__select {
+    width: 100%;
+    min-height: 46px;
+    padding: 9px 11px;
+    border: 1px solid var(--app-border-strong);
+    border-radius: 4px;
+    background: var(--app-surface);
+    color: var(--app-text);
+    font: inherit;
+}
+
+.repair-field__select:focus-visible {
+    border-color: var(--app-focus);
+    outline: 3px solid rgba(12, 82, 154, 0.25);
+    outline-offset: 1px;
+}
+
+.repair-field__select:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.repair-result-card {
+    margin-top: 4px;
+    padding: 18px;
+    border: 1px solid var(--app-border);
+    border-radius: 8px;
+    background: var(--app-surface-muted);
+    box-shadow: var(--app-shadow-subtle);
+}
+
+.repair-result-card__title {
+    margin: 0 0 14px;
+    color: var(--ermas-blue);
+    font-size: 1rem;
+}
+
+.repair-result-card__parameters {
+    display: grid;
+    gap: 7px;
+    margin: 0 0 16px;
+}
+
+.repair-result-card__parameters div {
+    display: grid;
+    grid-template-columns: minmax(120px, 0.8fr) minmax(0, 1.2fr);
+    gap: 12px;
+    padding-bottom: 7px;
+    border-bottom: 1px solid var(--app-border);
+}
+
+.repair-result-card__parameters dt {
+    color: var(--app-text-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.repair-result-card__parameters dd {
+    margin: 0;
+    color: var(--app-text);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.repair-result-card__prices {
+    display: grid;
+    gap: 2px;
+}
+
+@media (max-width: 760px) {
+    .repair-service-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .repair-service-image {
+        max-height: 210px;
+    }
+}
+
+@media (max-width: 430px) {
+    .repair-service-media {
+        padding: 8px;
+    }
+
+    .repair-service-image {
+        max-height: 150px;
+    }
+
+    .repair-result-card__parameters div {
+        grid-template-columns: 1fr;
+        gap: 2px;
     }
 }
 

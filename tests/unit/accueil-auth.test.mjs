@@ -15,7 +15,10 @@ const redesignedPages = [
     'jumelages-choix.html',
     'jumelages-information.html',
     'jumelages-pieces-evo.html',
-    'jumelages-pieces-360.html'
+    'jumelages-pieces-360.html',
+    'reparations-modifications.html',
+    'reparations-famille.html',
+    'reparations-prestation.html'
 ];
 const redesignedSources = await Promise.all(
     redesignedPages.map(async (file) => [file, await readFile(path.join(root, file), 'utf8')])
@@ -56,6 +59,7 @@ test('le visuel et les textes de l’accueil historique sont conservés', () => 
         'JANTES',
         'JUMELAGES',
         'ROUES ETROITES',
+        'RÉPARATIONS &amp; MODIFICATIONS',
         'DOCUMENTS',
         'NOUS CONTACTER',
         '&copy; 2026 ERMAS - Tous droits réservés.'
@@ -73,8 +77,8 @@ test('accueil charge localement les fondations visuelles et les actifs officiels
     assert.doesNotMatch(source, /fonts\.googleapis\.com/);
 });
 
-test('accueil distingue trois cartes métier et deux accès secondaires', () => {
-    assert.equal(source.match(/class="nav-card"/g)?.length, 4);
+test('accueil distingue cinq cartes métier et deux accès secondaires', () => {
+    assert.equal(source.match(/class="nav-card"/g)?.length, 5);
     assert.equal(source.match(/class="nav-card nav-card--secondary"/g)?.length, 2);
     assert.ok(source.includes('class="home-primary-grid"'));
     assert.ok(source.includes('class="home-secondary-grid"'));
@@ -82,18 +86,19 @@ test('accueil distingue trois cartes métier et deux accès secondaires', () => 
     assert.ok(source.includes('class="app-footer"'));
 });
 
-test('les cinq routes futures prévues sont préparées sans navigation anticipée', () => {
+test('les routes métier prévues sont préparées sans navigation anticipée', () => {
     for (const route of [
         'jantes.html',
         'jumelages.html',
         'roues-etroites.html',
+        'reparations-modifications.html',
         'documents.html',
         'contact.html'
     ]) {
         assert.ok(source.includes(`data-protected-route="${route}"`), `route manquante : ${route}`);
     }
 
-    assert.equal(source.match(/data-protected-route=/g)?.length, 6);
+    assert.equal(source.match(/data-protected-route=/g)?.length, 7);
 });
 
 test('accueil ne contient aucune logique de profil, remise ou enrôlement', () => {

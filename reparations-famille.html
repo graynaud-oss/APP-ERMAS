@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERMAS - Famille de réparations</title>
+    <link rel="icon" type="image/png" href="assets/brand/favicon.png"><link rel="shortcut icon" href="assets/brand/favicon.ico"><link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/app-ermas.css">
+    <script type="module" src="./js/logout.js"></script><script type="module" src="./js/home-navigation.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body><div id="repair-family-view" class="hidden app-shell catalog-page">
+    <header class="app-header"><div class="app-container app-header__inner"><a class="app-logo-link" href="https://www.ermas.fr/" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le site ERMAS"><img class="app-logo" src="assets/brand/ermas-logo.png" alt=""></a><button type="button" class="app-logout-button" data-global-logout>Se déconnecter</button></div></header>
+    <main class="catalog-page__body"><div class="app-container"><section class="app-page-panel" aria-labelledby="repair-family-title">
+        <div class="app-page-header"><div><p class="app-page-eyebrow">Services techniques</p><h1 id="repair-family-title" class="app-page-title"></h1><p id="repair-family-subtitle" class="app-page-subtitle"></p></div><div class="app-page-actions"><button type="button" data-protected-route="reparations-modifications.html" class="app-back-button">Retour</button></div></div>
+        <div id="repair-family-services" class="app-choice-grid" aria-label="Prestations de la famille"></div>
+        <div class="app-resource-row"><button type="button" data-protected-route="documents.html" class="app-resource-link">Consulter les fiches produits &amp; documentations techniques &rarr;</button></div>
+    </section></div></main>
+    <footer class="app-footer"><div class="app-container app-footer__inner"><p>&copy; 2026 ERMAS - Tous droits réservés.</p><nav class="app-footer__links" aria-label="Informations juridiques"><a href="https://www.ermas.fr/mentions-legales" target="_blank" rel="noopener noreferrer">Mentions légales</a><span aria-hidden="true">|</span><a href="https://www.ermas.fr/politique-confidentialite" target="_blank" rel="noopener noreferrer">Politique de confidentialité</a></nav></div></footer>
+</div><script type="module">
+    import { getSupabaseClient } from './js/supabase-client.js';
+    import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
+    import { getRepairFamily } from './js/repairs-catalog.js';
+    import { renderRepairFamily } from './js/repairs-family.js';
+    const client=getSupabaseClient();const view=document.getElementById('repair-family-view');let pageAuthorized=false;
+    async function initPage(){const context=await requireAuthorizedUser({client});if(context.state!==AUTHORIZATION_STATES.AUTHORIZED){window.location.href='index.html';return;}const requested=new URLSearchParams(window.location.search).get('family');const family=getRepairFamily(requested);if(!family){window.location.href='reparations-modifications.html';return;}pageAuthorized=true;if(!renderRepairFamily({familyId:family.id,onNavigate:(route)=>{if(pageAuthorized)window.location.href=route;}})){window.location.href='reparations-modifications.html';return;}document.querySelectorAll('[data-protected-route]').forEach((button)=>button.addEventListener('click',()=>{if(pageAuthorized)window.location.href=button.dataset.protectedRoute;}));view.classList.remove('hidden');}
+    initPage().catch(()=>{pageAuthorized=false;window.location.href='index.html';});
+</script></body></html>
