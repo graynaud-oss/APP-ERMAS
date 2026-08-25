@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import test from 'node:test';
+import { applyManiproNetVisibility } from '../../js/manipro-price-visibility.js';
 const root = new URL('../../', import.meta.url);
 const read = path => fs.readFileSync(new URL(path, root), 'utf8');
 const accueil = read('accueil.html');
@@ -38,6 +39,21 @@ test('le switch Prix NET commun pilote les deux montants', () => {
     assert.match(page, /setNetPriceVisible/);
     assert.match(page, /3619/);
     assert.match(page, /395/);
+});
+
+test('Prix NET suit réellement OFF puis ON puis OFF pour les deux montants', () => {
+    const elements = Array.from({ length: 2 }, () => ({
+        hidden: false,
+        classes: new Set(),
+        classList: { toggle(name, enabled) { enabled ? this.owner.classes.add(name) : this.owner.classes.delete(name); }, owner: null }
+    }));
+    elements.forEach((element) => { element.classList.owner = element; });
+    applyManiproNetVisibility(elements, false);
+    assert.ok(elements.every((element) => element.hidden && element.classes.has('hidden')));
+    applyManiproNetVisibility(elements, true);
+    assert.ok(elements.every((element) => !element.hidden && !element.classes.has('hidden')));
+    applyManiproNetVisibility(elements, false);
+    assert.ok(elements.every((element) => element.hidden && element.classes.has('hidden')));
 });
 
 test('retours, accueil, charte et responsive sont présents', () => {

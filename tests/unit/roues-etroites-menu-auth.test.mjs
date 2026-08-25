@@ -88,3 +88,8 @@ test('le catalogue Roues étroites utilise les fondations visuelles ERMAS locale
     assert.ok(source.includes('class="app-footer"'));
     assert.doesNotMatch(source, /<img[^>]+(?:photo|unsplash|pexels)/i);
 });
+
+test('le lien Documents est placé après les informations et avertissements Roues étroites', () => {
+    assert.ok(source.indexOf('class="app-resource-row"') > source.indexOf('class="app-notice"'));
+    assert.match(source, /data-protected-route="documents\.html" class="app-resource-link"/);
+});

@@ -81,3 +81,8 @@ test('le catalogue Jantes utilise les fondations visuelles ERMAS locales', () =>
     assert.ok(source.includes('class="app-footer"'));
     assert.doesNotMatch(source, /<img[^>]+(?:photo|unsplash|pexels)/i);
 });
+
+test('le lien Documents est placé après le contenu principal Jantes', () => {
+    assert.ok(source.indexOf('class="app-resource-row"') > source.indexOf('class="app-notice"'));
+    assert.match(source, /data-protected-route="documents\.html" class="app-resource-link"/);
+});

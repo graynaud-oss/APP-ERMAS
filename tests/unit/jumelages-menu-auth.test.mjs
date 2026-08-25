@@ -91,3 +91,8 @@ test('le catalogue Jumelages utilise les fondations visuelles ERMAS locales', ()
     assert.ok(source.includes('class="app-footer"'));
     assert.doesNotMatch(source, /<img[^>]+(?:photo|unsplash|pexels)/i);
 });
+
+test('le lien Documents reste en bas du contenu principal Jumelages', () => {
+    assert.ok(source.indexOf('class="app-resource-row"') > source.indexOf('class="app-choice-grid"'));
+    assert.match(source, /data-protected-route="documents\.html" class="app-resource-link"/);
+});
