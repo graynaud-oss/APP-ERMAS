@@ -8,6 +8,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..', '..');
 const source = await readFile(path.join(root, 'roues-etroites.html'), 'utf8');
 const accueilSource = await readFile(path.join(root, 'accueil.html'), 'utf8');
+const cssSource = await readFile(path.join(root, 'css', 'app-ermas.css'), 'utf8');
 
 test('le menu Roues étroites utilise le client partagé et le garde complet', () => {
     assert.ok(source.includes("from './js/supabase-client.js'"));
@@ -87,6 +88,21 @@ test('le catalogue Roues étroites utilise les fondations visuelles ERMAS locale
     assert.ok(source.includes('class="app-choice-grid"'));
     assert.ok(source.includes('class="app-footer"'));
     assert.doesNotMatch(source, /<img[^>]+(?:photo|unsplash|pexels)/i);
+});
+
+test('les cartes descriptives reprennent les teintes des cartes tarifaires sans être écrasées par le fond commun', () => {
+    const baseCardPosition = cssSource.indexOf('.catalog-info-card {');
+    const ecoPosition = cssSource.indexOf('.catalog-info-card--eco {');
+    const proPosition = cssSource.indexOf('.catalog-info-card--pro {');
+    const elitePosition = cssSource.indexOf('.catalog-info-card--elite {');
+
+    assert.ok(baseCardPosition >= 0);
+    assert.ok(ecoPosition > baseCardPosition);
+    assert.ok(proPosition > baseCardPosition);
+    assert.ok(elitePosition > baseCardPosition);
+    assert.match(cssSource, /\.catalog-info-card--eco \{[^}]*border-color:rgba\(229,57,53,\.45\);[^}]*background:rgba\(229,57,53,\.12\);/);
+    assert.match(cssSource, /\.catalog-info-card--pro \{[^}]*border-color:rgba\(22,119,200,\.48\);[^}]*background:rgba\(22,119,200,\.13\);/);
+    assert.match(cssSource, /\.catalog-info-card--elite \{[^}]*border-color:rgba\(241,180,60,\.50\);[^}]*background:rgba\(241,180,60,\.14\);/);
 });
 
 test('le lien Documents est placé après les informations et avertissements Roues étroites', () => {

@@ -1663,9 +1663,6 @@ button {
 .results-tier-card--eco .results-tier-card__title { color:var(--range-eco); }
 .results-tier-card--pro .results-tier-card__title { color:var(--range-pro); }
 .results-tier-card--elite .results-tier-card__title { color:var(--range-elite); }
-.catalog-info-card--eco { --range-accent: var(--range-eco); border-color:rgba(229,57,53,.45); background:rgba(229,57,53,.12); }
-.catalog-info-card--pro { --range-accent: var(--range-pro); border-color:rgba(22,119,200,.48); background:rgba(22,119,200,.13); }
-.catalog-info-card--elite { --range-accent: var(--range-elite); border-color:rgba(241,180,60,.50); background:rgba(241,180,60,.14); }
 .app-page-actions { display:flex; flex-direction:row; align-items:center; gap:8px; flex-wrap:nowrap; }
 .app-page-header > .app-back-button, .app-page-actions > .app-back-button { white-space:nowrap; }
 .manipro-layout { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr); gap:24px; align-items:start; }
@@ -1751,6 +1748,10 @@ button {
     box-shadow: var(--shadow-soft);
     transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
+
+.catalog-info-card--eco { --range-accent: var(--range-eco); border-color:rgba(229,57,53,.45); background:rgba(229,57,53,.12); }
+.catalog-info-card--pro { --range-accent: var(--range-pro); border-color:rgba(22,119,200,.48); background:rgba(22,119,200,.13); }
+.catalog-info-card--elite { --range-accent: var(--range-elite); border-color:rgba(241,180,60,.50); background:rgba(241,180,60,.14); }
 
 .catalog-info-card h3 { margin: 0 0 12px; color: var(--ermas-blue); font-size: 0.82rem; }
 .catalog-info-card h4 { margin: 10px 0 3px; color: var(--app-text); font-size: 0.65rem; letter-spacing: 0.05em; text-transform: uppercase; }
