@@ -76,9 +76,9 @@ test('navigation et accueil utilisent les structures compactes communes', () => 
 
 test('les gammes utilisent les couleurs validées', () => {
     assert.match(css, /#E53935/);
-    assert.match(css, /#1E88E5/);
+    assert.match(css, /#1677C8/);
     assert.match(css, /#F1B43C/);
-    assert.match(css, /rgba\(229,57,53,.07\)/);
-    assert.match(css, /rgba\(30,136,229,.07\)/);
-    assert.match(css, /rgba\(241,180,60,.07\)/);
+    assert.match(css, /rgba\(229,57,53,.12\)/);
+    assert.match(css, /rgba\(22,119,200,.13\)/);
+    assert.match(css, /rgba\(241,180,60,.14\)/);
 });
