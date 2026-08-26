@@ -8,11 +8,11 @@ const accueil = read('accueil.html');
 const page = read('manipro.html');
 const css = read('css/app-ermas.css');
 
-test('MANIPRO est accessible depuis l’accueil avec son GIF local', () => {
+test('MANIPRO est accessible depuis l’accueil avec son icône PNG locale', () => {
     assert.match(accueil, /data-protected-route="manipro\.html"/);
-    assert.match(accueil, /assets\/manipro\/manipro\.gif/);
-    assert.match(page, /assets\/manipro\/manipro\.gif/);
-    assert.doesNotMatch(page, /src="assets\/manipro\/[^\"]+\.(png|jpg|webp)"/);
+    assert.match(accueil, /assets\/home-icons\/manipro\.png/);
+    assert.match(page, /src="assets\/manipro\/manipro\.png"/);
+    assert.doesNotMatch(page, /assets\/manipro\/manipro\.gif/);
 });
 
 test('MANIPRO utilise le garde partagé et reste fermé avant autorisation', () => {

@@ -86,6 +86,14 @@ test('accueil distingue cinq cartes métier et deux accès secondaires', () => {
     assert.ok(source.includes('class="app-footer"'));
 });
 
+test('les cinq cartes métier utilisent les nouveaux PNG décoratifs dans le conteneur historique', () => {
+    for (const asset of ['jantes.png', 'jumelages.png', 'roues-etroites.png', 'manipro.png', 'reparations-modifications.png']) {
+        assert.match(source, new RegExp(`<span class="nav-card__icon nav-card__icon--image" aria-hidden="true"><img src="\\./assets/home-icons/${asset.replace('.', '\\.') }" alt="" loading="lazy"></span>`));
+    }
+    assert.equal(source.match(/assets\/home-icons\//g)?.length, 5);
+    assert.doesNotMatch(source, /assets\/manipro\/manipro\.gif/);
+});
+
 test('les routes métier prévues sont préparées sans navigation anticipée', () => {
     for (const route of [
         'jantes.html',
