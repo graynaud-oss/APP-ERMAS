@@ -77,9 +77,9 @@ test('accueil charge localement les fondations visuelles et les actifs officiels
     assert.doesNotMatch(source, /fonts\.googleapis\.com/);
 });
 
-test('accueil distingue cinq cartes métier et deux accès secondaires', () => {
+test('accueil distingue cinq cartes métier et trois accès secondaires', () => {
     assert.equal(source.match(/class="nav-card"/g)?.length, 5);
-    assert.equal(source.match(/class="nav-card nav-card--secondary"/g)?.length, 2);
+    assert.equal(source.match(/class="nav-card nav-card--secondary"/g)?.length, 3);
     assert.ok(source.includes('class="home-primary-grid"'));
     assert.ok(source.includes('class="home-secondary-grid"'));
     assert.ok(source.includes('class="app-header"'));
@@ -101,12 +101,13 @@ test('les routes métier prévues sont préparées sans navigation anticipée', 
         'roues-etroites.html',
         'reparations-modifications.html',
         'documents.html',
-        'contact.html'
+        'contact.html',
+        'installer.html'
     ]) {
         assert.ok(source.includes(`data-protected-route="${route}"`), `route manquante : ${route}`);
     }
 
-    assert.equal(source.match(/data-protected-route=/g)?.length, 7);
+    assert.equal(source.match(/data-protected-route=/g)?.length, 8);
 });
 
 test('accueil ne contient aucune logique de profil, remise ou enrôlement', () => {

@@ -6,3 +6,8 @@ export function applyManiproNetVisibility(elements, visible) {
     });
     return netVisible;
 }
+
+export function hasValidDiscount(value) {
+    const discount = Number(value);
+    return value !== null && value !== '' && Number.isFinite(discount) && discount > 0;
+}

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import test from 'node:test';
-import { applyManiproNetVisibility } from '../../js/manipro-price-visibility.js';
+import { applyManiproNetVisibility, hasValidDiscount } from '../../js/manipro-price-visibility.js';
 const root = new URL('../../', import.meta.url);
 const read = path => fs.readFileSync(new URL(path, root), 'utf8');
 const accueil = read('accueil.html');
@@ -54,6 +54,15 @@ test('Prix NET suit réellement OFF puis ON puis OFF pour les deux montants', ()
     assert.ok(elements.every((element) => !element.hidden && !element.classes.has('hidden')));
     applyManiproNetVisibility(elements, false);
     assert.ok(elements.every((element) => element.hidden && element.classes.has('hidden')));
+});
+
+test('le contrôle Prix NET exige une remise strictement positive et valide', () => {
+    assert.equal(hasValidDiscount(10), true);
+    assert.equal(hasValidDiscount(1), true);
+    for (const value of [0, null, undefined, '', 'invalide']) assert.equal(hasValidDiscount(value), false);
+    assert.match(page, /control\.classList\.toggle\('hidden',!hasRemise\)/);
+    assert.match(page, /hasRemise&&isNetPriceVisible\(\)/);
+    assert.match(page, /hasRemise&&toggle\.checked/);
 });
 
 test('retours, accueil, charte et responsive sont présents', () => {

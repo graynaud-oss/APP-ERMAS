@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ERMAS">
+    <title>ERMAS — Installer l’application</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" type="image/png" href="/assets/brand/favicon.png">
+    <link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
+    <link rel="stylesheet" href="/css/app-ermas.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="/js/logout.js"></script>
+    <script type="module" src="/js/pwa.js"></script>
+</head>
+<body>
+    <div id="installer-view" class="hidden app-shell pwa-install-page">
+        <header class="app-header"><div class="app-container app-header__inner"><a class="app-logo-link" href="https://www.ermas.fr/" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le site ERMAS"><img class="app-logo" src="/assets/brand/ermas-logo.png" alt=""></a><button type="button" class="app-logout-button" data-global-logout>Se déconnecter</button></div></header>
+        <main class="app-main"><div class="app-container"><section class="app-page-panel" aria-labelledby="installer-title">
+            <div class="app-page-header"><div><p class="app-page-eyebrow">Application mobile</p><h1 id="installer-title" class="app-page-title">Installer ERMAS Technique</h1><p class="app-page-subtitle">Accédez à la plateforme comme à une application depuis votre téléphone ou votre tablette.</p></div><button type="button" onclick="window.location.href='accueil.html'" class="app-back-button">Retour</button></div>
+            <div id="android-install" class="hidden pwa-install-panel">
+                <h2>Android</h2>
+                <p>Installez ERMAS Technique depuis votre navigateur mobile lorsque l’installation est disponible.</p>
+                <button id="install-button" type="button" class="hidden parts-access-button">INSTALLER ERMAS</button>
+            </div>
+            <div id="ios-install" class="hidden pwa-install-panel">
+                <h2>Installer ERMAS sur votre iPhone/iPad</h2>
+                <ol><li>Ouvrez la plateforme dans Safari.</li><li>Touchez le bouton Partager.</li><li>Choisissez « Sur l’écran d’accueil ».</li><li>Activez « Ouvrir comme app web » si cette option est proposée.</li><li>Touchez Ajouter.</li></ol>
+            </div>
+            <p id="desktop-install" class="hidden pwa-install-note">L’installation est proposée uniquement sur téléphone et tablette.</p>
+        </section></div></main>
+        <footer class="app-footer"><div class="app-container app-footer__inner"><p>&copy; 2026 ERMAS - Tous droits réservés.</p><nav class="app-footer__links" aria-label="Informations juridiques"><a href="https://www.ermas.fr/mentions-legales" target="_blank" rel="noopener noreferrer">Mentions légales</a><span aria-hidden="true">|</span><a href="https://www.ermas.fr/politique-confidentialite" target="_blank" rel="noopener noreferrer">Politique de confidentialité</a></nav></div></footer>
+    </div>
+    <script type="module">
+        import { getSupabaseClient } from './js/supabase-client.js';
+        import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
+        import { configureInstallPage, promptInstall } from './js/pwa.js';
+        const view = document.getElementById('installer-view');
+        const button = document.getElementById('install-button');
+        const panels = { button, androidPanel: document.getElementById('android-install'), iosPanel: document.getElementById('ios-install'), desktopMessage: document.getElementById('desktop-install') };
+        function refreshInstallState() { configureInstallPage(panels); }
+        async function init() {
+            try {
+                const context = await requireAuthorizedUser({ client: getSupabaseClient() });
+                if (context.state !== AUTHORIZATION_STATES.AUTHORIZED) { window.location.href = 'index.html'; return; }
+                refreshInstallState();
+                window.addEventListener('ermas-install-available', refreshInstallState);
+                button.addEventListener('click', () => { promptInstall(button); });
+                view.classList.remove('hidden');
+            } catch { window.location.href = 'index.html'; }
+        }
+        init();
+    </script>
+</body>
+</html>
