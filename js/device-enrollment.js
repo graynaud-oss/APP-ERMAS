@@ -91,7 +91,7 @@ export function migrateLegacyDeviceStorageForUser({
     return Object.freeze({ migrated: false, source: null });
 }
 
-function generateEnrollmentToken(cryptoProvider) {
+export function generateDeviceToken(cryptoProvider = globalThis.crypto) {
     if (!cryptoProvider || typeof cryptoProvider.getRandomValues !== 'function') {
         throw new Error('Un générateur cryptographique est requis pour l’enrôlement.');
     }
@@ -149,7 +149,7 @@ export async function initializeAuthorizedDeviceEnrollment({
 
     let token = readPendingDeviceToken(normalizedUserId, storage);
     if (!token) {
-        token = generateEnrollmentToken(cryptoProvider);
+        token = generateDeviceToken(cryptoProvider);
         storage.setItem(getPendingDeviceTokenStorageKey(normalizedUserId), token);
     }
 

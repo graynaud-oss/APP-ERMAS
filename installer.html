@@ -29,6 +29,19 @@
             <div id="ios-install" class="hidden pwa-install-panel">
                 <h2>Installer ERMAS sur votre iPhone/iPad</h2>
                 <ol><li>Ouvrez la plateforme dans Safari.</li><li>Touchez le bouton Partager.</li><li>Choisissez « Sur l’écran d’accueil ».</li><li>Activez « Ouvrir comme app web » si cette option est proposée.</li><li>Touchez Ajouter.</li></ol>
+                <div id="device-transfer-create" class="device-transfer-panel">
+                    <h3>Transférer mon accès vers l’application</h3>
+                    <p>Préparez un code depuis ce Safari autorisé, puis utilisez-le une seule fois dans l’application installée.</p>
+                    <button id="prepare-transfer-button" type="button" class="parts-access-button">PRÉPARER LE TRANSFERT</button>
+                    <div id="transfer-ticket-result" class="hidden device-transfer-ticket" aria-live="polite">
+                        <span>Code de transfert</span>
+                        <code id="transfer-ticket-value"></code>
+                        <button id="copy-transfer-ticket" type="button" class="auth-button auth-button--secondary">COPIER LE CODE</button>
+                        <p>Ce code est valable 10 minutes et ne peut être utilisé qu’une seule fois.</p>
+                        <p>Installez ERMAS Technique, ouvrez l’application, connectez-vous puis saisissez ce code.</p>
+                    </div>
+                    <p id="transfer-create-feedback" class="hidden auth-feedback auth-feedback--error" aria-live="polite"></p>
+                </div>
             </div>
             <p id="desktop-install" class="hidden pwa-install-note">L’installation est proposée uniquement sur téléphone et tablette.</p>
         </section></div></main>
@@ -37,21 +50,66 @@
     <script type="module">
         import { getSupabaseClient } from './js/supabase-client.js';
         import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
+        import { readLocalDeviceToken } from './js/device-enrollment.js';
+        import { createDeviceTransferTicket, DEVICE_TRANSFER_STATUSES } from './js/device-transfer.js';
         import { configureInstallPage, promptInstall } from './js/pwa.js';
         const view = document.getElementById('installer-view');
         const button = document.getElementById('install-button');
         const panels = { button, androidPanel: document.getElementById('android-install'), iosPanel: document.getElementById('ios-install'), desktopMessage: document.getElementById('desktop-install') };
+        const prepareTransferButton = document.getElementById('prepare-transfer-button');
+        const transferTicketResult = document.getElementById('transfer-ticket-result');
+        const transferTicketValue = document.getElementById('transfer-ticket-value');
+        const copyTransferTicketButton = document.getElementById('copy-transfer-ticket');
+        const transferCreateFeedback = document.getElementById('transfer-create-feedback');
+        let authorizedContext = null;
         function refreshInstallState() { configureInstallPage(panels); }
         async function init() {
             try {
                 const context = await requireAuthorizedUser({ client: getSupabaseClient() });
                 if (context.state !== AUTHORIZATION_STATES.AUTHORIZED) { window.location.href = 'index.html'; return; }
+                authorizedContext = context;
                 refreshInstallState();
                 window.addEventListener('ermas-install-available', refreshInstallState);
                 button.addEventListener('click', () => { promptInstall(button); });
                 view.classList.remove('hidden');
             } catch { window.location.href = 'index.html'; }
         }
+        prepareTransferButton.addEventListener('click', async () => {
+            prepareTransferButton.disabled = true;
+            transferCreateFeedback.classList.add('hidden');
+            transferTicketResult.classList.add('hidden');
+            transferTicketValue.textContent = '';
+            try {
+                const currentDeviceToken = readLocalDeviceToken(authorizedContext.user.id);
+                const response = await createDeviceTransferTicket({
+                    client: getSupabaseClient(),
+                    currentDeviceToken
+                });
+                if (response.status !== DEVICE_TRANSFER_STATUSES.CREATED) {
+                    transferCreateFeedback.textContent = 'Le transfert ne peut pas être préparé depuis cet appareil.';
+                    transferCreateFeedback.classList.remove('hidden');
+                    return;
+                }
+                transferTicketValue.textContent = response.ticket;
+                transferTicketResult.classList.remove('hidden');
+            } catch {
+                transferCreateFeedback.textContent = 'Une erreur technique empêche la préparation du transfert.';
+                transferCreateFeedback.classList.remove('hidden');
+            } finally {
+                prepareTransferButton.disabled = false;
+            }
+        });
+        copyTransferTicketButton.addEventListener('click', async () => {
+            const ticket = transferTicketValue.textContent;
+            if (!ticket) return;
+            try {
+                await navigator.clipboard.writeText(ticket);
+                copyTransferTicketButton.textContent = 'CODE COPIÉ';
+            } catch {
+                transferCreateFeedback.textContent = 'Copie automatique impossible. Sélectionnez et copiez le code affiché.';
+                transferCreateFeedback.classList.remove('hidden');
+            }
+        });
         init();
     </script>
 </body>

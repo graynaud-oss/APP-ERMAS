@@ -144,6 +144,25 @@
             </button>
         </div>
     </section>
+
+    <section id="device-transfer-view" class="auth-view hidden">
+        <div class="auth-panel">
+            <div class="auth-heading">
+                <p class="app-page-eyebrow">Application installée</p>
+                <h2 class="auth-title">Finaliser le transfert vers cette application</h2>
+                <p class="auth-subtitle">Saisissez le code préparé depuis Safari sur l’appareil actuellement autorisé.</p>
+            </div>
+            <div id="device-transfer-error" class="auth-feedback auth-feedback--error hidden" aria-live="polite"></div>
+            <form id="device-transfer-form" class="auth-form">
+                <div class="auth-field">
+                    <label for="device-transfer-code">Code de transfert</label>
+                    <input id="device-transfer-code" type="text" inputmode="text" autocomplete="off" autocapitalize="none" spellcheck="false" required>
+                </div>
+                <button id="device-transfer-submit" type="submit" class="auth-button auth-button--primary">ASSOCIER CETTE APPLICATION</button>
+            </form>
+            <button onclick="logoutUser()" class="auth-button auth-button--secondary auth-button--spaced">Se déconnecter</button>
+        </div>
+    </section>
     </main>
     <footer class="app-footer">
         <div class="app-container app-footer__inner">
@@ -161,6 +180,8 @@
         import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
         import { createOwnProfile, updateOwnPersonalProfile } from './js/profile.js';
         import { DEVICE_ENROLLMENT_STATUSES, initializeAuthorizedDeviceEnrollment } from './js/device-enrollment.js';
+        import { claimDeviceTransferTicket, DEVICE_TRANSFER_STATUSES } from './js/device-transfer.js';
+        import { isIosDevice, isStandalone } from './js/pwa.js';
 
         const supabaseClient = getSupabaseClient();
 
@@ -170,6 +191,11 @@
         const accessStatusView = document.getElementById('access-status-view');
         const accessStatusTitle = document.getElementById('access-status-title');
         const accessStatusMessage = document.getElementById('access-status-message');
+        const deviceTransferView = document.getElementById('device-transfer-view');
+        const deviceTransferForm = document.getElementById('device-transfer-form');
+        const deviceTransferCode = document.getElementById('device-transfer-code');
+        const deviceTransferError = document.getElementById('device-transfer-error');
+        const deviceTransferSubmit = document.getElementById('device-transfer-submit');
         let currentAuthorization = null;
         let onboardingMode = 'create';
         let authorizationRequestGeneration = 0;
@@ -186,6 +212,19 @@
             onboardingView.classList.add('hidden');
             blockedView.classList.add('hidden');
             accessStatusView.classList.add('hidden');
+            deviceTransferView.classList.add('hidden');
+        }
+
+        function showDeviceTransfer(authorization) {
+            hideAllViews();
+            currentAuthorization = authorization;
+            deviceTransferCode.value = '';
+            deviceTransferError.classList.add('hidden');
+            deviceTransferView.classList.remove('hidden');
+        }
+
+        function isIosStandaloneApp() {
+            return isStandalone(window) && isIosDevice(window.navigator);
         }
 
         function showAccessStatus(title, message) {
@@ -311,10 +350,18 @@
                     return;
 
                 case AUTHORIZATION_STATES.LOCAL_TOKEN_MISSING:
+                    if (isIosStandaloneApp()) {
+                        showDeviceTransfer(authorization);
+                        return;
+                    }
                     showAccessStatus('Appareil non reconnu', 'Le jeton de cet appareil est absent. Aucun nouveau jeton n’a été généré et l’accès est refusé.');
                     return;
 
                 case AUTHORIZATION_STATES.DEVICE_MISMATCH:
+                    if (isIosStandaloneApp()) {
+                        showDeviceTransfer(authorization);
+                        return;
+                    }
                     showAccessStatus('Appareil non autorisé', 'Ce compte est associé à un autre appareil. Contactez ERMAS si une intervention exceptionnelle est nécessaire.');
                     return;
 
@@ -332,6 +379,42 @@
         }
 
         handleSession();
+
+        deviceTransferForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const authorization = currentAuthorization;
+            if (!isIosStandaloneApp()
+                || !authorization?.session?.user
+                || ![AUTHORIZATION_STATES.LOCAL_TOKEN_MISSING, AUTHORIZATION_STATES.DEVICE_MISMATCH].includes(authorization.state)) {
+                showAccessStatus('Transfert refusé', 'Les conditions de sécurité du transfert ne sont pas réunies.');
+                return;
+            }
+
+            const requestGeneration = authorizationRequestGeneration;
+            deviceTransferSubmit.disabled = true;
+            deviceTransferError.classList.add('hidden');
+            try {
+                const response = await claimDeviceTransferTicket({
+                    client: supabaseClient,
+                    ticket: deviceTransferCode.value,
+                    userId: authorization.user.id,
+                    currentServerToken: authorization.profile.device_token
+                });
+                if (requestGeneration !== authorizationRequestGeneration) return;
+                if (response.status === DEVICE_TRANSFER_STATUSES.TRANSFERRED) {
+                    await handleSession({ allowEnrollment: false });
+                    return;
+                }
+                deviceTransferError.textContent = 'Le code est invalide, expiré, déjà utilisé ou ne correspond plus à l’appareil autorisé.';
+                deviceTransferError.classList.remove('hidden');
+            } catch {
+                if (requestGeneration !== authorizationRequestGeneration) return;
+                deviceTransferError.textContent = 'Une erreur technique empêche le transfert. Aucun accès n’a été accordé.';
+                deviceTransferError.classList.remove('hidden');
+            } finally {
+                if (requestGeneration === authorizationRequestGeneration) deviceTransferSubmit.disabled = false;
+            }
+        });
 
         document.getElementById('onboarding-form').addEventListener('submit', async (e) => {
             e.preventDefault();

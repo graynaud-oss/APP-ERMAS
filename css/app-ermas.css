@@ -1840,6 +1840,14 @@ button {
 .pwa-install-panel ol { padding-left: 22px; }
 .pwa-install-panel .parts-access-button { margin-top: 16px; width: 100%; justify-content: center; }
 .pwa-install-note { margin: 18px 0 0; color: var(--app-text-muted); font-size: .875rem; }
+.device-transfer-panel { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--app-border); }
+.device-transfer-panel h3 { margin: 0 0 8px; color: var(--ermas-anthracite); font-size: .95rem; }
+.device-transfer-ticket { margin-top: 16px; padding: 14px; border: 1px solid var(--app-border); border-radius: 4px; background: var(--app-surface); }
+.device-transfer-ticket > span, .device-transfer-ticket code { display: block; }
+.device-transfer-ticket > span { color: var(--app-text-muted); font-size: .75rem; font-weight: 800; text-transform: uppercase; }
+.device-transfer-ticket code { margin: 8px 0 12px; overflow-wrap: anywhere; color: var(--ermas-blue); font-size: .9rem; user-select: all; }
+.device-transfer-ticket p + p { margin-top: 6px; }
+.auth-button--spaced { margin-top: 14px; }
 .pwa-offline-page { min-height: 100vh; display: grid; place-items: center; margin: 0; padding: 20px; background: var(--app-background); color: var(--app-text); font-family: Arial, sans-serif; }
 .pwa-offline-card { width: min(100%, 460px); padding: 28px; text-align: center; border: 1px solid var(--app-border); border-radius: 5px; background: var(--app-surface); }
 .pwa-offline-card .app-logo { margin-inline: auto; }
