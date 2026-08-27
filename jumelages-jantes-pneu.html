@@ -83,6 +83,7 @@
         import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
         import { isNetPriceVisible, setNetPriceVisible } from './js/net-price-visibility.js';
         import { escapeHtml } from './js/safe-dom.js';
+        import { PRODUCT_OPTION_FAMILIES, renderAvailableProductOptions } from './js/product-options.js';
         import {
             filterTiresByAvailableCatalogDimensions,
             findCatalogProductsForTires,
@@ -532,6 +533,12 @@
             if (!html) {
                 resultsContent.innerHTML = `<div class="p-4 bg-gray-900/50 border border-gray-800 text-gray-400 text-xs rounded-xl text-center">Aucune jante tarifée trouvée pour cette dimension de pneu.</div>`;
             } else {
+                html += renderAvailableProductOptions({
+                    family: PRODUCT_OPTION_FAMILIES.DUAL_WHEELS,
+                    discount: userRemise,
+                    netPriceVisible,
+                    hasResults: true
+                });
                 resultsContent.innerHTML = html;
             }
 

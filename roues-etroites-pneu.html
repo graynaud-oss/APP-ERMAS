@@ -67,6 +67,7 @@
         import { isNetPriceVisible, setNetPriceVisible } from './js/net-price-visibility.js';
         import { escapeHtml } from './js/safe-dom.js';
         import { getNarrowWheelPricesFromColumns, renderNarrowWheelPriceOffers } from './js/narrow-wheel-pricing.js';
+        import { PRODUCT_OPTION_FAMILIES, renderAvailableProductOptions } from './js/product-options.js';
 
         const PNEU_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=139891043&single=true&output=csv';
         const TARIFS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=21297594&single=true&output=csv';
@@ -385,6 +386,12 @@
             if (!html) {
                 resultsContent.innerHTML = `<div class="p-4 bg-gray-900/50 border border-gray-800 text-gray-400 text-xs rounded-xl text-center">Aucune roue étroite tarifée trouvée pour cette dimension de pneu.</div>`;
             } else {
+                html += renderAvailableProductOptions({
+                    family: PRODUCT_OPTION_FAMILIES.NARROW_WHEELS,
+                    discount: userRemise,
+                    netPriceVisible,
+                    hasResults: true
+                });
                 resultsContent.innerHTML = html;
             }
 

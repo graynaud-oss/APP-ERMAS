@@ -92,6 +92,7 @@
         import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
         import { isNetPriceVisible, setNetPriceVisible } from './js/net-price-visibility.js';
         import { escapeHtml } from './js/safe-dom.js';
+        import { PRODUCT_OPTION_FAMILIES, renderAvailableProductOptions } from './js/product-options.js';
         import {
             getEncodedJumelagesType,
             getJumelagesCatalogUrl,
@@ -461,6 +462,12 @@
                 html += `</div>`;
             });
 
+            html += renderAvailableProductOptions({
+                family: PRODUCT_OPTION_FAMILIES.DUAL_WHEELS,
+                discount: userRemise,
+                netPriceVisible,
+                hasResults: true
+            });
             resultsContent.innerHTML = html;
             updateNetPriceVisibility();
             resultsContainer.classList.remove('hidden');

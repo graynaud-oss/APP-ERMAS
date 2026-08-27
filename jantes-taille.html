@@ -81,6 +81,7 @@
         import { isNetPriceVisible, setNetPriceVisible } from './js/net-price-visibility.js';
         import { buildWheelDimensionIndex, getVariableWayState, NARROW_WHEELS_CSV_URL, VARIABLE_WAY_STATES } from './js/wheel-dimension-index.js';
         import { escapeHtml } from './js/safe-dom.js';
+        import { PRODUCT_OPTION_FAMILIES, renderAvailableProductOptions } from './js/product-options.js';
 
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWjGoPLparHgevFFnvi4cOqQk-q12ZqXSJzZEOWQDr7p-5DRPE4zTuWKXPQQh9m4eZRVHql-B8tf1F/pub?gid=1966421754&single=true&output=csv';
         const supabaseClient = getSupabaseClient();
@@ -390,6 +391,12 @@
             }
 
             html += `</div>`;
+            html += renderAvailableProductOptions({
+                family: PRODUCT_OPTION_FAMILIES.STANDARD_WHEELS,
+                discount: userRemise,
+                netPriceVisible,
+                hasResults: true
+            });
             resultsContent.innerHTML = html;
             updateNetPriceVisibility();
             resultsContainer.classList.remove('hidden');

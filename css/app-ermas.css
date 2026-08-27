@@ -209,7 +209,11 @@ button {
 }
 
 .app-header {
-    min-height: 74px;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    min-height: 64px;
+    padding-top: env(safe-area-inset-top);
     display: flex;
     align-items: center;
     background: rgba(255, 255, 255, 0.94);
@@ -224,6 +228,31 @@ button {
     align-items: center;
     justify-content: space-between;
     gap: 20px;
+}
+
+.app-header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.home-logout {
+    display: flex;
+    justify-content: center;
+    margin-top: 44px;
+    padding-top: 22px;
+    border-top: 1px solid var(--app-border);
+}
+
+.app-header-actions .app-back-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
 }
 
 .app-logo {
@@ -657,7 +686,33 @@ button {
     }
 
     .app-header {
-        min-height: 66px;
+        min-height: 58px;
+    }
+
+    .app-header__inner:has(.app-header-actions) {
+        flex-wrap: nowrap;
+        gap: 10px;
+        padding-block: 6px;
+    }
+
+    .app-header__inner:has(.app-header-actions) .app-logo {
+        width: 118px;
+    }
+
+    .app-header-actions {
+        width: auto;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(82px, 1fr));
+        gap: 6px;
+    }
+
+    .app-header-actions .app-back-button,
+    .app-header-actions .app-logout-button {
+        width: 100%;
+        min-width: 0;
+        min-height: 40px;
+        padding-inline: 7px;
+        font-size: 0.6875rem;
     }
 
     .app-logo {
@@ -1384,11 +1439,6 @@ button {
     cursor: pointer;
 }
 
-.app-back-button::before {
-    margin-right: 7px;
-    content: "\2190";
-}
-
 .app-choice-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1832,6 +1882,30 @@ button {
 .manipro-prices [data-net-price][hidden], .manipro-prices [data-net-price].hidden { display:none !important; }
 @media (max-width: 620px) { .manipro-layout {grid-template-columns:1fr;} }
 @media (max-width: 430px) { .app-page-actions { flex-wrap:wrap; } }
+
+.product-options {
+    margin-top: 22px;
+    padding-top: 20px;
+    border-top: 1px solid var(--app-border);
+}
+.product-options__heading { margin-bottom: 13px; }
+.product-options__heading h2 { margin: 0; color: var(--ermas-blue); font-size: .78rem; font-weight: 800; letter-spacing: .1em; }
+.product-options__heading p { margin: 5px 0 0; color: var(--app-text-muted); font-size: .78rem; line-height: 1.45; }
+.product-options__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.product-options__grid--compact { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.product-options__card { min-width: 0; padding: 13px; border: 1px solid var(--app-border); border-radius: 4px; background: var(--app-surface-muted); }
+.product-options__card h3 { margin: 0 0 9px; color: var(--ermas-anthracite); font-size: .78rem; font-weight: 800; }
+.product-options__variant-note { margin: -5px 0 8px; color: var(--app-text-muted); font-size: .68rem; }
+.product-options__variant + .product-options__variant { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--app-border); }
+.product-options__variant h4 { margin: 0 0 4px; color: var(--ermas-blue); font-size: .72rem; }
+.product-options__price { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; color: var(--app-text-muted); font-size: .68rem; }
+.product-options__price strong { color: var(--ermas-anthracite); font-size: .78rem; white-space: nowrap; }
+.product-options__price--net { margin-top: 5px; padding-top: 5px; }
+.product-options [data-net-price][hidden] { display: none !important; }
+@media (max-width: 620px) {
+    .product-options__grid,
+    .product-options__grid--compact { grid-template-columns: 1fr; }
+}
 
 .pwa-install-page { padding-bottom: env(safe-area-inset-bottom); }
 .pwa-install-panel { margin-top: 18px; padding: 18px; border: 1px solid var(--app-border); border-radius: 5px; background: var(--app-surface-muted); }
