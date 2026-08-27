@@ -149,8 +149,8 @@
         <div class="auth-panel">
             <div class="auth-heading">
                 <p class="app-page-eyebrow">Application installée</p>
-                <h2 class="auth-title">Finaliser le transfert vers cette application</h2>
-                <p class="auth-subtitle">Saisissez le code préparé depuis Safari sur l’appareil actuellement autorisé.</p>
+                <h2 class="auth-title">Finaliser l’installation</h2>
+                <p class="auth-subtitle">Collez le code généré dans Safari pour transférer votre accès vers cette application.</p>
             </div>
             <div id="device-transfer-error" class="auth-feedback auth-feedback--error hidden" aria-live="polite"></div>
             <form id="device-transfer-form" class="auth-form">
@@ -158,7 +158,7 @@
                     <label for="device-transfer-code">Code de transfert</label>
                     <input id="device-transfer-code" type="text" inputmode="text" autocomplete="off" autocapitalize="none" spellcheck="false" required>
                 </div>
-                <button id="device-transfer-submit" type="submit" class="auth-button auth-button--primary">ASSOCIER CETTE APPLICATION</button>
+                <button id="device-transfer-submit" type="submit" class="auth-button auth-button--primary">VALIDER LE TRANSFERT</button>
             </form>
             <button onclick="logoutUser()" class="auth-button auth-button--secondary auth-button--spaced">Se déconnecter</button>
         </div>
@@ -405,7 +405,9 @@
                     await handleSession({ allowEnrollment: false });
                     return;
                 }
-                deviceTransferError.textContent = 'Le code est invalide, expiré, déjà utilisé ou ne correspond plus à l’appareil autorisé.';
+                deviceTransferError.textContent = response.status === DEVICE_TRANSFER_STATUSES.EXPIRED_TICKET
+                    ? 'Le code a expiré. Générez-en un nouveau depuis Safari.'
+                    : 'Le code est invalide, déjà utilisé ou ne correspond plus à l’appareil autorisé.';
                 deviceTransferError.classList.remove('hidden');
             } catch {
                 if (requestGeneration !== authorizationRequestGeneration) return;

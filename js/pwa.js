@@ -1,5 +1,7 @@
 let deferredInstallPrompt = null;
 
+export const INSTALL_NOTICE_STORAGE_KEY = 'ermas_install_notice_seen';
+
 export function isStandalone(windowObject = globalThis.window) {
     return windowObject?.matchMedia?.('(display-mode: standalone)').matches === true
         || windowObject?.navigator?.standalone === true;
@@ -24,6 +26,28 @@ export function isIosSafari(navigatorObject = globalThis.navigator) {
     return isIosDevice(navigatorObject) && safari;
 }
 
+export function shouldShowInstallNotice({
+    windowObject = globalThis.window,
+    storage = globalThis.localStorage
+} = {}) {
+    if (isStandalone(windowObject) || !isMobileOrTablet(windowObject?.navigator)) return false;
+
+    try {
+        return storage?.getItem?.(INSTALL_NOTICE_STORAGE_KEY) !== 'true';
+    } catch {
+        return false;
+    }
+}
+
+export function markInstallNoticeSeen(storage = globalThis.localStorage) {
+    try {
+        storage?.setItem?.(INSTALL_NOTICE_STORAGE_KEY, 'true');
+        return true;
+    } catch {
+        return false;
+    }
+}
+
 export async function registerServiceWorker(navigatorObject = globalThis.navigator) {
     if (!navigatorObject?.serviceWorker) return null;
     try {
@@ -33,7 +57,7 @@ export async function registerServiceWorker(navigatorObject = globalThis.navigat
     }
 }
 
-export function configureInstallPage({ button, androidPanel, iosPanel, desktopMessage }, windowObject = globalThis.window) {
+export function configureInstallPage({ button, androidPanel, iosPanel, iosUnsupportedMessage, desktopMessage }, windowObject = globalThis.window) {
     const standalone = isStandalone(windowObject);
     const mobileOrTablet = isMobileOrTablet(windowObject?.navigator);
     const iosDevice = isIosDevice(windowObject?.navigator);
@@ -45,7 +69,11 @@ export function configureInstallPage({ button, androidPanel, iosPanel, desktopMe
         return 'desktop';
     }
     if (iosDevice) {
-        if (iosSafari) iosPanel?.classList.remove('hidden');
+        if (iosSafari) {
+            iosPanel?.classList.remove('hidden');
+        } else {
+            iosUnsupportedMessage?.classList.remove('hidden');
+        }
         return iosSafari ? 'ios' : 'ios-unsupported';
     }
 

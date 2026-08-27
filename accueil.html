@@ -35,6 +35,18 @@
                     <p class="home-lead">Sélectionnez une rubrique ci-dessous :</p>
                 </section>
 
+                <aside id="install-notice" class="hidden app-notice pwa-install-notice" aria-labelledby="install-notice-title">
+                    <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l-4-4m4 4l4-4M5 19h14"/></svg>
+                    <div class="pwa-install-notice__content">
+                        <strong id="install-notice-title">Installer ERMAS Technique</strong>
+                        <p>Ajoutez la plateforme à votre téléphone ou tablette pour y accéder comme à une application.</p>
+                        <div class="pwa-install-notice__actions">
+                            <button id="install-notice-open" type="button" class="pwa-install-notice__primary">VOIR COMMENT L’INSTALLER</button>
+                            <button id="install-notice-dismiss" type="button" class="pwa-install-notice__dismiss" aria-label="Masquer cette information">Plus tard</button>
+                        </div>
+                    </div>
+                </aside>
+
                 <section class="home-section" aria-labelledby="home-catalogues-title">
                     <h2 id="home-catalogues-title" class="home-section__title">Catalogues techniques</h2>
                     <div class="home-primary-grid">
@@ -120,9 +132,13 @@
     <script type="module">
         import { getSupabaseClient } from './js/supabase-client.js';
         import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
+        import { markInstallNoticeSeen, shouldShowInstallNotice } from './js/pwa.js';
 
         const supabaseClient = getSupabaseClient();
         const appView = document.getElementById('app-view');
+        const installNotice = document.getElementById('install-notice');
+        const installNoticeOpen = document.getElementById('install-notice-open');
+        const installNoticeDismiss = document.getElementById('install-notice-dismiss');
         let pageAuthorized = false;
 
         async function initPage() {
@@ -142,9 +158,28 @@
 
             pageAuthorized = true;
 
+            if (shouldShowInstallNotice()) {
+                installNotice.classList.remove('hidden');
+            }
+
+            installNoticeOpen.addEventListener('click', () => {
+                if (!pageAuthorized) return;
+                markInstallNoticeSeen();
+                window.location.href = 'installer.html';
+            });
+
+            installNoticeDismiss.addEventListener('click', () => {
+                if (!pageAuthorized) return;
+                markInstallNoticeSeen();
+                installNotice.classList.add('hidden');
+            });
+
             document.querySelectorAll('[data-protected-route]').forEach((button) => {
                 button.addEventListener('click', () => {
                     if (!pageAuthorized) return;
+                    if (button.dataset.protectedRoute === 'installer.html') {
+                        markInstallNoticeSeen();
+                    }
                     window.location.href = button.dataset.protectedRoute;
                 });
             });

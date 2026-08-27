@@ -183,7 +183,8 @@ test('la PWA iOS n’affiche le claim que pour token absent ou différent après
     assert.match(index, /isIosStandaloneApp\(\)/);
     assert.match(index, /AUTHORIZATION_STATES\.LOCAL_TOKEN_MISSING/);
     assert.match(index, /AUTHORIZATION_STATES\.DEVICE_MISMATCH/);
-    assert.match(index, /Finaliser le transfert vers cette application/);
+    assert.match(index, /Finaliser l’installation/);
+    assert.match(index, /Collez le code généré dans Safari/);
     assert.match(index, /claimDeviceTransferTicket/);
     assert.match(index, /response\.status === DEVICE_TRANSFER_STATUSES\.TRANSFERRED/);
     assert.match(index, /await handleSession\(\{ allowEnrollment: false \}\)/);

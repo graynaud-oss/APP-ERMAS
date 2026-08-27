@@ -1,7 +1,16 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import test from 'node:test';
-import { configureInstallPage, isIosDevice, isIosSafari, isMobileOrTablet, isStandalone } from '../../js/pwa.js';
+import {
+    configureInstallPage,
+    INSTALL_NOTICE_STORAGE_KEY,
+    isIosDevice,
+    isIosSafari,
+    isMobileOrTablet,
+    isStandalone,
+    markInstallNoticeSeen,
+    shouldShowInstallNotice
+} from '../../js/pwa.js';
 
 const root = new URL('../../', import.meta.url);
 const read = (path) => fs.readFileSync(new URL(path, root), 'utf8');
@@ -78,7 +87,7 @@ test('Android, iOS, standalone et desktop sont distingués sans CTA PC', () => {
 
 test('la configuration n’affiche jamais le CTA Android sur iOS ou desktop', () => {
     const element = () => ({ classList: { removed: [], remove(name) { this.removed.push(name); } } });
-    const buildPanels = () => ({ button: element(), androidPanel: element(), iosPanel: element(), desktopMessage: element() });
+    const buildPanels = () => ({ button: element(), androidPanel: element(), iosPanel: element(), iosUnsupportedMessage: element(), desktopMessage: element() });
     const safariPanels = buildPanels();
     assert.equal(configureInstallPage(safariPanels, { matchMedia: () => ({ matches: false }), navigator: { userAgent: 'Mozilla/5.0 (iPhone) AppleWebKit Safari', maxTouchPoints: 5 } }), 'ios');
     assert.deepEqual(safariPanels.iosPanel.classList.removed, ['hidden']);
@@ -86,6 +95,8 @@ test('la configuration n’affiche jamais le CTA Android sur iOS ou desktop', ()
     const chromeIosPanels = buildPanels();
     assert.equal(configureInstallPage(chromeIosPanels, { matchMedia: () => ({ matches: false }), navigator: { userAgent: 'Mozilla/5.0 (iPhone) AppleWebKit CriOS Safari', maxTouchPoints: 5 } }), 'ios-unsupported');
     assert.deepEqual(chromeIosPanels.androidPanel.classList.removed, []);
+    assert.deepEqual(chromeIosPanels.iosPanel.classList.removed, []);
+    assert.deepEqual(chromeIosPanels.iosUnsupportedMessage.classList.removed, ['hidden']);
     const desktopPanels = buildPanels();
     assert.equal(configureInstallPage(desktopPanels, { matchMedia: () => ({ matches: false }), navigator: { userAgent: 'Mozilla/5.0 (Windows NT 10.0)', maxTouchPoints: 0 } }), 'desktop');
     assert.deepEqual(desktopPanels.androidPanel.classList.removed, []);
@@ -96,10 +107,80 @@ test('la page installer fournit uniquement les parcours Android et Safari demand
     assert.match(accueil, /data-protected-route="installer\.html"/);
     assert.match(accueil, /INSTALLER L’APP/);
     assert.match(installer, /INSTALLER ERMAS/);
-    assert.match(installer, /Ouvrez la plateforme dans Safari/);
+    assert.match(installer, /Touchez le bouton Partager de Safari/);
     assert.match(installer, /Sur l’écran d’accueil/);
     assert.match(installer, /Ouvrir comme app web/);
     assert.doesNotMatch(installer, /Windows|macOS|Linux/);
+});
+
+test('la notice d’installation apparaît une seule fois sur mobile non standalone', () => {
+    const values = new Map();
+    const storage = {
+        getItem: (key) => values.get(key) ?? null,
+        setItem: (key, value) => values.set(key, value)
+    };
+    const mobileWindow = {
+        matchMedia: () => ({ matches: false }),
+        navigator: { userAgent: 'Mozilla/5.0 (iPhone) AppleWebKit Safari', maxTouchPoints: 5 }
+    };
+
+    assert.equal(shouldShowInstallNotice({ windowObject: mobileWindow, storage }), true);
+    assert.equal(markInstallNoticeSeen(storage), true);
+    assert.equal(values.get(INSTALL_NOTICE_STORAGE_KEY), 'true');
+    assert.equal(shouldShowInstallNotice({ windowObject: mobileWindow, storage }), false);
+});
+
+test('la notice reste absente en standalone et sur desktop', () => {
+    const unseenStorage = { getItem: () => null };
+    assert.equal(shouldShowInstallNotice({
+        windowObject: { matchMedia: () => ({ matches: true }), navigator: { userAgent: 'Mozilla/5.0 (iPhone)' } },
+        storage: unseenStorage
+    }), false);
+    assert.equal(shouldShowInstallNotice({
+        windowObject: { matchMedia: () => ({ matches: false }), navigator: { userAgent: 'Mozilla/5.0 (Windows NT 10.0)', maxTouchPoints: 0 } },
+        storage: unseenStorage
+    }), false);
+});
+
+test('la notice accueil est non bloquante, accessible et mémorisée après chaque action', () => {
+    assert.match(accueil, /id="install-notice"[^>]*class="hidden app-notice pwa-install-notice"/);
+    assert.match(accueil, /Installer ERMAS Technique/);
+    assert.match(accueil, /VOIR COMMENT L’INSTALLER/);
+    assert.match(accueil, /id="install-notice-dismiss"[^>]*aria-label="Masquer cette information"/);
+    assert.match(accueil, /installNoticeOpen\.addEventListener[\s\S]*markInstallNoticeSeen\(\)[\s\S]*window\.location\.href = 'installer\.html'/);
+    assert.match(accueil, /installNoticeDismiss\.addEventListener[\s\S]*markInstallNoticeSeen\(\)[\s\S]*installNotice\.classList\.add\('hidden'\)/);
+    assert.match(accueil, /button\.dataset\.protectedRoute === 'installer\.html'[\s\S]*markInstallNoticeSeen\(\)/);
+    assert.ok(accueil.indexOf('context.state !== AUTHORIZATION_STATES.AUTHORIZED') < accueil.indexOf('shouldShowInstallNotice()'));
+});
+
+test('le guide Safari présente l’installation avant le transfert sans créer de ticket automatiquement', () => {
+    const stepOne = installer.indexOf('Étape 1');
+    const stepTwo = installer.indexOf('Étape 2');
+    const clickHandler = installer.indexOf("prepareTransferButton.addEventListener('click'");
+    const ticketCall = installer.indexOf('await createDeviceTransferTicket');
+    assert.ok(stepOne >= 0 && stepOne < stepTwo);
+    assert.ok(stepTwo < clickHandler && clickHandler < ticketCall);
+    assert.match(installer, /Ajouter l’application/);
+    assert.match(installer, /Transférer votre accès/);
+    assert.match(installer, /Ce code est valable 10 minutes et ne peut être utilisé qu’une seule fois/);
+    assert.match(installer, /Copiez ce code[\s\S]*Ouvrez ERMAS Technique[\s\S]*Connectez-vous[\s\S]*Collez le code/);
+    assert.doesNotMatch(installer, /localStorage[^\n]*(?:ticket|code)/i);
+});
+
+test('un navigateur iOS non Safari reçoit seulement l’instruction Safari', () => {
+    assert.match(installer, /id="ios-unsupported"[^>]*class="hidden/);
+    assert.match(installer, /Pour installer ERMAS Technique sur iPhone ou iPad, ouvrez cette page dans Safari/);
+    assert.ok(installer.indexOf('id="ios-unsupported"') > installer.indexOf('</div>'));
+});
+
+test('Android conserve beforeinstallprompt et son bouton natif sans ticket imposé', () => {
+    const pwa = read('js/pwa.js');
+    const androidBlock = installer.slice(installer.indexOf('id="android-install"'), installer.indexOf('id="ios-install"'));
+    assert.match(pwa, /beforeinstallprompt/);
+    assert.match(pwa, /deferredInstallPrompt\.prompt\(\)/);
+    assert.match(androidBlock, /id="install-button"/);
+    assert.match(androidBlock, /INSTALLER ERMAS/);
+    assert.doesNotMatch(androidBlock, /transfert|ticket|code/i);
 });
 
 test('la page hors ligne ne contient aucun prix ni donnée métier de secours', () => {
