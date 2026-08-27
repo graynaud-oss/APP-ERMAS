@@ -48,10 +48,35 @@ export function markInstallNoticeSeen(storage = globalThis.localStorage) {
     }
 }
 
-export async function registerServiceWorker(navigatorObject = globalThis.navigator) {
+export async function registerServiceWorker(
+    navigatorObject = globalThis.navigator,
+    locationObject = globalThis.location
+) {
     if (!navigatorObject?.serviceWorker) return null;
+
+    const serviceWorkerContainer = navigatorObject.serviceWorker;
+    const controlledBeforeRegistration = Boolean(serviceWorkerContainer.controller);
+    let reloadStarted = false;
+
+    serviceWorkerContainer.addEventListener?.('controllerchange', () => {
+        if (!controlledBeforeRegistration || reloadStarted) return;
+        reloadStarted = true;
+        locationObject?.reload?.();
+    });
+
     try {
-        return await navigatorObject.serviceWorker.register('/service-worker.js', { scope: '/' });
+        const registration = await serviceWorkerContainer.register('/service-worker.js', {
+            scope: '/',
+            updateViaCache: 'none'
+        });
+
+        try {
+            await registration.update?.();
+        } catch {
+            // Conserve le Service Worker actif si le contrôle réseau est momentanément indisponible.
+        }
+
+        return registration;
     } catch {
         return null;
     }

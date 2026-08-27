@@ -52,25 +52,28 @@ test('les pages d’entrée déclarent la PWA mobile sans contourner Auth', () =
     assert.match(installer, /window\.location\.href = 'index\.html'/);
 });
 
-test('le service worker ne met en cache qu’une allowlist statique sûre', () => {
-    assert.match(worker, /ermas-static-v1/);
-    assert.match(worker, /STATIC_ASSETS/);
-    assert.match(worker, /STATIC_PATHS\.has\(url\.pathname\)/);
+test('le service worker privilégie le réseau pour le code et limite le cache-first aux actifs statiques', () => {
+    assert.match(worker, /ermas-static-v2/);
+    assert.match(worker, /networkFirstWithCache/);
+    assert.match(worker, /isApplicationCodeRequest/);
+    assert.match(worker, /staticAssetCacheFirst/);
     assert.match(worker, /self\.skipWaiting\(\)/);
     assert.match(worker, /self\.clients\.claim\(\)/);
-    assert.match(worker, /name\.startsWith\('ermas-static-'\)/);
+    assert.match(worker, /cacheName\.startsWith\(CACHE_PREFIX\)/);
     assert.doesNotMatch(worker, /docs\.google(?:usercontent)?\.com/);
     assert.doesNotMatch(worker, /supabase\.co/);
-    assert.doesNotMatch(worker, /cache\.put/);
     assert.match(worker, /url\.origin !== self\.location\.origin[\s\S]*fetch\(request\)/);
     assert.match(worker, /event\.respondWith\(fetch\(request\)\)/);
 });
 
 test('l’enregistrement du service worker est racine, silencieux et non bloquant', () => {
     const pwa = read('js/pwa.js');
-    assert.match(pwa, /serviceWorker\.register\('\/service-worker\.js', \{ scope: '\/' \}\)/);
+    assert.match(pwa, /register\('\/service-worker\.js', \{[\s\S]*scope: '\/'[\s\S]*updateViaCache: 'none'/);
+    assert.match(pwa, /registration\.update\?\.\(\)/);
+    assert.match(pwa, /controllerchange/);
     assert.match(pwa, /catch \{[\s\S]*return null/);
     assert.match(pwa, /window\.addEventListener\('load'/);
+    assert.doesNotMatch(pwa, /setInterval|setTimeout/);
 });
 
 test('Android, iOS, standalone et desktop sont distingués sans CTA PC', () => {
