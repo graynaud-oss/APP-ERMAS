@@ -2221,12 +2221,20 @@ html:has(dialog[open]) {
 .pwa-ios-action strong { display: block; color: var(--ermas-anthracite); font-size: .92rem; line-height: 1.35; }
 .pwa-ios-action p { margin-top: 5px; font-size: .8rem; line-height: 1.5; }
 .pwa-ios-guide__reassurance { margin-top: 14px !important; padding-left: 12px; border-left: 3px solid var(--ermas-blue); font-size: .8rem; }
+.pwa-ios-return-reminder { margin-top: 16px; padding: 14px; border: 2px solid var(--ermas-blue); border-radius: 5px; background: #eef5fb; color: var(--ermas-anthracite); }
+.pwa-ios-return-reminder strong { display: block; font-size: .95rem; line-height: 1.4; }
+.pwa-ios-return-reminder p { margin-top: 5px; font-size: .82rem; line-height: 1.5; }
+.pwa-transfer-step > p + p { margin-top: 6px; }
+.device-transfer-ticket__ready { display: block; margin-bottom: 6px; color: var(--ermas-blue); font-size: 1rem; }
+.device-transfer-ticket__ready + p { margin-bottom: 14px; color: var(--ermas-anthracite); font-weight: 700; }
+.pwa-transfer-step__back { display: block; margin: 14px auto 0; padding: 10px 14px; border: 0; background: transparent; color: var(--ermas-blue); font: inherit; font-size: .75rem; font-weight: 800; cursor: pointer; }
+.pwa-transfer-step__back:focus-visible { outline: 3px solid rgba(12, 82, 154, 0.3); outline-offset: 2px; }
 .pwa-offline-page { min-height: 100vh; display: grid; place-items: center; margin: 0; padding: 20px; background: var(--app-background); color: var(--app-text); font-family: Arial, sans-serif; }
 .pwa-offline-card { width: min(100%, 460px); padding: 28px; text-align: center; border: 1px solid var(--app-border); border-radius: 5px; background: var(--app-surface); }
 .pwa-offline-card .app-logo { margin-inline: auto; }
 .pwa-offline-card h1 { color: var(--ermas-blue); }
 .pwa-offline-card p { color: var(--app-text-muted); line-height: 1.6; }
-@media (max-width: 430px) { .pwa-install-panel { padding: 14px; } .pwa-install-notice { padding: 12px; } .pwa-install-notice__actions { gap: 6px 10px; } .pwa-ios-actions { gap: 10px; } .pwa-ios-action { grid-template-columns: 52px minmax(0, 1fr); gap: 11px; padding: 12px; } .pwa-ios-action__visual { width: 52px; height: 52px; border-radius: 12px; } .pwa-ios-action__icon { width: 30px; height: 30px; } .pwa-ios-action__home-icon { width: 30px; height: 30px; font-size: 1.3rem; } .pwa-ios-action__add { padding: 6px; font-size: .58rem; } .pwa-ios-action strong { font-size: .85rem; } .pwa-ios-action p { font-size: .75rem; } .pwa-offline-card { padding: 20px; } }
+@media (max-width: 430px) { .pwa-install-panel { padding: 14px; } .pwa-install-notice { padding: 12px; } .pwa-install-notice__actions { gap: 6px 10px; } .pwa-ios-actions { gap: 10px; } .pwa-ios-action { grid-template-columns: 52px minmax(0, 1fr); gap: 11px; padding: 12px; } .pwa-ios-action__visual { width: 52px; height: 52px; border-radius: 12px; } .pwa-ios-action__icon { width: 30px; height: 30px; } .pwa-ios-action__home-icon { width: 30px; height: 30px; font-size: 1.3rem; } .pwa-ios-action__add { padding: 6px; font-size: .58rem; } .pwa-ios-action strong { font-size: .85rem; } .pwa-ios-action p { font-size: .75rem; } .pwa-ios-return-reminder { padding: 12px; } .pwa-ios-return-reminder strong { font-size: .88rem; } .pwa-ios-return-reminder p { font-size: .76rem; } .pwa-offline-card { padding: 20px; } }
 
 .results-tier-card__title {
     margin: 0 0 12px;

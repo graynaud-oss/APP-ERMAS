@@ -158,7 +158,7 @@ test('la notice accueil est non bloquante, accessible et mémorisée après chaq
 
 test('le guide Safari présente l’installation avant le transfert sans créer de ticket automatiquement', () => {
     const stepOne = installer.indexOf('Étape 1');
-    const stepTwo = installer.indexOf('Étape 2');
+    const stepTwo = installer.indexOf('Dernière étape');
     const clickHandler = installer.indexOf("prepareTransferButton.addEventListener('click'");
     const ticketCall = installer.indexOf('await createDeviceTransferTicket');
     assert.ok(stepOne >= 0 && stepOne < stepTwo);
@@ -171,7 +171,7 @@ test('le guide Safari présente l’installation avant le transfert sans créer 
     assert.match(installer, /Rien ne s’installe automatiquement/);
     assert.match(installer, /Transférer votre accès/);
     assert.match(installer, /Ce code est valable 10 minutes et ne peut être utilisé qu’une seule fois/);
-    assert.match(installer, /Copiez ce code[\s\S]*Ouvrez ERMAS Technique[\s\S]*Connectez-vous[\s\S]*Collez le code/);
+    assert.match(installer, /Copiez ce code[\s\S]*Ouvrez ERMAS depuis la nouvelle icône[\s\S]*Connectez-vous[\s\S]*Entrez ce code dans ERMAS/);
     assert.doesNotMatch(installer, /localStorage[^\n]*(?:ticket|code)/i);
 });
 
@@ -186,6 +186,39 @@ test('le guide iPhone reste purement visuel et isolé du parcours PWA standalone
     assert.match(pwa, /const standalone = isStandalone\(windowObject\)[^]*if \(standalone\) return 'standalone'/);
     assert.ok(pwa.indexOf("return 'standalone'") < pwa.indexOf("iosPanel?.classList.remove('hidden')"));
     assert.doesNotMatch(installer, /onclick="[^"]*(?:Partager|écran d’accueil|Ajouter)/i);
+});
+
+test('le parcours iPhone impose une transition humaine claire avant le transfert V15', () => {
+    const guide = installer.indexOf('id="ios-install-guide-step"');
+    const reminder = installer.indexOf('Une fois l’icône ajoutée, ne l’ouvrez pas tout de suite.');
+    const continueButton = installer.indexOf('id="continue-to-transfer-button"');
+    const transfer = installer.indexOf('id="device-transfer-create"');
+    assert.ok(guide >= 0 && guide < reminder && reminder < continueButton && continueButton < transfer);
+    assert.match(installer, /Revenez ici dans Safari pour terminer l’installation/);
+    assert.match(installer, /J’AI AJOUTÉ L’ICÔNE/);
+    assert.match(installer, /id="device-transfer-create" class="hidden/);
+    assert.match(installer, /continueToTransferButton\.addEventListener\('click', showTransferStep\)/);
+    assert.match(installer, /showTransferStep[\s\S]*classList\.remove\('hidden'\)[\s\S]*\.focus\(\)/);
+    assert.doesNotMatch(installer.slice(installer.indexOf('function showTransferStep'), installer.indexOf("prepareTransferButton.addEventListener")), /rpc|device_token|localStorage|createDeviceTransferTicket/);
+});
+
+test('le succès réel du ticket autorise explicitement l’ouverture de la nouvelle icône', () => {
+    const createdCheck = installer.indexOf('response.status !== DEVICE_TRANSFER_STATUSES.CREATED');
+    const ticketAssignment = installer.indexOf('transferTicketValue.textContent = response.ticket');
+    const resultReveal = installer.indexOf("transferTicketResult.classList.remove('hidden')");
+    assert.ok(createdCheck >= 0 && createdCheck < ticketAssignment && ticketAssignment < resultReveal);
+    assert.match(installer, /Votre code est prêt\./);
+    assert.match(installer, /Vous pouvez maintenant ouvrir ERMAS depuis la nouvelle icône/);
+    assert.match(installer, /Entrez ce code dans ERMAS/);
+    assert.match(installer, /Ce code est valable 10 minutes/);
+});
+
+test('l’ouverture prématurée de la PWA indique de retourner dans Safari sans modifier le refus', () => {
+    assert.match(index, /Finaliser l’installation/);
+    assert.match(index, /Retournez dans Safari sur ERMAS/);
+    assert.match(index, /AUTHORIZATION_STATES\.LOCAL_TOKEN_MISSING[\s\S]*showDeviceTransfer\(authorization\)/);
+    assert.match(index, /AUTHORIZATION_STATES\.DEVICE_MISMATCH[\s\S]*showDeviceTransfer\(authorization\)/);
+    assert.match(index, /claimDeviceTransferTicket/);
 });
 
 test('un navigateur iOS non Safari reçoit seulement l’instruction Safari', () => {

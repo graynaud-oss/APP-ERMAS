@@ -28,7 +28,7 @@
                 <button id="install-button" type="button" class="hidden parts-access-button">INSTALLER ERMAS</button>
             </div>
             <div id="ios-install" class="hidden pwa-install-panel pwa-ios-guide">
-                <section class="pwa-install-step" aria-labelledby="ios-install-step-title">
+                <section id="ios-install-guide-step" class="pwa-install-step" aria-labelledby="ios-install-step-title">
                     <p class="pwa-install-step__eyebrow">Étape 1</p>
                     <h2 id="ios-install-step-title">Ajouter l’application</h2>
                     <p class="pwa-ios-guide__intro">Sur votre iPhone, suivez simplement ces trois gestes dans Safari.</p>
@@ -48,21 +48,30 @@
                             <div><strong>3. Confirmez avec Ajouter</strong><p>Si « Ouvrir comme app web » apparaît, laissez l’option activée, puis touchez « Ajouter ».</p></div>
                         </li>
                     </ol>
+                    <div class="pwa-ios-return-reminder" role="note">
+                        <strong>Une fois l’icône ajoutée, ne l’ouvrez pas tout de suite.</strong>
+                        <p>Revenez ici dans Safari pour terminer l’installation et obtenir votre code.</p>
+                    </div>
                     <p class="pwa-ios-guide__reassurance">Rien ne s’installe automatiquement : vous gardez le contrôle à chaque étape.</p>
+                    <button id="continue-to-transfer-button" type="button" class="parts-access-button">J’AI AJOUTÉ L’ICÔNE</button>
                 </section>
-                <section id="device-transfer-create" class="device-transfer-panel pwa-install-step" aria-labelledby="ios-transfer-step-title">
-                    <p class="pwa-install-step__eyebrow">Étape 2</p>
+                <section id="device-transfer-create" class="hidden device-transfer-panel pwa-install-step pwa-transfer-step" aria-labelledby="ios-transfer-step-title" tabindex="-1">
+                    <p class="pwa-install-step__eyebrow">Dernière étape</p>
                     <h2 id="ios-transfer-step-title">Transférer votre accès</h2>
-                    <p>Une fois ERMAS Technique ajoutée à votre écran d’accueil, préparez votre code de transfert.</p>
+                    <p><strong>N’ouvrez pas encore ERMAS depuis la nouvelle icône.</strong></p>
+                    <p>Créez d’abord votre code de transfert ci-dessous.</p>
                     <button id="prepare-transfer-button" type="button" class="parts-access-button">PRÉPARER LE TRANSFERT</button>
                     <div id="transfer-ticket-result" class="hidden device-transfer-ticket" aria-live="polite">
+                        <strong class="device-transfer-ticket__ready">Votre code est prêt.</strong>
+                        <p>Vous pouvez maintenant ouvrir ERMAS depuis la nouvelle icône sur votre écran d’accueil.</p>
                         <span>Code de transfert</span>
                         <code id="transfer-ticket-value"></code>
                         <button id="copy-transfer-ticket" type="button" class="auth-button auth-button--secondary">COPIER LE CODE</button>
                         <p>Ce code est valable 10 minutes et ne peut être utilisé qu’une seule fois.</p>
-                        <ol><li>Copiez ce code.</li><li>Ouvrez ERMAS Technique depuis l’icône ajoutée à votre écran d’accueil.</li><li>Connectez-vous.</li><li>Collez le code lorsqu’il vous est demandé.</li></ol>
+                        <ol><li>Copiez ce code.</li><li>Ouvrez ERMAS depuis la nouvelle icône.</li><li>Connectez-vous.</li><li>Entrez ce code dans ERMAS.</li></ol>
                     </div>
                     <p id="transfer-create-feedback" class="hidden auth-feedback auth-feedback--error" aria-live="polite"></p>
+                    <button id="back-to-install-guide-button" type="button" class="pwa-transfer-step__back">REVOIR L’ÉTAPE 1</button>
                 </section>
             </div>
             <p id="ios-unsupported" class="hidden pwa-install-note">Pour installer ERMAS Technique sur iPhone ou iPad, ouvrez cette page dans Safari.</p>
@@ -80,12 +89,26 @@
         const button = document.getElementById('install-button');
         const panels = { button, androidPanel: document.getElementById('android-install'), iosPanel: document.getElementById('ios-install'), iosUnsupportedMessage: document.getElementById('ios-unsupported'), desktopMessage: document.getElementById('desktop-install') };
         const prepareTransferButton = document.getElementById('prepare-transfer-button');
+        const installGuideStep = document.getElementById('ios-install-guide-step');
+        const continueToTransferButton = document.getElementById('continue-to-transfer-button');
+        const deviceTransferCreate = document.getElementById('device-transfer-create');
+        const backToInstallGuideButton = document.getElementById('back-to-install-guide-button');
         const transferTicketResult = document.getElementById('transfer-ticket-result');
         const transferTicketValue = document.getElementById('transfer-ticket-value');
         const copyTransferTicketButton = document.getElementById('copy-transfer-ticket');
         const transferCreateFeedback = document.getElementById('transfer-create-feedback');
         let authorizedContext = null;
         function refreshInstallState() { configureInstallPage(panels); }
+        function showTransferStep() {
+            installGuideStep.classList.add('hidden');
+            deviceTransferCreate.classList.remove('hidden');
+            deviceTransferCreate.focus();
+        }
+        function showInstallGuideStep() {
+            deviceTransferCreate.classList.add('hidden');
+            installGuideStep.classList.remove('hidden');
+            continueToTransferButton.focus();
+        }
         async function init() {
             try {
                 const context = await requireAuthorizedUser({ client: getSupabaseClient() });
@@ -97,6 +120,8 @@
                 view.classList.remove('hidden');
             } catch { window.location.href = 'index.html'; }
         }
+        continueToTransferButton.addEventListener('click', showTransferStep);
+        backToInstallGuideButton.addEventListener('click', showInstallGuideStep);
         prepareTransferButton.addEventListener('click', async () => {
             prepareTransferButton.disabled = true;
             transferCreateFeedback.classList.add('hidden');
