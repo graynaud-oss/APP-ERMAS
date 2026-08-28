@@ -164,10 +164,28 @@ test('le guide Safari présente l’installation avant le transfert sans créer 
     assert.ok(stepOne >= 0 && stepOne < stepTwo);
     assert.ok(stepTwo < clickHandler && clickHandler < ticketCall);
     assert.match(installer, /Ajouter l’application/);
+    assert.match(installer, /1\. Touchez le bouton Partager de Safari/);
+    assert.match(installer, /2\. Choisissez l’ajout à l’écran d’accueil/);
+    assert.match(installer, /Sur l’écran d’accueil[^]*Ajouter à l’écran d’accueil/);
+    assert.match(installer, /3\. Confirmez avec Ajouter/);
+    assert.match(installer, /Rien ne s’installe automatiquement/);
     assert.match(installer, /Transférer votre accès/);
     assert.match(installer, /Ce code est valable 10 minutes et ne peut être utilisé qu’une seule fois/);
     assert.match(installer, /Copiez ce code[\s\S]*Ouvrez ERMAS Technique[\s\S]*Connectez-vous[\s\S]*Collez le code/);
     assert.doesNotMatch(installer, /localStorage[^\n]*(?:ticket|code)/i);
+});
+
+test('le guide iPhone reste purement visuel et isolé du parcours PWA standalone', () => {
+    const pwa = read('js/pwa.js');
+    const css = read('css/app-ermas.css');
+    assert.match(installer, /class="pwa-ios-actions"/);
+    assert.match(installer, /carré avec une flèche vers le haut/);
+    assert.match(installer, /Ouvrir comme app web/);
+    assert.match(css, /\.pwa-ios-action\s*\{/);
+    assert.match(css, /@media \(max-width: 430px\)[^]*\.pwa-ios-action/);
+    assert.match(pwa, /const standalone = isStandalone\(windowObject\)[^]*if \(standalone\) return 'standalone'/);
+    assert.ok(pwa.indexOf("return 'standalone'") < pwa.indexOf("iosPanel?.classList.remove('hidden')"));
+    assert.doesNotMatch(installer, /onclick="[^"]*(?:Partager|écran d’accueil|Ajouter)/i);
 });
 
 test('un navigateur iOS non Safari reçoit seulement l’instruction Safari', () => {

@@ -2211,12 +2211,22 @@ html:has(dialog[open]) {
 .pwa-install-step + .pwa-install-step { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--app-border); }
 .pwa-install-step__eyebrow { margin: 0 0 5px !important; color: var(--ermas-blue) !important; font-size: .7rem !important; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
 .pwa-ios-guide .device-transfer-panel { margin-top: 18px; }
+.pwa-ios-guide__intro { max-width: 46rem; }
+.pwa-ios-actions { display: grid; gap: 12px; margin-top: 16px !important; padding: 0 !important; list-style: none; }
+.pwa-ios-action { display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: center; gap: 14px; min-width: 0; padding: 14px; border: 1px solid var(--app-border); border-radius: 5px; background: var(--app-surface); }
+.pwa-ios-action__visual { display: grid; place-items: center; width: 64px; height: 64px; border: 1px solid #bfd1e3; border-radius: 14px; background: #f2f7fc; color: var(--ermas-blue); }
+.pwa-ios-action__icon { width: 34px; height: 34px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pwa-ios-action__home-icon { display: grid; place-items: center; width: 34px; height: 34px; border: 2px solid currentColor; border-radius: 7px; font-size: 1.5rem; line-height: 1; }
+.pwa-ios-action__add { padding: 7px 9px; border-radius: 12px; background: var(--ermas-blue); color: #fff; font-size: .68rem; font-weight: 800; }
+.pwa-ios-action strong { display: block; color: var(--ermas-anthracite); font-size: .92rem; line-height: 1.35; }
+.pwa-ios-action p { margin-top: 5px; font-size: .8rem; line-height: 1.5; }
+.pwa-ios-guide__reassurance { margin-top: 14px !important; padding-left: 12px; border-left: 3px solid var(--ermas-blue); font-size: .8rem; }
 .pwa-offline-page { min-height: 100vh; display: grid; place-items: center; margin: 0; padding: 20px; background: var(--app-background); color: var(--app-text); font-family: Arial, sans-serif; }
 .pwa-offline-card { width: min(100%, 460px); padding: 28px; text-align: center; border: 1px solid var(--app-border); border-radius: 5px; background: var(--app-surface); }
 .pwa-offline-card .app-logo { margin-inline: auto; }
 .pwa-offline-card h1 { color: var(--ermas-blue); }
 .pwa-offline-card p { color: var(--app-text-muted); line-height: 1.6; }
-@media (max-width: 430px) { .pwa-install-panel { padding: 14px; } .pwa-install-notice { padding: 12px; } .pwa-install-notice__actions { gap: 6px 10px; } .pwa-offline-card { padding: 20px; } }
+@media (max-width: 430px) { .pwa-install-panel { padding: 14px; } .pwa-install-notice { padding: 12px; } .pwa-install-notice__actions { gap: 6px 10px; } .pwa-ios-actions { gap: 10px; } .pwa-ios-action { grid-template-columns: 52px minmax(0, 1fr); gap: 11px; padding: 12px; } .pwa-ios-action__visual { width: 52px; height: 52px; border-radius: 12px; } .pwa-ios-action__icon { width: 30px; height: 30px; } .pwa-ios-action__home-icon { width: 30px; height: 30px; font-size: 1.3rem; } .pwa-ios-action__add { padding: 6px; font-size: .58rem; } .pwa-ios-action strong { font-size: .85rem; } .pwa-ios-action p { font-size: .75rem; } .pwa-offline-card { padding: 20px; } }
 
 .results-tier-card__title {
     margin: 0 0 12px;
