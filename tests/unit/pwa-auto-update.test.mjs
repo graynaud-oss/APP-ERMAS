@@ -165,12 +165,12 @@ test('les images statiques conservent un cache-first limité', async () => {
     assert.deepEqual(environment.fetchCalls, []);
 });
 
-test('l’activation supprime v1, conserve v2 et réclame immédiatement les clients', async () => {
+test('l’activation supprime les anciens caches v1/v2 et réclame immédiatement les clients', async () => {
     const environment = createWorkerEnvironment();
     let activation;
     environment.listeners.activate({ waitUntil(promise) { activation = promise; } });
     await activation;
-    assert.deepEqual(environment.deletedCaches, ['ermas-static-v1']);
+    assert.deepEqual(environment.deletedCaches, ['ermas-static-v1', 'ermas-static-v2']);
 });
 
 test('l’enregistrement ignore le cache HTTP du worker et contrôle une mise à jour au chargement', async () => {

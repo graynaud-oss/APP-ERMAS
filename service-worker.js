@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ermas-static-v2';
+const CACHE_NAME = 'ermas-static-v3';
 const CACHE_PREFIX = 'ermas-static-';
 const OFFLINE_FALLBACK = '/offline.html';
 const PRECACHE_ASSETS = [
@@ -7,7 +7,8 @@ const PRECACHE_ASSETS = [
     '/assets/brand/ermas-logo.png',
     '/assets/brand/apple-touch-icon.png',
     '/assets/pwa/icon-192.png',
-    '/assets/pwa/icon-512.png'
+    '/assets/pwa/icon-512.png',
+    '/assets/pwa/icon-512-maskable.png'
 ];
 
 function isCacheableResponse(response) {

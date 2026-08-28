@@ -20,6 +20,12 @@ const installer = read('installer.html');
 const accueil = read('accueil.html');
 const index = read('index.html');
 
+function readPngSize(path) {
+    const data = fs.readFileSync(new URL(path, root));
+    assert.equal(data.toString('ascii', 1, 4), 'PNG');
+    return [data.readUInt32BE(16), data.readUInt32BE(20)];
+}
+
 test('le manifeste PWA décrit ERMAS Technique et ses icônes existantes', () => {
     assert.equal(manifest.name, 'ERMAS Technique');
     assert.equal(manifest.short_name, 'ERMAS');
@@ -33,8 +39,43 @@ test('le manifeste PWA décrit ERMAS Technique et ses icônes existantes', () =>
         assert.ok(fs.existsSync(new URL(`.${icon.src}`, root)));
         assert.equal(icon.type, 'image/png');
     }
-    assert.deepEqual(manifest.icons.map(({ sizes }) => sizes), ['192x192', '512x512']);
+    assert.deepEqual(manifest.icons.map(({ sizes }) => sizes), ['192x192', '512x512', '512x512']);
+    assert.deepEqual(manifest.icons.map(({ purpose }) => purpose), ['any', 'any', 'maskable']);
     assert.ok(fs.existsSync(new URL('assets/brand/apple-touch-icon.png', root)));
+});
+
+test('la source ERMAS unique fournit toutes les tailles Web, Android et iOS', () => {
+    const expectedPngSizes = new Map([
+        ['assets/brand/favicon-16.png', [16, 16]],
+        ['assets/brand/favicon-32.png', [32, 32]],
+        ['assets/brand/favicon-48.png', [48, 48]],
+        ['assets/brand/favicon.png', [96, 96]],
+        ['assets/brand/apple-touch-icon.png', [180, 180]],
+        ['assets/pwa/icon-192.png', [192, 192]],
+        ['assets/pwa/icon-512.png', [512, 512]],
+        ['assets/pwa/icon-512-maskable.png', [512, 512]]
+    ]);
+    assert.ok(fs.existsSync(new URL('assets/brand/ermas-app-icon-source.jpg', root)));
+    assert.ok(fs.existsSync(new URL('assets/brand/favicon.ico', root)));
+    for (const [path, dimensions] of expectedPngSizes) {
+        assert.deepEqual(readPngSize(path), dimensions, path);
+    }
+});
+
+test('toutes les pages Web utilisent le favicon ERMAS central sans ancienne référence', () => {
+    const pages = fs.readdirSync(root).filter((name) => name.endsWith('.html'));
+    assert.ok(pages.length > 0);
+    for (const page of pages) {
+        const source = read(page);
+        assert.match(source, /assets\/brand\/favicon\.(?:png|ico)/, page);
+        assert.doesNotMatch(source, /assets\/(?:pwa\/icon-(?:192|512)|brand\/apple-touch-icon)\.png[^>]*rel="(?:shortcut )?icon"/, page);
+    }
+});
+
+test('les entrées PWA iOS utilisent la même apple-touch-icon ERMAS', () => {
+    for (const page of [index, accueil, installer]) {
+        assert.match(page, /rel="apple-touch-icon" href="(?:\.?\/)?assets\/brand\/apple-touch-icon\.png"/);
+    }
 });
 
 test('les pages d’entrée déclarent la PWA mobile sans contourner Auth', () => {
@@ -53,13 +94,14 @@ test('les pages d’entrée déclarent la PWA mobile sans contourner Auth', () =
 });
 
 test('le service worker privilégie le réseau pour le code et limite le cache-first aux actifs statiques', () => {
-    assert.match(worker, /ermas-static-v2/);
+    assert.match(worker, /ermas-static-v3/);
     assert.match(worker, /networkFirstWithCache/);
     assert.match(worker, /isApplicationCodeRequest/);
     assert.match(worker, /staticAssetCacheFirst/);
     assert.match(worker, /self\.skipWaiting\(\)/);
     assert.match(worker, /self\.clients\.claim\(\)/);
     assert.match(worker, /cacheName\.startsWith\(CACHE_PREFIX\)/);
+    assert.match(worker, /assets\/pwa\/icon-512-maskable\.png/);
     assert.doesNotMatch(worker, /docs\.google(?:usercontent)?\.com/);
     assert.doesNotMatch(worker, /supabase\.co/);
     assert.match(worker, /url\.origin !== self\.location\.origin[\s\S]*fetch\(request\)/);
