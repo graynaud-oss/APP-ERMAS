@@ -320,6 +320,7 @@ test('le garde migre invisiblement un utilisateur legacy confirmé', async () =>
     const profile = completeProfile();
     const client = {
         auth: { getSession: async () => ({ data: { session: { user: { id: USER_A } } }, error: null }) },
+        rpc: async () => ({ data: false, error: null }),
         from: () => ({
             select() { return this; },
             eq() { return this; },
@@ -337,6 +338,7 @@ test('un autre compte ou appareil ne peut pas emprunter une clé utilisateur exi
     const fakeStorage = storage({ [getDeviceTokenStorageKey(USER_C)]: 'dev_server' });
     const client = {
         auth: { getSession: async () => ({ data: { session: { user: { id: USER_A } } }, error: null }) },
+        rpc: async () => ({ data: false, error: null }),
         from: () => ({
             select() { return this; },
             eq() { return this; },
@@ -389,6 +391,7 @@ test('un pending confirmé est récupéré sans générer ni réécrire le token
     const authStorage = storage({ [getPendingDeviceTokenStorageKey(USER_A)]: pending });
     const client = {
         auth: { getSession: async () => ({ data: { session: { user: { id: USER_A } } }, error: null }) },
+        rpc: async () => ({ data: false, error: null }),
         from: () => ({
             select() { return this; },
             eq() { return this; },

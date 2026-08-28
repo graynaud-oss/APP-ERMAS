@@ -56,6 +56,284 @@ button {
     display: none !important;
 }
 
+html:has(dialog[open]) {
+    overflow: hidden;
+}
+
+/* Prototype local — informations internes ERMAS */
+.notices-access {
+    margin-block: 20px 8px;
+}
+
+.notices-access__button {
+    width: 100%;
+    min-height: 68px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 18px;
+    border: 1px solid var(--app-border);
+    border-radius: 6px;
+    background: var(--app-surface);
+    color: var(--ermas-blue);
+    cursor: pointer;
+    text-align: left;
+}
+
+.notices-access__button:disabled {
+    cursor: default;
+    opacity: 0.55;
+}
+
+.notices-access__button > :first-child {
+    display: grid;
+    flex: 1;
+}
+
+.notices-access__eyebrow {
+    color: var(--app-text-muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.notices-access__badge {
+    min-width: 26px;
+    height: 26px;
+    display: inline-grid;
+    place-items: center;
+    padding-inline: 7px;
+    border-radius: 999px;
+    background: var(--ermas-red);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+.notice-dialog {
+    width: min(calc(100% - 32px), 620px);
+    max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--app-text);
+    overflow: visible;
+}
+
+.notice-dialog::backdrop {
+    background: rgba(14, 21, 29, 0.66);
+}
+
+.notice-dialog__panel {
+    position: relative;
+    max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    padding: 28px;
+    border-top: 5px solid var(--ermas-blue);
+    border-radius: 8px;
+    background: var(--app-surface);
+    box-shadow: 0 20px 60px rgba(15, 25, 38, 0.24);
+    overflow-y: auto;
+}
+
+.notice-dialog__panel--list {
+    display: grid;
+    gap: 14px;
+}
+
+.notice-dialog__close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--app-text-muted);
+    cursor: pointer;
+    font-size: 1.65rem;
+    line-height: 1;
+}
+
+.notice-modal__eyebrow {
+    margin: 0 44px 8px 0;
+    color: var(--ermas-blue);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+}
+
+.notice-type {
+    width: fit-content;
+    display: inline-flex;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--ermas-blue-soft);
+    color: var(--ermas-blue);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.notice-type--important {
+    background: #fff4dc;
+    color: #875800;
+}
+
+.notice-type--maintenance {
+    background: #f2edf5;
+    color: #634471;
+}
+
+.notice-modal__title {
+    margin: 14px 44px 10px 0;
+    color: var(--ermas-anthracite);
+    font-size: clamp(1.35rem, 4vw, 1.8rem);
+    line-height: 1.2;
+}
+
+.notice-modal__message {
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.notice-modal__validity {
+    margin: 18px 0 0;
+    color: var(--app-text-muted);
+    font-size: 0.85rem;
+}
+
+.notice-dialog__primary {
+    width: 100%;
+    margin-top: 24px;
+}
+
+.notices-list {
+    display: grid;
+    gap: 10px;
+}
+
+.notices-list__item {
+    position: relative;
+    display: grid;
+    gap: 5px;
+    padding: 14px;
+    border: 1px solid var(--app-border);
+    border-left: 4px solid var(--app-border-strong);
+    border-radius: 5px;
+    background: var(--app-surface);
+    color: var(--app-text);
+    cursor: pointer;
+    text-align: left;
+}
+
+.notices-list__item.is-unread {
+    border-left-color: var(--ermas-blue);
+    background: #fbfdff;
+}
+
+.notices-list__title { margin-top: 3px; }
+.notices-list__date,
+.notices-list__excerpt,
+.notices-list__state,
+.notices-list__empty { color: var(--app-text-muted); font-size: 0.82rem; }
+.notices-list__state { color: var(--ermas-blue); font-weight: 700; }
+
+.admin-notices-page {
+    display: grid;
+    gap: 24px;
+}
+
+.admin-access-denied {
+    width: min(calc(100% - 32px), 560px);
+    margin: 15vh auto 0;
+    padding: 28px;
+    border: 1px solid var(--app-border);
+    border-top: 5px solid var(--ermas-blue);
+    border-radius: 6px;
+    background: var(--app-surface);
+    text-align: center;
+}
+
+.admin-access-denied h1 { margin-top: 0; font-size: 1.35rem; }
+
+.admin-notices-panel {
+    padding: 24px;
+    border: 1px solid var(--app-border);
+    border-radius: 6px;
+    background: var(--app-surface);
+    box-shadow: var(--app-shadow-subtle);
+}
+
+.admin-notices-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.admin-notices-field {
+    display: grid;
+    gap: 6px;
+    color: var(--app-text-muted);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.admin-notices-field--wide,
+.admin-notices-check,
+.admin-notices-feedback,
+.admin-notices-form__actions {
+    grid-column: 1 / -1;
+}
+
+.admin-notices-field input,
+.admin-notices-field textarea,
+.admin-notices-field select {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid var(--app-border-strong);
+    border-radius: 4px;
+    background: #fff;
+    color: var(--app-text);
+    font: inherit;
+    text-transform: none;
+}
+
+.admin-notices-field textarea { resize: vertical; }
+.admin-notices-check { display: flex; align-items: center; gap: 9px; }
+.admin-notices-feedback { min-height: 24px; margin: 0; color: var(--ermas-blue); }
+.admin-notices-feedback.is-error { color: var(--ermas-red); }
+.admin-notices-form__actions,
+.admin-notice-card__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.admin-notices-storage { margin: 18px 0 0; color: var(--app-text-muted); font-size: 0.78rem; }
+.admin-notices-list { display: grid; gap: 12px; }
+.admin-notice-card { padding: 16px; border: 1px solid var(--app-border); border-radius: 5px; }
+.admin-notice-card h3 { margin: 0; }
+.admin-notice-card p { margin: 6px 0 12px; color: var(--app-text-muted); font-size: 0.82rem; }
+.admin-notice-card__action { min-height: 38px; padding: 7px 12px; }
+
+@media (hover: hover) and (pointer: fine) {
+    .notices-access__button:not(:disabled):hover,
+    .notices-list__item:hover { border-color: var(--ermas-red); }
+    .notice-dialog__close:hover { color: var(--ermas-red); }
+}
+
+@media (max-width: 560px) {
+    .notice-dialog { width: calc(100% - 20px); }
+    .notice-dialog__panel { padding: 22px 18px calc(20px + env(safe-area-inset-bottom)); }
+    .admin-notices-panel { padding: 18px 14px; }
+    .admin-notices-form { grid-template-columns: 1fr; }
+    .admin-notices-field,
+    .admin-notices-check,
+    .admin-notices-feedback,
+    .admin-notices-form__actions { grid-column: 1; }
+    .admin-notices-form__actions .app-button { width: 100%; }
+}
+
 /* Catalogues interactifs de pièces détachées Jumelages */
 .parts-access-block {
     margin-top: 24px;

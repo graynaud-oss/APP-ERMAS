@@ -46,6 +46,17 @@
                     </div>
                 </aside>
 
+                <section id="notices-section" class="home-section notices-access" aria-labelledby="notices-section-title">
+                    <button id="open-notices-list" type="button" class="notices-access__button" disabled>
+                        <span>
+                            <span class="notices-access__eyebrow">Communications ERMAS</span>
+                            <strong id="notices-section-title">INFORMATIONS</strong>
+                        </span>
+                        <span id="notices-unread-badge" class="hidden notices-access__badge" aria-label="Informations non lues"></span>
+                        <span class="nav-card__arrow" aria-hidden="true">→</span>
+                    </button>
+                </section>
+
                 <section class="home-section" aria-labelledby="home-catalogues-title">
                     <h2 id="home-catalogues-title" class="home-section__title">Catalogues techniques</h2>
                     <div class="home-primary-grid">
@@ -131,17 +142,52 @@
         </footer>
     </div>
 
+    <dialog id="notice-dialog" class="notice-dialog" aria-label="Information ERMAS">
+        <div class="notice-dialog__panel">
+            <button id="notice-dialog-close" type="button" class="notice-dialog__close" aria-label="Fermer">×</button>
+            <div id="notice-dialog-content" class="notice-modal" aria-live="polite"></div>
+            <button id="notice-dialog-acknowledge" type="button" class="app-button notice-dialog__primary">J’AI COMPRIS</button>
+        </div>
+    </dialog>
+
+    <dialog id="notices-list-dialog" class="notice-dialog" aria-labelledby="notices-list-title">
+        <div class="notice-dialog__panel notice-dialog__panel--list">
+            <button id="notices-list-close" type="button" class="notice-dialog__close" aria-label="Fermer">×</button>
+            <p class="notice-modal__eyebrow">Communications ERMAS</p>
+            <h2 id="notices-list-title" class="notice-modal__title">Informations récentes</h2>
+            <div id="notices-list" class="notices-list"></div>
+        </div>
+    </dialog>
+
     <script type="module">
         import { getSupabaseClient } from './js/supabase-client.js';
         import { AUTHORIZATION_STATES, requireAuthorizedUser } from './js/auth-guard.js';
         import { markInstallNoticeSeen, shouldShowInstallNotice } from './js/pwa.js';
+        import {
+            fetchAvailableNotices,
+            fetchNoticeReadIds,
+            getUnreadNotices,
+            markNoticeRead
+        } from './js/app-notices.js';
+        import { openNoticeDialog, renderNoticesList } from './js/notices-ui.js';
 
         const supabaseClient = getSupabaseClient();
         const appView = document.getElementById('app-view');
         const installNotice = document.getElementById('install-notice');
         const installNoticeOpen = document.getElementById('install-notice-open');
         const installNoticeDismiss = document.getElementById('install-notice-dismiss');
+        const noticesButton = document.getElementById('open-notices-list');
+        const unreadBadge = document.getElementById('notices-unread-badge');
+        const noticeDialog = document.getElementById('notice-dialog');
+        const noticeDialogContent = document.getElementById('notice-dialog-content');
+        const noticeDialogAcknowledge = document.getElementById('notice-dialog-acknowledge');
+        const noticesListDialog = document.getElementById('notices-list-dialog');
+        const noticesList = document.getElementById('notices-list');
         let pageAuthorized = false;
+
+        function closeDialog(dialog) {
+            if (dialog.open) dialog.close();
+        }
 
         async function initPage() {
             let context;
@@ -159,6 +205,64 @@
             }
 
             pageAuthorized = true;
+
+            const userId = context.user.id;
+            const { data: activeNotices, error: noticesError } = await fetchAvailableNotices(supabaseClient);
+            const { data: initialReadIds, error: readsError } = await fetchNoticeReadIds(supabaseClient, userId);
+            if (noticesError || readsError) throw noticesError || readsError;
+            let readIds = new Set(initialReadIds);
+            const refreshNotices = async () => {
+                const { data: refreshedReadIds, error } = await fetchNoticeReadIds(supabaseClient, userId);
+                if (error) throw error;
+                readIds = new Set(refreshedReadIds);
+                const unreadCount = activeNotices.filter((notice) => !readIds.has(String(notice.id))).length;
+                unreadBadge.textContent = String(unreadCount);
+                unreadBadge.classList.toggle('hidden', unreadCount === 0);
+                renderNoticesList({
+                    container: noticesList,
+                    notices: activeNotices,
+                    seenIds: readIds,
+                    onOpen: (notice) => {
+                        closeDialog(noticesListDialog);
+                        openNoticeDialog({
+                            dialog: noticeDialog,
+                            content: noticeDialogContent,
+                            notice,
+                            acknowledgeButton: noticeDialogAcknowledge,
+                            onAcknowledge: async (item) => {
+                                const { error } = await markNoticeRead(supabaseClient, item.id, userId);
+                                if (error && error.code !== '23505') throw error;
+                                await refreshNotices();
+                            }
+                        });
+                    }
+                });
+            };
+
+            await refreshNotices();
+            noticesButton.disabled = false;
+            noticesButton.addEventListener('click', async () => {
+                if (!pageAuthorized) return;
+                await refreshNotices();
+                noticesListDialog.showModal();
+            });
+            document.getElementById('notices-list-close').addEventListener('click', () => closeDialog(noticesListDialog));
+            document.getElementById('notice-dialog-close').addEventListener('click', () => closeDialog(noticeDialog));
+
+            const [automaticNotice] = getUnreadNotices(activeNotices, readIds);
+            if (automaticNotice) {
+                openNoticeDialog({
+                    dialog: noticeDialog,
+                    content: noticeDialogContent,
+                    notice: automaticNotice,
+                    acknowledgeButton: noticeDialogAcknowledge,
+                    onAcknowledge: async (notice) => {
+                        const { error } = await markNoticeRead(supabaseClient, notice.id, userId);
+                        if (error && error.code !== '23505') throw error;
+                        await refreshNotices();
+                    }
+                });
+            }
 
             if (shouldShowInstallNotice()) {
                 installNotice.classList.remove('hidden');

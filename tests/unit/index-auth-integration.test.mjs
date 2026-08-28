@@ -41,6 +41,7 @@ test('tous les états d’autorisation requis sont traités explicitement', () =
     for (const state of [
         'NO_SESSION',
         'SESSION_ERROR',
+        'ADMIN_CHECK_ERROR',
         'PROFILE_NOT_FOUND',
         'PROFILE_INCOMPLETE',
         'PROFILE_FETCH_ERROR',

@@ -5,11 +5,13 @@ import {
     migrateLegacyDeviceStorageForUser,
     readLocalDeviceToken
 } from './device-enrollment.js';
+import { getCurrentAdminStatus } from './admin-access.js';
 
 export const AUTHORIZATION_STATES = Object.freeze({
     AUTHORIZED: 'AUTHORIZED',
     NO_SESSION: 'NO_SESSION',
     SESSION_ERROR: 'SESSION_ERROR',
+    ADMIN_CHECK_ERROR: 'ADMIN_CHECK_ERROR',
     PROFILE_NOT_FOUND: 'PROFILE_NOT_FOUND',
     PROFILE_INCOMPLETE: 'PROFILE_INCOMPLETE',
     PROFILE_FETCH_ERROR: 'PROFILE_FETCH_ERROR',
@@ -35,7 +37,8 @@ export function evaluateAuthorization({
     profile,
     localDeviceToken,
     sessionError = null,
-    profileError = null
+    profileError = null,
+    isAdmin = false
 }) {
     if (sessionError) return result(AUTHORIZATION_STATES.SESSION_ERROR, { error: sessionError });
     if (!session?.user) return result(AUTHORIZATION_STATES.NO_SESSION);
@@ -43,6 +46,15 @@ export function evaluateAuthorization({
     if (!profile) return result(AUTHORIZATION_STATES.PROFILE_NOT_FOUND, { session, user: session.user });
     if (isProfileBlocked(profile)) return result(AUTHORIZATION_STATES.ACCOUNT_BLOCKED, { session, user: session.user, profile });
     if (!isProfileComplete(profile)) return result(AUTHORIZATION_STATES.PROFILE_INCOMPLETE, { session, user: session.user, profile });
+    if (isAdmin === true) {
+        return result(AUTHORIZATION_STATES.AUTHORIZED, {
+            session,
+            user: session.user,
+            profile,
+            isAdmin: true,
+            deviceEnforcementBypassed: true
+        });
+    }
 
     const serverToken = typeof profile.device_token === 'string'
         ? profile.device_token
@@ -74,7 +86,9 @@ export function evaluateAuthorization({
         session,
         user: session.user,
         profile,
-        localDeviceToken
+        localDeviceToken,
+        isAdmin: false,
+        deviceEnforcementBypassed: false
     });
 }
 
@@ -89,8 +103,27 @@ export async function requireAuthorizedUser({
         return evaluateAuthorization({ session, sessionError });
     }
 
+    const adminStatus = await getCurrentAdminStatus(client);
+    if (adminStatus.error) {
+        return result(AUTHORIZATION_STATES.ADMIN_CHECK_ERROR, {
+            session,
+            user: session.user,
+            error: adminStatus.error
+        });
+    }
+
     const { data: profile, error: profileError } = await getOwnProfile(client, session.user.id);
     const userId = session.user.id;
+    if (adminStatus.isAdmin) {
+        return evaluateAuthorization({
+            session,
+            profile,
+            profileError,
+            localDeviceToken: null,
+            isAdmin: true
+        });
+    }
+
     migrateLegacyDeviceStorageForUser({
         userId,
         serverDeviceToken: profile?.device_token,
@@ -108,6 +141,7 @@ export async function requireAuthorizedUser({
         session,
         profile,
         localDeviceToken,
-        profileError
+        profileError,
+        isAdmin: false
     });
 }

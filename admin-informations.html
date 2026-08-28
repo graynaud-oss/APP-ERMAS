@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff">
+    <title>ERMAS — Prototype Informations</title>
+    <link rel="icon" type="image/png" sizes="96x96" href="./assets/brand/favicon.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="./css/app-ermas.css">
+</head>
+<body>
+    <section id="admin-access-denied" class="hidden admin-access-denied" aria-live="polite">
+        <h1>ACCÈS ADMINISTRATEUR REQUIS</h1>
+        <p>Cette page est réservée aux administrateurs ERMAS.</p>
+        <a class="app-button" href="accueil.html">RETOUR À L’ACCUEIL</a>
+    </section>
+    <div id="admin-app" class="hidden app-shell">
+        <header class="app-header">
+            <div class="app-container app-header__inner">
+                <a class="app-logo-link" href="accueil.html" aria-label="Retour à l’accueil"><img src="./assets/brand/ermas-logo.png" alt="ERMAS" class="app-logo" width="525" height="123"></a>
+            </div>
+        </header>
+
+        <main class="app-main">
+            <div class="app-container admin-notices-page">
+                <section class="home-introduction">
+                    <p class="home-eyebrow">Prototype local</p>
+                    <h1 class="home-title">Informations ERMAS</h1>
+                    <p class="home-lead">Créez et prévisualisez les communications destinées aux utilisateurs ERMAS.</p>
+                </section>
+
+                <section class="admin-notices-panel" aria-labelledby="notice-form-title">
+                    <h2 id="notice-form-title" class="home-section__title">Créer ou modifier une information</h2>
+                    <form id="notice-form" class="admin-notices-form" novalidate>
+                        <label class="admin-notices-field"><span>Titre *</span><input name="title" type="text" maxlength="120" required></label>
+                        <label class="admin-notices-field admin-notices-field--wide"><span>Message *</span><textarea name="message" rows="6" maxlength="2000" required></textarea></label>
+                        <label class="admin-notices-field"><span>Type</span><select name="type"><option value="information">Information</option><option value="important">Important</option><option value="maintenance">Maintenance</option></select></label>
+                        <label class="admin-notices-field"><span>Date de début</span><input name="starts_at" type="date"></label>
+                        <label class="admin-notices-field"><span>Date de fin</span><input name="ends_at" type="date"></label>
+                        <label class="admin-notices-check"><input name="active" type="checkbox" checked><span>Information active</span></label>
+                        <p id="notice-form-feedback" class="admin-notices-feedback" role="status"></p>
+                        <div class="admin-notices-form__actions">
+                            <button id="notice-preview-button" type="button" class="app-button app-button--secondary">APERÇU</button>
+                            <button type="submit" class="app-button">ENREGISTRER</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="admin-notices-panel" aria-labelledby="admin-list-title">
+                    <h2 id="admin-list-title" class="home-section__title">Informations locales existantes</h2>
+                    <div id="admin-notices-list" class="admin-notices-list"></div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <dialog id="notice-preview-dialog" class="notice-dialog" aria-label="Aperçu de l’information ERMAS">
+        <div class="notice-dialog__panel">
+            <button id="notice-preview-close" type="button" class="notice-dialog__close" aria-label="Fermer">×</button>
+            <div id="notice-preview-content" class="notice-modal"></div>
+            <button id="notice-preview-acknowledge" type="button" class="app-button notice-dialog__primary">J’AI COMPRIS</button>
+        </div>
+    </dialog>
+
+    <script type="module" src="./js/admin-notices.js"></script>
+</body>
+</html>

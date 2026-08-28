@@ -319,6 +319,10 @@
                     showAccessStatus('Connexion indisponible', 'La session ne peut pas être vérifiée. Veuillez réessayer ultérieurement.');
                     return;
 
+                case AUTHORIZATION_STATES.ADMIN_CHECK_ERROR:
+                    showAccessStatus('Vérification indisponible', 'Votre niveau d’accès ne peut pas être vérifié. Aucun accès n’a été accordé.');
+                    return;
+
                 case AUTHORIZATION_STATES.PROFILE_FETCH_ERROR:
                     showAccessStatus('Profil indisponible', 'Votre profil ne peut pas être vérifié. Aucun accès n’a été accordé.');
                     return;
