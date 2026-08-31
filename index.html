@@ -181,6 +181,7 @@
         import { createOwnProfile, updateOwnPersonalProfile } from './js/profile.js';
         import { DEVICE_ENROLLMENT_STATUSES, initializeAuthorizedDeviceEnrollment } from './js/device-enrollment.js';
         import { claimDeviceTransferTicket, DEVICE_TRANSFER_STATUSES } from './js/device-transfer.js';
+        import { enforceSignUpEmailConfirmation, getEmailConfirmationRedirectUrl, getSignInErrorMessage, SIGN_UP_CONFIRMATION_STATES } from './js/email-confirmation.js';
         import { isIosDevice, isStandalone } from './js/pwa.js';
 
         const supabaseClient = getSupabaseClient();
@@ -515,23 +516,33 @@
                     successMsg.classList.remove('hidden');
                 }
             } else if (mode === 'signup') {
-                const { data, error } = await supabaseClient.auth.signUp({ email, password });
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email,
+                    password,
+                    options: { emailRedirectTo: getEmailConfirmationRedirectUrl(window.location) }
+                });
                 if (error) {
                     errorMsg.textContent = error.message;
                     errorMsg.classList.remove('hidden');
                 } else if (data.user) {
-                    successMsg.textContent = "Compte créé avec succès ! Vous pouvez vous connecter.";
-                    successMsg.classList.remove('hidden');
-                    
-                    mode = 'login';
-                    formTitle.textContent = "Connexion à votre espace";
-                    submitBtn.textContent = "Se connecter";
-                    toggleModeBtn.innerHTML = "Pas encore de compte ? <span class='text-red-500 font-semibold'>Créer un compte</span>";
+                    const confirmation = await enforceSignUpEmailConfirmation(supabaseClient, data);
+                    if (confirmation.state === SIGN_UP_CONFIRMATION_STATES.CONFIRMATION_REQUIRED) {
+                        successMsg.textContent = "Votre compte a été créé. Un email de confirmation vient de vous être envoyé. Cliquez sur le lien reçu avant de vous connecter.";
+                        successMsg.classList.remove('hidden');
+
+                        mode = 'login';
+                        formTitle.textContent = "Connexion à votre espace";
+                        submitBtn.textContent = "Se connecter";
+                        toggleModeBtn.innerHTML = "Pas encore de compte ? <span class='text-red-500 font-semibold'>Créer un compte</span>";
+                    } else {
+                        errorMsg.textContent = "La confirmation de l’adresse email n’est pas disponible. L’accès reste fermé. Contactez ERMAS.";
+                        errorMsg.classList.remove('hidden');
+                    }
                 }
             } else {
                 const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) {
-                    errorMsg.textContent = "Identifiants incorrects.";
+                    errorMsg.textContent = getSignInErrorMessage(error);
                     errorMsg.classList.remove('hidden');
                 } else {
                     handleSession();

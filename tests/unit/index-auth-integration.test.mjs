@@ -122,7 +122,7 @@ test('les vues et parcours Auth requis restent présents', () => {
         assert.match(indexSource, new RegExp(`function\\s+${functionName}\\s*\\(`), `fonction Auth manquante : ${functionName}`);
     }
     assert.ok(indexSource.includes('supabaseClient.auth.signInWithPassword({ email, password })'));
-    assert.ok(indexSource.includes('supabaseClient.auth.signUp({ email, password })'));
+    assert.match(indexSource, /supabaseClient\.auth\.signUp\(\{[\s\S]*emailRedirectTo: getEmailConfirmationRedirectUrl\(window\.location\)/);
     assert.ok(indexSource.includes('supabaseClient.auth.resetPasswordForEmail(email,'));
     assert.ok(indexSource.includes('window.logoutUser = logoutUser;'));
 });
