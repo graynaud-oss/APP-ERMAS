@@ -2166,6 +2166,37 @@ html:has(dialog[open]) {
     padding-top: 20px;
     border-top: 1px solid var(--app-border);
 }
+
+.auth-password-control {
+    position: relative;
+}
+
+.auth-password-control input {
+    padding-right: 92px;
+}
+
+.auth-password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    min-height: 32px;
+    padding: 5px 8px;
+    transform: translateY(-50%);
+    border: 0;
+    border-radius: 3px;
+    background: transparent;
+    color: var(--ermas-blue);
+    font: inherit;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+}
+
+.auth-password-toggle:focus-visible {
+    outline: 3px solid rgba(12, 82, 154, 0.3);
+    outline-offset: 1px;
+}
 .product-options__heading { margin-bottom: 13px; }
 .product-options__heading h2 { margin: 0; color: var(--ermas-blue); font-size: .78rem; font-weight: 800; letter-spacing: .1em; }
 .product-options__heading p { margin: 5px 0 0; color: var(--app-text-muted); font-size: .78rem; line-height: 1.45; }

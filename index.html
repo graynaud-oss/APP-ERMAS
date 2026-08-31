@@ -50,7 +50,18 @@
 
                 <div id="password-field-container" class="auth-field">
                     <label for="password">Mot de passe</label>
-                    <input type="password" id="password" required>
+                    <div class="auth-password-control">
+                        <input type="password" id="password" required>
+                        <button type="button" id="password-visibility" class="auth-password-toggle" aria-label="Afficher le mot de passe" aria-pressed="false">AFFICHER</button>
+                    </div>
+                </div>
+
+                <div id="password-confirmation-container" class="auth-field hidden">
+                    <label for="password-confirmation">Confirmer le mot de passe</label>
+                    <div class="auth-password-control">
+                        <input type="password" id="password-confirmation" autocomplete="new-password">
+                        <button type="button" id="password-confirmation-visibility" class="auth-password-toggle" aria-label="Afficher le mot de passe" aria-pressed="false">AFFICHER</button>
+                    </div>
                 </div>
 
                 <div id="forgot-password-container" class="auth-link-row">
@@ -183,6 +194,7 @@
         import { claimDeviceTransferTicket, DEVICE_TRANSFER_STATUSES } from './js/device-transfer.js';
         import { enforceSignUpEmailConfirmation, getEmailConfirmationRedirectUrl, getSignInErrorMessage, SIGN_UP_CONFIRMATION_STATES } from './js/email-confirmation.js';
         import { isIosDevice, isStandalone } from './js/pwa.js';
+        import { bindPasswordVisibility, passwordsMatch, setPasswordVisibility } from './js/password-visibility.js';
 
         const supabaseClient = getSupabaseClient();
 
@@ -464,14 +476,32 @@
         const errorMsg = document.getElementById('error-msg');
         const successMsg = document.getElementById('success-msg');
         const passwordContainer = document.getElementById('password-field-container');
+        const passwordInput = document.getElementById('password');
+        const passwordVisibilityButton = document.getElementById('password-visibility');
+        const passwordConfirmationContainer = document.getElementById('password-confirmation-container');
+        const passwordConfirmationInput = document.getElementById('password-confirmation');
+        const passwordConfirmationVisibilityButton = document.getElementById('password-confirmation-visibility');
         const forgotContainer = document.getElementById('forgot-password-container');
+
+        bindPasswordVisibility(passwordInput, passwordVisibilityButton);
+        bindPasswordVisibility(passwordConfirmationInput, passwordConfirmationVisibilityButton);
+
+        function updatePasswordFields() {
+            const isSignup = mode === 'signup';
+            const isForgot = mode === 'forgot';
+            passwordContainer.style.display = isForgot ? 'none' : 'block';
+            passwordConfirmationContainer.classList.toggle('hidden', !isSignup);
+            passwordConfirmationInput.required = isSignup;
+            forgotContainer.style.display = isForgot ? 'none' : 'block';
+            setPasswordVisibility(passwordInput, passwordVisibilityButton, false);
+            setPasswordVisibility(passwordConfirmationInput, passwordConfirmationVisibilityButton, false);
+        }
 
         document.getElementById('forgot-btn').addEventListener('click', () => {
             mode = 'forgot';
             formTitle.textContent = "Récupération du mot de passe";
             submitBtn.textContent = "Envoyer le lien de réinitialisation";
-            passwordContainer.style.display = 'none';
-            forgotContainer.style.display = 'none';
+            updatePasswordFields();
             toggleModeBtn.innerHTML = "Retour à la <span class='text-red-500 font-semibold'>connexion</span>";
             errorMsg.classList.add('hidden');
             successMsg.classList.add('hidden');
@@ -480,9 +510,6 @@
         toggleModeBtn.addEventListener('click', () => {
             errorMsg.classList.add('hidden');
             successMsg.classList.add('hidden');
-            passwordContainer.style.display = 'block';
-            forgotContainer.style.display = 'block';
-
             if (mode === 'forgot' || mode === 'login') {
                 mode = 'signup';
                 formTitle.textContent = "Créer un nouveau compte";
@@ -494,6 +521,7 @@
                 submitBtn.textContent = "Se connecter";
                 toggleModeBtn.innerHTML = "Pas encore de compte ? <span class='text-red-500 font-semibold'>Créer un compte</span>";
             }
+            updatePasswordFields();
         });
 
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
@@ -516,6 +544,11 @@
                     successMsg.classList.remove('hidden');
                 }
             } else if (mode === 'signup') {
+                if (!passwordsMatch(password, passwordConfirmationInput.value)) {
+                    errorMsg.textContent = "Les deux mots de passe ne correspondent pas.";
+                    errorMsg.classList.remove('hidden');
+                    return;
+                }
                 const { data, error } = await supabaseClient.auth.signUp({
                     email,
                     password,
@@ -534,6 +567,7 @@
                         formTitle.textContent = "Connexion à votre espace";
                         submitBtn.textContent = "Se connecter";
                         toggleModeBtn.innerHTML = "Pas encore de compte ? <span class='text-red-500 font-semibold'>Créer un compte</span>";
+                        updatePasswordFields();
                     } else {
                         errorMsg.textContent = "La confirmation de l’adresse email n’est pas disponible. L’accès reste fermé. Contactez ERMAS.";
                         errorMsg.classList.remove('hidden');
