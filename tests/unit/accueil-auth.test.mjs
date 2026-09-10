@@ -86,11 +86,15 @@ test('accueil distingue cinq cartes métier et trois accès secondaires', () => 
     assert.ok(source.includes('class="app-footer"'));
 });
 
-test('les cinq cartes métier utilisent les nouveaux PNG décoratifs dans le conteneur historique', () => {
-    for (const asset of ['jantes.png', 'jumelages.png', 'roues-etroites.png', 'manipro.png', 'reparations-modifications.png']) {
+test('les cinq cartes métier utilisent leurs PNG dans le conteneur historique', () => {
+    for (const asset of ['jantes.png', 'jumelages.png']) {
         assert.match(source, new RegExp(`<span class="nav-card__icon nav-card__icon--image" aria-hidden="true"><img src="\\./assets/home-icons/${asset.replace('.', '\\.') }" alt="" loading="lazy"></span>`));
     }
-    assert.equal(source.match(/assets\/home-icons\//g)?.length, 5);
+    for (const [asset, alt] of [['ar-elite.png', 'Roues étroites'], ['manipro-hero.png', 'MANIPRO'], ['dv2.png', 'Réparations et modifications']]) {
+        assert.match(source, new RegExp(`<span class="nav-card__icon nav-card__icon--image nav-card__product-media"><img src="\\./assets/product-images/${asset.replace('.', '\\.') }" alt="${alt}" loading="lazy"></span>`));
+    }
+    assert.equal(source.match(/assets\/home-icons\//g)?.length, 2);
+    assert.equal(source.match(/assets\/product-images\//g)?.length, 3);
     assert.doesNotMatch(source, /assets\/manipro\/manipro\.gif/);
 });
 

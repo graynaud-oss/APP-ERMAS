@@ -3,10 +3,10 @@ export const REPAIRS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1
 const CSV_HEADERS = Object.freeze(['FAMILLE', 'PRESTATION', 'VARIANTE', 'TRANCHE_DIAMETRE', 'EPAISSEUR', 'LARGEUR_MODIFICATION', 'TYPE_PERCAGE', 'NOMBRE_TROUS', 'PRIX']);
 
 export const REPAIR_FAMILIES = Object.freeze([
-    { id: 'centres-percage', label: 'Centres & perçage', description: 'Réfections de centre et opérations de perçage.' },
-    { id: 'renforcement', label: 'Renforcement', description: 'Renforts et semelles pour jantes agricoles.' },
-    { id: 'largeur', label: 'Modification de largeur', description: 'Élargissement ou rétrécissement de jante.' },
-    { id: 'deplacement', label: 'Déplacement de voile', description: 'Déplacement de voile embouti soudé.' }
+    { id: 'centres-percage', label: 'Centres & perçage', description: 'Réfections de centre et opérations de perçage.', image: 'assets/product-images/refection-centre-3.png', imageAlt: 'Centres et perçage' },
+    { id: 'renforcement', label: 'Renforcement', description: 'Renforts et semelles pour jantes agricoles.', image: 'assets/product-images/renfort-3.png', imageAlt: 'Renforcement' },
+    { id: 'largeur', label: 'Modification de largeur', description: 'Élargissement ou rétrécissement de jante.', image: 'assets/product-images/elargisseur-3.png', imageAlt: 'Modification de largeur' },
+    { id: 'deplacement', label: 'Déplacement de voile', description: 'Déplacement de voile embouti soudé.', image: 'assets/product-images/dv3.png', imageAlt: 'Déplacement de voile' }
 ]);
 
 const CENTER_DIAMETERS = Object.freeze([

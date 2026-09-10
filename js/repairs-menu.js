@@ -7,13 +7,17 @@ function createElement(tag, className = '', text = '') {
     return element;
 }
 
-function createRouteButton(title, description, route) {
+function createRouteButton(title, description, route, image, imageAlt) {
     const button = createElement('button', 'app-choice-card');
     button.type = 'button';
     button.dataset.repairRoute = route;
-    const icon = createElement('span', 'app-choice-card__icon', '↗');
-    icon.setAttribute('aria-hidden', 'true');
-    button.append(icon, createElement('span', 'app-choice-card__title', title), createElement('span', 'app-choice-card__description', description));
+    const media = createElement('span', 'app-choice-card__media');
+    const visual = createElement('img');
+    visual.src = image;
+    visual.alt = imageAlt;
+    visual.loading = 'lazy';
+    media.append(visual);
+    button.append(media, createElement('span', 'app-choice-card__title', title), createElement('span', 'app-choice-card__description', description));
     return button;
 }
 
@@ -25,7 +29,9 @@ export function renderRepairMenu({ onNavigate }) {
         family.description,
         family.id === 'deplacement'
             ? 'reparations-prestation.html?type=deplacement-voile'
-            : `reparations-famille.html?family=${encodeURIComponent(family.id)}`
+            : `reparations-famille.html?family=${encodeURIComponent(family.id)}`,
+        family.image,
+        family.imageAlt
     )));
 
     document.querySelectorAll('[data-repair-route]').forEach((button) => {

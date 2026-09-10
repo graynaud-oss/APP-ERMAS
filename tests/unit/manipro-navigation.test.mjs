@@ -10,7 +10,7 @@ const css = read('css/app-ermas.css');
 
 test('MANIPRO est accessible depuis l’accueil avec son icône PNG locale', () => {
     assert.match(accueil, /data-protected-route="manipro\.html"/);
-    assert.match(accueil, /assets\/home-icons\/manipro\.png/);
+    assert.match(accueil, /assets\/product-images\/manipro-hero\.png/);
     assert.match(page, /src="assets\/manipro\/manipro\.png"/);
     assert.doesNotMatch(page, /assets\/manipro\/manipro\.gif/);
 });
