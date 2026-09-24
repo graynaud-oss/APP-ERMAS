@@ -22,7 +22,7 @@ const assets = [
     'manipro-hero.png',
     'deplacement-voile-2.png',
     '360.png',
-    'tgd.png',
+    'TGD.png',
     'tgd-plus.png',
     'av-eco.png',
     'av-premium.png',
@@ -66,7 +66,7 @@ test('les quatre gammes Jumelages utilisent les visuels demandés', () => {
     const cardTgdPlus = jumelages.match(/<button[^>]+type=TGD%2B[^]*?<\/button>/)?.[0] ?? '';
     assert.match(cardEvo, /evo\.png" alt="Jumelage EVO"[^]*?<span class="app-choice-card__title">EVO<\/span>/);
     assert.match(card360, /360\.png" alt="Jumelage 360"[^]*?<span class="app-choice-card__title">360<\/span>/);
-    assert.match(cardTgd, /tgd\.png" alt="TGD"[^]*?<span class="app-choice-card__title">TGD<\/span>/);
+    assert.match(cardTgd, /TGD\.png" alt="TGD"[^]*?<span class="app-choice-card__title">TGD<\/span>/);
     assert.match(cardTgdPlus, /tgd-plus\.png" alt="Jumelage TGD\+"[^]*?<span class="app-choice-card__title">TGD\+<\/span>/);
     assert.doesNotMatch(jumelages, /tendeur-360-dessous\.png/);
 });
