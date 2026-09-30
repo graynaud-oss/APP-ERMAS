@@ -17,8 +17,9 @@ function calculateCurrentResult(testCase) {
     const horsToutJanteEngin = Number.parseFloat(testCase.horsToutJanteEngin) || 0;
     const emboitementJanteEngin = Number.parseFloat(testCase.emboitementJanteEngin) || 0;
     const emboitementJumelage = Number.parseFloat(testCase.emboitementJumelage) || 0;
-    return (voie + horsToutJumelage)
-        + (2 * horsToutJanteEngin)
+    return voie
+        + horsToutJanteEngin
+        + (2 * horsToutJumelage)
         + (2 * entretoise)
         - (2 * emboitementJanteEngin)
         - (2 * emboitementJumelage);
@@ -96,7 +97,7 @@ test('contrat produit, EVO/360, conversions et formules restent présents', () =
         "'EVO':", "'360':", 'selectedProduct.nom', 'selectedProduct.tendeurs',
         'parseFloat(selectedProduct.colC) || 0', 'parseFloat(selectedProduct.colD) || 0',
         'const voie = parseFloat(inputVoie.value);', 'const entretoiseSouhaitee = parseFloat(inputEntretoise.value);',
-        'const resultat = (voie + horsToutJumelage)', '+ (2 * horsToutJanteEngin)',
+        'const resultat = voie', '+ horsToutJanteEngin', '+ (2 * horsToutJumelage)',
         '+ (2 * entretoiseSouhaitee)', '- (2 * emboitementJanteEngin)',
         '- (2 * emboitementJumelage);', "resultat.toFixed(1) + ' mm'",
         "alert('Veuillez remplir tous les champs correctement.')", "alert('Jante engin introuvable.')",
@@ -104,9 +105,17 @@ test('contrat produit, EVO/360, conversions et formules restent présents', () =
     ]) assert.ok(source.includes(fragment), `contrat historique absent : ${fragment}`);
 });
 
-test('les quatre cas historiques donnent exactement les mêmes résultats', () => {
-    assert.equal(cases.length, 4);
+test('les cinq cas de référence appliquent la formule corrigée', () => {
+    assert.equal(cases.length, 5);
     for (const testCase of cases) assert.equal(calculateCurrentResult(testCase), testCase.resultat, testCase.nom);
+});
+
+test('EVO et 360 appliquent la même formule et ne diffèrent que par leur source CSV', () => {
+    const requiredCase = cases.find(({ nom }) => nom === 'cas métier obligatoire EVO et 360');
+    assert.equal(calculateCurrentResult(requiredCase), 3872);
+    assert.match(source, /'EVO': 'https:\/\/docs\.google\.com\/spreadsheets\/[^']+gid=1732806915[^']+'/);
+    assert.match(source, /'360': 'https:\/\/docs\.google\.com\/spreadsheets\/[^']+gid=1287684735[^']+'/);
+    assert.equal(source.match(/const resultat = voie/g)?.length, 1);
 });
 
 test('le calculateur hors tout utilise les fondations visuelles ERMAS locales', () => {

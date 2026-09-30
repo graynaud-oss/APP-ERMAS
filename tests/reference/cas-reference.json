@@ -7,10 +7,11 @@
     { "nom": "déports produit invalides convertis en zéro", "fam": 1500, "deportMaxI": "invalide", "deportMinJ": "", "voieMaxi": 1500, "voieMini": 1500 }
   ],
   "calculHorsTout": [
-    { "nom": "valeurs entières", "voie": 1500, "horsToutJumelage": 500, "horsToutJanteEngin": 200, "entretoise": 100, "emboitementJanteEngin": 50, "emboitementJumelage": 30, "resultat": 2440 },
+    { "nom": "valeurs entières", "voie": 1500, "horsToutJumelage": 500, "horsToutJanteEngin": 200, "entretoise": 100, "emboitementJanteEngin": 50, "emboitementJumelage": 30, "resultat": 2740 },
     { "nom": "valeurs nulles", "voie": 1600, "horsToutJumelage": 0, "horsToutJanteEngin": 0, "entretoise": 0, "emboitementJanteEngin": 0, "emboitementJumelage": 0, "resultat": 1600 },
-    { "nom": "valeurs décimales", "voie": 1425.5, "horsToutJumelage": 310.25, "horsToutJanteEngin": 120.5, "entretoise": 75.25, "emboitementJanteEngin": 40.5, "emboitementJumelage": 15.25, "resultat": 2015.75 },
-    { "nom": "géométrie produit invalide convertie en zéro", "voie": 1500, "horsToutJumelage": "invalide", "horsToutJanteEngin": 100, "entretoise": 50, "emboitementJanteEngin": 25, "emboitementJumelage": "", "resultat": 1750 }
+    { "nom": "valeurs décimales", "voie": 1425.5, "horsToutJumelage": 310.25, "horsToutJanteEngin": 120.5, "entretoise": 75.25, "emboitementJanteEngin": 40.5, "emboitementJumelage": 15.25, "resultat": 2205.5 },
+    { "nom": "géométrie produit invalide convertie en zéro", "voie": 1500, "horsToutJumelage": "invalide", "horsToutJanteEngin": 100, "entretoise": 50, "emboitementJanteEngin": 25, "emboitementJumelage": "", "resultat": 1650 },
+    { "nom": "cas métier obligatoire EVO et 360", "voie": 1962, "horsToutJumelage": 450, "horsToutJanteEngin": 630, "entretoise": 350, "emboitementJanteEngin": 80, "emboitementJumelage": 80, "resultat": 3872 }
   ],
   "prix": [
     { "nom": "remise zéro", "prix": "100", "remise": 0, "net": 100, "affichage": "100.00" },

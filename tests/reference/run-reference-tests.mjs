@@ -24,7 +24,7 @@ function calculHorsTout(c) {
   const hje = Number.parseFloat(c.horsToutJanteEngin) || 0;
   const eje = Number.parseFloat(c.emboitementJanteEngin) || 0;
   const ej = Number.parseFloat(c.emboitementJumelage) || 0;
-  return { resultat: (voie + hj) + (2 * hje) + (2 * entretoise) - (2 * eje) - (2 * ej) };
+  return { resultat: voie + hje + (2 * hj) + (2 * entretoise) - (2 * eje) - (2 * ej) };
 }
 
 function prixNetActuel(prix, remise) {
@@ -96,7 +96,7 @@ for (const fixture of ['jantes.csv', 'jumelages.csv', 'roues-etroites.csv']) {
 
 const sourceChecks = {
   'calcul-voie.html': ['fam + (2 * dataI)', 'fam - (2 * dataJ)', "sessionStorage.getItem('ermas_calc_product')"],
-  'calcul-hors-tout.html': ['(voie + horsToutJumelage)', '(2 * entretoiseSouhaitee)', "sessionStorage.getItem('ermas_hors_tout_product')"],
+  'calcul-hors-tout.html': ['const resultat = voie', 'horsToutJanteEngin', '(2 * horsToutJumelage)', '(2 * entretoiseSouhaitee)', "sessionStorage.getItem('ermas_hors_tout_product')"],
   'index.html': ["localStorage.getItem('ermas_device_token')", '.select(\'nom, prenom, entreprise, device_token, email, blocage\')'],
   'jumelages-jantes-taille.html': ["sessionStorage.setItem('ermas_jante_diametre'", "sessionStorage.setItem('ermas_jante_largeur'", "sessionStorage.setItem('ermas_jante_tendeurs'"],
   'jumelages-jantes-pneu.html': ["sessionStorage.setItem('ermas_pneu_largeur'", "sessionStorage.setItem('ermas_pneu_rapport'", "sessionStorage.setItem('ermas_pneu_diametre'"]
