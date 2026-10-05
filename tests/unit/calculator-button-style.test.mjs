@@ -5,9 +5,13 @@ import test from 'node:test';
 const root = new URL('../../', import.meta.url);
 const read = (path) => fs.readFileSync(new URL(path, root), 'utf8');
 
-test('les boutons hors-tout réutilisent exactement la classe du calcul de voie', () => {
-    for (const path of ['jantes-taille.html', 'jantes-pneu.html', 'roues-etroites-taille.html', 'roues-etroites-pneu.html']) {
+test('les boutons calculateurs utilisent la classe commune uniquement dans leurs contextes compatibles', () => {
+    for (const path of ['jantes-taille.html', 'jantes-pneu.html']) {
         assert.match(read(path), /Estimer la voie de travail[\s\S]*?<\/button>|class="results-primary-action"[\s\S]*?Estimer la voie de travail/);
+    }
+
+    for (const path of ['roues-etroites-taille.html', 'roues-etroites-pneu.html']) {
+        assert.doesNotMatch(read(path), /Estimer la voie de travail/);
     }
 
     const taille = read('jumelages-jantes-taille.html');

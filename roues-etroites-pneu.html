@@ -367,19 +367,6 @@
 
                 html += `${renderNarrowWheelPriceOffers(match, userRemise, netPriceVisible)}</div>`;
 
-                const hasValidI = match.deportMaxI && !isNaN(parseFloat(match.deportMaxI));
-                const hasValidJ = match.deportMinJ && !isNaN(parseFloat(match.deportMinJ));
-
-                if (hasValidI && hasValidJ) {
-                    html += `
-                        <div class="pt-2">
-                            <button onclick='ouvrirCalculateur(${escapeHtml(JSON.stringify(match))})' class="results-primary-action">
-                                Estimer la voie de travail
-                            </button>
-                        </div>
-                    `;
-                }
-
                 html += `</div>`;
             });
 

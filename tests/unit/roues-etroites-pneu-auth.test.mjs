@@ -45,7 +45,7 @@ test('aucune écriture administrative ni enrôlement n’est introduit', () => {
     assert.doesNotMatch(source, /Math\.random|crypto\.getRandomValues|ermas_device_token_pending/);
 });
 
-test('filtres et calculateur restent verrouillés avant autorisation', () => {
+test('les filtres et le handler historique restent verrouillés avant autorisation', () => {
     assert.ok(source.includes('let pageAuthorized = false;'));
     assert.ok(source.includes('pageAuthorized = true;'));
     assert.ok(source.split('if (!pageAuthorized) return;').length - 1 >= 4);
@@ -84,14 +84,15 @@ test('correspondance, normalisation, filtres et déduplication restent inchangé
     ]) assert.ok(source.includes(fragment), `règle métier absente : ${fragment}`);
 });
 
-test('trois tarifs, stockage et calculateur restent présents', () => {
+test('les trois tarifs restent présents sans bouton de calculateur de voie fixe', () => {
     for (const fragment of [
         "from './js/narrow-wheel-pricing.js'",
         'renderNarrowWheelPriceOffers(match, userRemise, netPriceVisible)',
-        'prixVV:       prices.prixEco', 'match.deportMaxI', 'match.deportMinJ',
+        'prixVV:       prices.prixEco',
         "sessionStorage.setItem('ermas_calc_product', JSON.stringify(product))",
         "window.location.href = 'calcul-voie.html?source=roues-etroites-pneu'"
     ]) assert.ok(source.includes(fragment), `contrat historique absent : ${fragment}`);
+    assert.doesNotMatch(source, /Estimer la voie de travail/);
 });
 
 test('Roues Étroites Pneu généralise le contrôle commun à toutes les cartes', () => {
@@ -102,7 +103,6 @@ test('Roues Étroites Pneu généralise le contrôle commun à toutes les cartes
     assert.ok(source.includes("resultsContent.querySelectorAll('[data-net-price]')"));
     assert.ok(source.includes('updateNetPriceVisibility();\n            resultsContainer.classList.remove'));
     assert.ok(source.includes('renderNarrowWheelPriceOffers(match, userRemise, netPriceVisible)'));
-    assert.ok(source.includes('class="results-primary-action"'));
     assert.doesNotMatch(source, /localStorage|Remise appliquée|Réduction|Économie|Prix NET\s*\([^)]*%/i);
 });
 

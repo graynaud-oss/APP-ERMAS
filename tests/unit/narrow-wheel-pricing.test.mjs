@@ -99,11 +99,12 @@ test('le responsive empile les offres et informations sans largeur forcée', () 
     assert.doesNotMatch(css, /results-tier-grid[^{]*\{[^}]*min-width:\s*[1-9]/);
 });
 
-test('filtres, pneus sans rapport et contrat calculateur restent présents', () => {
+test('filtres et pneus sans rapport restent présents sans accès au calculateur de voie fixe', () => {
     assert.match(taille, /item\.diametre === chosenD/);
     assert.match(taille, /item\.largeurJante === chosenL/);
     assert.match(pneu, /\(!selectedWidthHasRapports \|\| item\.rapport === chosenR\)/);
     for (const page of [taille, pneu]) {
+        assert.doesNotMatch(page, /Estimer la voie de travail/);
         assert.match(page, /sessionStorage\.setItem\('ermas_calc_product'/);
         assert.match(page, /calcul-voie\.html\?source=roues-etroites-/);
     }

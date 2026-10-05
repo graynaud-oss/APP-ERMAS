@@ -47,7 +47,7 @@ test('aucune écriture administrative ni enrôlement n’est introduit', () => {
     assert.doesNotMatch(source, /Math\.random|crypto\.getRandomValues|ermas_device_token_pending/);
 });
 
-test('filtres et calculateur restent verrouillés avant autorisation', () => {
+test('les filtres et le handler historique restent verrouillés avant autorisation', () => {
     assert.ok(source.includes('let pageAuthorized = false;'));
     assert.ok(source.includes('pageAuthorized = true;'));
     assert.ok(source.split('if (!pageAuthorized) return;').length - 1 >= 4);
@@ -74,7 +74,7 @@ test('source, parser, champs, filtres et tri restent présents', () => {
     ]) assert.ok(source.includes(fragment), `fragment métier absent : ${fragment}`);
 });
 
-test('trois tarifs et contrat calculateur restent présents', () => {
+test('les trois tarifs restent présents sans bouton de calculateur de voie fixe', () => {
     for (const fragment of [
         "from './js/narrow-wheel-pricing.js'",
         'renderNarrowWheelPriceOffers(match, userRemise, netPriceVisible)',
@@ -82,6 +82,7 @@ test('trois tarifs et contrat calculateur restent présents', () => {
         "sessionStorage.setItem('ermas_calc_product', JSON.stringify(product))",
         "window.location.href = 'calcul-voie.html?source=roues-etroites-taille'"
     ]) assert.ok(source.includes(fragment), `contrat historique absent : ${fragment}`);
+    assert.doesNotMatch(source, /Estimer la voie de travail/);
 });
 
 test('Roues Étroites Taille généralise le contrôle commun BRUT NET sans modifier la coercition', () => {
@@ -91,7 +92,6 @@ test('Roues Étroites Taille généralise le contrôle commun BRUT NET sans modi
     assert.ok(source.includes('netPriceVisible = setNetPriceVisible(netPriceToggle.checked);'));
     assert.ok(source.includes("resultsContent.querySelectorAll('[data-net-price]')"));
     assert.ok(source.includes('renderNarrowWheelPriceOffers(match, userRemise, netPriceVisible)'));
-    assert.ok(source.includes('class="results-primary-action"'));
     assert.doesNotMatch(source, /localStorage|Remise appliquée|Réduction|Économie|Prix NET\s*\([^)]*%/i);
 });
 

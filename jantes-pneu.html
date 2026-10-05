@@ -342,7 +342,11 @@
                     `;
 
                     // VOIE FIXE
-                    if (match.prixVF && !isNaN(parseFloat(match.prixVF))) {
+                    const hasValidFixedPrice = Boolean(match.prixVF && !isNaN(parseFloat(match.prixVF)));
+                    const hasValidI = match.deportMaxI && !isNaN(parseFloat(match.deportMaxI));
+                    const hasValidJ = match.deportMinJ && !isNaN(parseFloat(match.deportMinJ));
+
+                    if (hasValidFixedPrice) {
                         const baseVF = parseFloat(match.prixVF);
                         const finalVF = userRemise > 0 ? baseVF * (1 - userRemise / 100) : baseVF;
                         
@@ -367,6 +371,15 @@
                                 </div>
                                 <div class="mt-2 pt-2 border-t border-gray-800/60">
                                     <div class="text-white font-bold text-sm">${finalVF.toFixed(2)} €</div>
+                                </div>
+                            `;
+                        }
+                        if (hasValidI && hasValidJ) {
+                            html += `
+                                <div class="pt-2">
+                                    <button onclick='ouvrirCalculateur(${escapeHtml(JSON.stringify(match))})' class="results-primary-action">
+                                        Estimer la voie de travail
+                                    </button>
                                 </div>
                             `;
                         }
@@ -436,20 +449,6 @@
                     }
 
                     html += `</div>`;
-
-                    // BOUTON DE CALCUL DE VOIE SI DEPORTS VALIDES
-                    const hasValidI = match.deportMaxI && !isNaN(parseFloat(match.deportMaxI));
-                    const hasValidJ = match.deportMinJ && !isNaN(parseFloat(match.deportMinJ));
-
-                    if (hasValidI && hasValidJ) {
-                        html += `
-                            <div class="pt-2">
-                                <button onclick='ouvrirCalculateur(${escapeHtml(JSON.stringify(match))})' class="results-primary-action">
-                                    Estimer la voie de travail
-                                </button>
-                            </div>
-                        `;
-                    }
 
                     html += `</div>`;
                 });
